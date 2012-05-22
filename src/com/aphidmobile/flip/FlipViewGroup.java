@@ -1,13 +1,12 @@
 package com.aphidmobile.flip;
 
+import java.util.LinkedList;
+
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.LinkedList;
 
 /*
 Copyright 2012 Aphid Mobile

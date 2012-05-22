@@ -1,7 +1,7 @@
 android-flip
 ============
 
-Demo of flip animation on Android, which is similar to the effect of [Flipboard iOS](http://www.flipboard.com)
+Demo of flip animation on Android, which is similar to the effect of [Flipboard iPhone](http://www.flipboard.com)
 
 A pre-built APK file for Android OS 2.2+ can be found at:
 
