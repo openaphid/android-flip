@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:background="@android:color/white"
+	>
+	<TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
+	          android:textSize="24dip"
+	          android:text="@string/first_page_title"
+	          android:background="@android:color/white"
+	          android:textColor="@android:color/black" android:textStyle="bold"/>
+	
+	<TextView android:layout_width="fill_parent" android:layout_height="wrap_content"
+	          android:layout_weight="1.0"
+	          android:layout_marginTop="8dp"
+	          android:textSize="16dp"
+	          android:background="@android:color/white"
+	          android:textColor="@android:color/black"
+	          android:text="@string/first_page_description"
+		/>
+	
+	<ImageView android:layout_width="fill_parent" android:layout_height="wrap_content"
+	           android:background="@android:color/white"
+	           android:src="@drawable/aphid_logo"
+		/>
+
+</LinearLayout>

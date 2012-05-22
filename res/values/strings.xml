@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Flip Demo</string>
+	<string name="activity_title">Flip Demo By Aphid Mobile</string>
+
+	<string name="first_page_title">[1] OpenAphid 0.2 is Available</string>
+	<string name="first_page_description">AphidMobile is pleased to announce the availability of OpenAphid 0.2.
+		\n\n
+		Highlights of the 0.2 release include:
+		\n\n
+		- New binding system for exposing Objective-C methods to JavaScript
+		\n\n
+		- Hide constructor when enumerating attributs of an OpenAphid JavaScript object
+		\n\n
+		- Fix incorrect value of node.onframeupdate when it’s not set; should be null instead of an invalid empty value
+		\n\n
+		- Add a new target of ObjCBindingTest in Demos
+		\n\n
+		- Support Google Analytics iOS SDK in Boilerplate-iOS
+	</string>
+
+	<string name="second_page_title">[2] JavaScript and Cocos2D-iPhone: A Sneak Peek of OpenAphid</string>
+	<string name="second_page_description">
+		OpenAphid is our secret OSS project to combine the power of JavaScript and Cocos2d-iPhone for native game
+		development on mobile devices. It allows developers to write fast and native quality games in JavaScript language.
+		\n\n
+		A set of Cocos2D-style JavaScript APIs are provided for composing scenes, applying actions on nodes, handling
+		events, etc. The core runtime of OpenAphid is wrote in C++, which adopts the architecture of Cocos2d-iPhone. The
+		JavaScript binding module bridges the C++ runtime and the JavaScript engine, which allows games to use native
+		features in pure JavaScript.
+		\n\n
+		A set of Cocos2D-style JavaScript APIs are provided for composing scenes, applying actions on nodes, handling
+		events, etc. The core runtime of OpenAphid is wrote in C++, which adopts the architecture of Cocos2d-iPhone. The
+		JavaScript binding module bridges the C++ runtime and the JavaScript engine, which allows games to use native
+		features in pure JavaScript.
+	</string>
+	<string name="item_about">about</string>
+
+</resources>
