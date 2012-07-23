@@ -42,11 +42,15 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	private FlipViewGroup flipViewGroup;
 
 	private FlipCards cards;
+	
+	private boolean created = false;
 
 	public FlipRenderer(FlipViewGroup flipViewGroup) {
 		this.flipViewGroup = flipViewGroup;
 
 		cards = new FlipCards();
+		
+		//Logger.i("Renderer created");
 	}
 
 	@Override
@@ -57,6 +61,13 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		
+		created = true;
+		
+		cards.invalidateTexture();
+		flipViewGroup.reloadTexture();
+		
+		//Logger.i("onSurfaceCreated");
 	}
 
 	public static float[] light0Position = {0, 0, 100f, 0f};
@@ -102,7 +113,10 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	}
 
 	public void updateTexture(View view) {
-		cards.reloadTexture(view);
+		if (created) {
+			//Logger.i("updateTexture");
+			cards.reloadTexture(view);
+		}
 		//flipViewGroup.getSurfaceView().requestRender();
 	}
 

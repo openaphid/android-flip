@@ -11,6 +11,8 @@ import android.view.View;
 import com.aphidmobile.flip.FlipViewGroup;
 
 public class MainActivity extends Activity {
+	private FlipViewGroup contentView;
+	
 	/**
 	 * Called when the activity is first created.
 	 */
@@ -20,7 +22,7 @@ public class MainActivity extends Activity {
 		
 		setTitle(R.string.activity_title);
 
-		FlipViewGroup contentView = new FlipViewGroup(this);
+		contentView = new FlipViewGroup(this);
 		
 		contentView.addFlipView(View.inflate(this, R.layout.second_page, null));
 		contentView.addFlipView(View.inflate(this, R.layout.first_page, null));
@@ -43,4 +45,18 @@ public class MainActivity extends Activity {
 		
 		return true;
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		contentView.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		contentView.onPause();
+	}
+	
+	
 }

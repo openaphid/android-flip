@@ -64,7 +64,7 @@ public class Texture {
 
 	public void destroy(GL10 gl) {
 		if (id[0] != 0)
-			gl.glDeleteTextures(GL_TEXTURE_2D, id, 0);
+			gl.glDeleteTextures(1, id, 0);
 
 		id[0] = 0;
 	}

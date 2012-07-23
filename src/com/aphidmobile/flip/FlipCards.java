@@ -98,4 +98,9 @@ public class FlipCards {
 
 		}
 	}
+
+	public void invalidateTexture() {
+		//Texture is vanished when the gl context is gone, no need to delete it explicitly
+		texture = null;
+	}
 }

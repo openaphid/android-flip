@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -26,8 +28,23 @@ limitations under the License.
  */
 
 public class FlipViewGroup extends ViewGroup {
+	
+	private static final int MSG_SURFACE_CREATED = 1;
 
 	private LinkedList<View> flipViews = new LinkedList<View>();
+	
+	private Handler handler = new Handler(new Handler.Callback() {		
+		@Override
+		public boolean handleMessage(Message msg) {
+			if (msg.what == MSG_SURFACE_CREATED) {
+				width = 0;
+				height = 0;
+				requestLayout();
+				return true;
+			}
+			return false;
+		}
+	});
 
 	private GLSurfaceView surfaceView;
 	private FlipRenderer renderer;
@@ -71,12 +88,12 @@ public class FlipViewGroup extends ViewGroup {
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		//Logger.i(String.format("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, flipViews.size()));
+		Logger.i(String.format("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, flipViews.size()));
 		
 		for (View child : flipViews)
 			child.layout(0, 0, r - l, b - t);
 
-		if (changed) {
+		if (changed || width == 0) {
 			int w = r - l;
 			int h = b - t;
 			surfaceView.layout(0, 0, w, h);
@@ -105,5 +122,17 @@ public class FlipViewGroup extends ViewGroup {
 
 	public void startFlipping() {
 		flipping = true;
+	}
+	
+	public void onResume() {
+		surfaceView.onResume();
+	}
+
+	public void onPause() {
+		surfaceView.onPause();
+	}
+	
+	public void reloadTexture() {
+		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
 	}
 }
