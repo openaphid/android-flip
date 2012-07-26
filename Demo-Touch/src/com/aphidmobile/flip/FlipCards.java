@@ -1,11 +1,11 @@
 package com.aphidmobile.flip;
 
+import static com.aphidmobile.flip.FlipRenderer.*;
+
 import android.graphics.Bitmap;
 import android.view.View;
 
 import javax.microedition.khronos.opengles.GL10;
-
-import static com.aphidmobile.flip.FlipRenderer.*;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -28,19 +28,18 @@ public class FlipCards {
 	private static final int MAX_ANGLE = 180;
 	private static final float SPEED = 1.5f;
 
-	
 	private Texture frontTexture;
 	private Bitmap frontBitmap;
-	
+
 	private Texture backTexture;
 	private Bitmap backBitmap;
 
 	private Card frontTopCard;
 	private Card frontBottomCard;
-	
+
 	private Card backTopCard;
 	private Card backBottomCard;
-	
+
 	private float angle = 0f;
 	private boolean forward = true;
 	private boolean animating = true;
@@ -48,14 +47,14 @@ public class FlipCards {
 	public FlipCards() {
 		frontTopCard = new Card();
 		frontBottomCard = new Card();
-		
+
 		backTopCard = new Card();
 		backBottomCard = new Card();
 
 		//frontBottomCard.setAnimating(true);
-		
+
 		//backTopCard.setAnimating(true);
-		
+
 		backTopCard.setAxis(Card.AXIS_BOTTOM);
 	}
 
@@ -69,7 +68,7 @@ public class FlipCards {
 
 		if (frontTexture == null)
 			return;
-		
+
 		if (animating) {
 			if (angle >= MAX_ANGLE)
 				forward = false;
@@ -81,7 +80,7 @@ public class FlipCards {
 			else
 				angle -= SPEED;
 		}
-		
+
 		if (angle < 90) {
 			frontTopCard.draw(gl);
 			backBottomCard.draw(gl);
@@ -138,7 +137,7 @@ public class FlipCards {
 			frontBitmap.recycle();
 			frontBitmap = null;
 		}
-		
+
 		if (backBitmap != null) {
 			if (backTexture != null)
 				backTexture.destroy(gl);
