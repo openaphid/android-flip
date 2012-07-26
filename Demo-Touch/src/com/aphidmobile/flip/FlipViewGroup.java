@@ -103,10 +103,12 @@ public class FlipViewGroup extends ViewGroup {
 				width = w;
 				height = h;
 
-				if (flipping && !flipViews.isEmpty()) {
-					View view = flipViews.getLast(); //
-					renderer.updateTexture(view);
-					view.setVisibility(View.INVISIBLE);
+				if (flipping && flipViews.size() >= 2) {
+					View frontView = flipViews.get(flipViews.size() - 1);
+					View backView = flipViews.get(flipViews.size() - 2);
+					renderer.updateTexture(frontView, backView);
+					frontView.setVisibility(View.INVISIBLE);
+					backView.setVisibility(View.INVISIBLE);
 				}
 			}
 		}

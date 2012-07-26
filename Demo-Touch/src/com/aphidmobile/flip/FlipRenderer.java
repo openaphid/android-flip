@@ -21,7 +21,6 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.view.View;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 /*
@@ -89,7 +88,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		float fovy = 20f;
 		float eyeZ = height / 2f / (float) Math.tan(Utils.d2r(fovy / 2));
 
-		GLU.gluPerspective(gl, fovy, (float) width / (float) height, 0.5f, Math.max(1500.0f, eyeZ));
+		GLU.gluPerspective(gl, fovy, (float) width / (float) height, 0.5f, Math.max(2500.0f, eyeZ));
 
 		gl.glMatrixMode(GL_MODELVIEW);
 		gl.glLoadIdentity();
@@ -130,10 +129,10 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		cards.draw(gl);
 	}
 
-	public void updateTexture(View view) {
+	public void updateTexture(View frontView, View backView) {
 		if (created) {
 			//Logger.i("updateTexture");
-			cards.reloadTexture(view);
+			cards.reloadTexture(frontView, backView);
 		}
 		//flipViewGroup.getSurfaceView().requestRender();
 	}

@@ -25,81 +25,167 @@ limitations under the License.
  */
 
 public class FlipCards {
-	private Texture texture;
-	private Bitmap bitmap;
+	private static final int MAX_ANGLE = 180;
+	private static final float SPEED = 1.5f;
 
-	private Card topCard;
-	private Card bottomCard;
+	
+	private Texture frontTexture;
+	private Bitmap frontBitmap;
+	
+	private Texture backTexture;
+	private Bitmap backBitmap;
+
+	private Card frontTopCard;
+	private Card frontBottomCard;
+	
+	private Card backTopCard;
+	private Card backBottomCard;
+	
+	private float angle = 0f;
+	private boolean forward = true;
+	private boolean animating = true;
 
 	public FlipCards() {
-		topCard = new Card();
-		bottomCard = new Card();
+		frontTopCard = new Card();
+		frontBottomCard = new Card();
+		
+		backTopCard = new Card();
+		backBottomCard = new Card();
 
-		//topCard.setAnimating(true);
-		bottomCard.setAnimating(true);
+		//frontBottomCard.setAnimating(true);
+		
+		//backTopCard.setAnimating(true);
+		
+		backTopCard.setAxis(Card.AXIS_BOTTOM);
 	}
 
-	public void reloadTexture(View view) {
-		bitmap = GrabIt.takeScreenshot(view);
+	public void reloadTexture(View frontView, View backView) {
+		frontBitmap = GrabIt.takeScreenshot(frontView);
+		backBitmap = GrabIt.takeScreenshot(backView);
 	}
 
 	public void draw(GL10 gl) {
 		applyTexture(gl);
 
-		if (texture == null)
+		if (frontTexture == null)
 			return;
+		
+		if (animating) {
+			if (angle >= MAX_ANGLE)
+				forward = false;
+			if (angle <= 1)
+				forward = true;
 
-		topCard.draw(gl);
-		bottomCard.draw(gl);
+			if (forward)
+				angle += SPEED;
+			else
+				angle -= SPEED;
+		}
+		
+		if (angle < 90) {
+			frontTopCard.draw(gl);
+			backBottomCard.draw(gl);
+			frontBottomCard.setAngle(angle);
+			frontBottomCard.draw(gl);
+		} else {
+			frontTopCard.draw(gl);
+			backTopCard.setAngle(180 - angle);
+			backTopCard.draw(gl);
+			backBottomCard.draw(gl);
+		}
 	}
 
 	private void applyTexture(GL10 gl) {
-		if (bitmap != null) {
-			if (texture != null)
-				texture.destroy(gl);
+		if (frontBitmap != null) {
+			if (frontTexture != null)
+				frontTexture.destroy(gl);
 
-			texture = Texture.createTexture(bitmap, gl);
+			frontTexture = Texture.createTexture(frontBitmap, gl);
 
-			topCard.setTexture(texture);
-			bottomCard.setTexture(texture);
+			frontTopCard.setTexture(frontTexture);
+			frontBottomCard.setTexture(frontTexture);
 
-			topCard.setCardVertices(new float[]{
-				0f, bitmap.getHeight(), 0f,                     //top left
-				0f, bitmap.getHeight() / 2.0f, 0f,              //bottom left
-				bitmap.getWidth(), bitmap.getHeight() / 2f, 0f, //bottom right
-				bitmap.getWidth(), bitmap.getHeight(), 0f       //top right
+			frontTopCard.setCardVertices(new float[]{
+				0f, frontBitmap.getHeight(), 0f,                     //top left
+				0f, frontBitmap.getHeight() / 2.0f, 0f,              //bottom left
+				frontBitmap.getWidth(), frontBitmap.getHeight() / 2f, 0f, //bottom right
+				frontBitmap.getWidth(), frontBitmap.getHeight(), 0f       //top right
 			});
 
-			topCard.setTextureCoordinates(new float[]{
+			frontTopCard.setTextureCoordinates(new float[]{
 				0f, 0f,
-				0f, bitmap.getHeight() / 2f / (float) texture.getHeight(),
-				bitmap.getWidth() / (float) texture.getWidth(), bitmap.getHeight() / 2f / (float) texture.getHeight(),
-				bitmap.getWidth() / (float) texture.getWidth(), 0f
+				0f, frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
+				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
+				frontBitmap.getWidth() / (float) frontTexture.getWidth(), 0f
 			});
 
-			bottomCard.setCardVertices(new float[]{
-				0f, bitmap.getHeight() / 2f, 0f,                //top left
+			frontBottomCard.setCardVertices(new float[]{
+				0f, frontBitmap.getHeight() / 2f, 0f,                //top left
 				0f, 0f, 0f,                                      //bottom left
-				bitmap.getWidth(), 0f, 0f,                      //bottom right
-				bitmap.getWidth(), bitmap.getHeight() / 2f, 0f  //top right
+				frontBitmap.getWidth(), 0f, 0f,                      //bottom right
+				frontBitmap.getWidth(), frontBitmap.getHeight() / 2f, 0f  //top right
 			});
 
-			bottomCard.setTextureCoordinates(new float[]{
-				0f, bitmap.getHeight() / 2f / (float) texture.getHeight(),
-				0f, bitmap.getHeight() / (float) texture.getHeight(),
-				bitmap.getWidth() / (float) texture.getWidth(), bitmap.getHeight() / (float) texture.getHeight(),
-				bitmap.getWidth() / (float) texture.getWidth(), bitmap.getHeight() / 2f / (float) texture.getHeight()
+			frontBottomCard.setTextureCoordinates(new float[]{
+				0f, frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
+				0f, frontBitmap.getHeight() / (float) frontTexture.getHeight(),
+				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / (float) frontTexture.getHeight(),
+				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight()
 			});
 
 			checkError(gl);
 
-			bitmap.recycle();
-			bitmap = null;
+			frontBitmap.recycle();
+			frontBitmap = null;
+		}
+		
+		if (backBitmap != null) {
+			if (backTexture != null)
+				backTexture.destroy(gl);
+
+			backTexture = Texture.createTexture(backBitmap, gl);
+
+			backTopCard.setTexture(backTexture);
+			backBottomCard.setTexture(backTexture);
+
+			backTopCard.setCardVertices(new float[]{
+				0f, backBitmap.getHeight(), 0f,                     //top left
+				0f, backBitmap.getHeight() / 2.0f, 0f,              //bottom left
+				backBitmap.getWidth(), backBitmap.getHeight() / 2f, 0f, //bottom right
+				backBitmap.getWidth(), backBitmap.getHeight(), 0f       //top right
+			});
+
+			backTopCard.setTextureCoordinates(new float[]{
+				0f, 0f,
+				0f, backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
+				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
+				backBitmap.getWidth() / (float) backTexture.getWidth(), 0f
+			});
+
+			backBottomCard.setCardVertices(new float[]{
+				0f, backBitmap.getHeight() / 2f, 0f,                //top left
+				0f, 0f, 0f,                                      //bottom left
+				backBitmap.getWidth(), 0f, 0f,                      //bottom right
+				backBitmap.getWidth(), backBitmap.getHeight() / 2f, 0f  //top right
+			});
+
+			backBottomCard.setTextureCoordinates(new float[]{
+				0f, backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
+				0f, backBitmap.getHeight() / (float) backTexture.getHeight(),
+				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / (float) backTexture.getHeight(),
+				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / 2f / (float) backTexture.getHeight()
+			});
+
+			checkError(gl);
+
+			backBitmap.recycle();
+			backBitmap = null;
 		}
 	}
 
 	public void invalidateTexture() {
 		//Texture is vanished when the gl context is gone, no need to delete it explicitly
-		texture = null;
+		frontTexture = null;
+		backTexture = null;
 	}
 }

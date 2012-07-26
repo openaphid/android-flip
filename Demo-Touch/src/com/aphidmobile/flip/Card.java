@@ -28,8 +28,11 @@ limitations under the License.
  */
 
 public class Card {
-	private static final int MAX_ANGLE = 75;
-	private static final float SPEED = 1.5f;
+//	private static final int MAX_ANGLE = 75;
+//	private static final float SPEED = 1.5f;
+	
+	public static final int AXIS_TOP = 0;
+	public static final int AXIS_BOTTOM = 1;
 
 	private float cardVertices[];
 
@@ -46,12 +49,16 @@ public class Card {
 	private Texture texture;
 
 	private float angle = 0f;
+	
+	private int axis = AXIS_TOP;
 
-	private boolean animating = false;
+//	private boolean animating = false;
 
-	private boolean forward = true;
+//	private boolean forward = true;
 	
 	private boolean dirty = false;
+	
+	
 
 	public Texture getTexture() {
 		return texture;
@@ -71,13 +78,17 @@ public class Card {
 		this.dirty = true;
 	}
 
-	public void setAngle(int angle) {
+	public void setAngle(float angle) {
 		this.angle = angle;
 	}
 
-	public void setAnimating(boolean animating) {
-		this.animating = animating;
+	public void setAxis(int axis) {
+		this.axis = axis;
 	}
+
+	/*public void setAnimating(boolean animating) {
+		this.animating = animating;
+	}*/
 
 	public void draw(GL10 gl) {
 		if (dirty)
@@ -112,12 +123,18 @@ public class Card {
 		gl.glPushMatrix();
 
 		if (angle > 0) {
-			gl.glTranslatef(0, cardVertices[1], 0f);
-			gl.glRotatef(-angle, 1f, 0f, 0f);
-			gl.glTranslatef(0, -cardVertices[1], 0f);
+			if (axis == AXIS_TOP) {
+				gl.glTranslatef(0, cardVertices[1], 0f);
+				gl.glRotatef(-angle, 1f, 0f, 0f);
+				gl.glTranslatef(0, -cardVertices[1], 0f);
+			} else {
+				gl.glTranslatef(0, cardVertices[7], 0f);
+				gl.glRotatef(angle, 1f, 0f, 0f);
+				gl.glTranslatef(0, -cardVertices[7], 0f);
+			}
 		}
 
-		if (animating) {
+		/*if (animating) {
 			if (angle >= MAX_ANGLE)
 				forward = false;
 			if (angle <= 1)
@@ -127,7 +144,7 @@ public class Card {
 				angle += SPEED;
 			else
 				angle -= SPEED;
-		}
+		}*/
 
 		gl.glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
 		gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
@@ -141,7 +158,7 @@ public class Card {
 			gl.glDisable(GL_TEXTURE_2D);
 		}
 
-		if (angle > 0) {
+		if (angle > 0 && false) {
 			gl.glDisable(GL_LIGHTING);
 			gl.glDisable(GL_DEPTH_TEST);
 			float w = cardVertices[9] - cardVertices[0];
