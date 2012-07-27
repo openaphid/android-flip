@@ -19,10 +19,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
-import android.view.MotionEvent;
 import android.view.View;
-
-import java.util.LinkedList;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -47,10 +44,6 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	private FlipCards cards;
 	
 	private boolean created = false;
-	
-	private final LinkedList<Runnable> eventQueue = new LinkedList<Runnable>();
-
-	private final AphidTouchEventQueue touchQueue = new AphidTouchEventQueue();
 
 	public FlipRenderer(FlipViewGroup flipViewGroup) {
 		this.flipViewGroup = flipViewGroup;
@@ -117,19 +110,8 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	}
 
 	@Override
-	public void onDrawFrame(GL10 gl) {
-		synchronized (eventQueue) {
-			if (!eventQueue.isEmpty()) {
-				for (Runnable r : eventQueue) {
-					r.run();
-				}
-				eventQueue.clear();
-			}
-		}
-		
+	public void onDrawFrame(GL10 gl) {		
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		touchQueue.processAllTouchesInGLThread(this);
 		
 		cards.draw(gl);
 	}
@@ -147,9 +129,5 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		if (error != 0) {
 			throw new RuntimeException(GLU.gluErrorString(error));
 		}
-	}
-
-	public void onTouch(AphidTouchEvent t) {
-		//TODO
 	}
 }

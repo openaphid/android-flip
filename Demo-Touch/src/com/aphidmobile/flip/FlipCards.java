@@ -1,13 +1,14 @@
 package com.aphidmobile.flip;
 
-import static com.aphidmobile.flip.FlipRenderer.*;
+import static com.aphidmobile.flip.FlipRenderer.checkError;
+
+import javax.microedition.khronos.opengles.GL10;
 
 import android.graphics.Bitmap;
 import android.view.MotionEvent;
 import android.view.View;
-import com.aphidmobile.utils.AphidLog;
 
-import javax.microedition.khronos.opengles.GL10;
+import com.aphidmobile.utils.AphidLog;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -27,7 +28,6 @@ limitations under the License.
  */
 
 public class FlipCards {
-	private static final int MAX_ANGLE = 180;
 	private static final float ACCELERATION = 0.618f;
 	private static final float TIP_SPEED = 1f;
 	private static final float MOVEMENT_RATE = 1.5f;

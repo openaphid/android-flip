@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.aphidmobile.utils;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -24,8 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 public class UI {
-	private static Context application_context;
-
 	private static Handler shared_handler = null;
 	
 	public static Handler getHandler() {
