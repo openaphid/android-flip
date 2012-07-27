@@ -29,7 +29,13 @@ limitations under the License.
 public class FlipCards {
 	private static final int MAX_ANGLE = 180;
 	private static final float ACCELERATION = 0.618f;
+	private static final float TIP_SPEED = 1f;
 	private static final float MOVEMENT_RATE = 1.5f;
+	private static final int MAX_TIP_ANGLE = 60;
+
+	private static final int STATE_TIP = 0;
+	private static final int STATE_TOUCH = 1;
+	private static final int STATE_AUTO_ROTATE = 2;
 
 	private Texture frontTexture;
 	private Bitmap frontBitmap;
@@ -45,8 +51,9 @@ public class FlipCards {
 
 	private float angle = 0f;
 	private boolean forward = true;
-	private boolean animating = false;
+	//	private boolean animating = false;
 	private int animatedFrame = 0;
+	private int state = STATE_TIP;
 
 	public FlipCards() {
 		frontTopCard = new Card();
@@ -63,7 +70,7 @@ public class FlipCards {
 		frontBitmap = GrabIt.takeScreenshot(frontView);
 		backBitmap = GrabIt.takeScreenshot(backView);
 	}
-	
+
 	public void rotateBy(float delta) {
 		angle += delta;
 		if (angle > 180)
@@ -72,11 +79,11 @@ public class FlipCards {
 			angle = 0;
 	}
 
-	public void setAnimating(boolean animating) {
-		if (this.animating != animating) {
-			this.animating = animating;
+	public void setState(int state) {
+		if (this.state != state) {
+			this.state = state;
 			animatedFrame = 0;
-		}		
+		}
 	}
 
 	public void draw(GL10 gl) {
@@ -85,11 +92,33 @@ public class FlipCards {
 		if (frontTexture == null)
 			return;
 
-		if (animating) {
-			animatedFrame++;
-			rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
-			if (angle >= 180 || angle <= 0)
-				setAnimating(false);
+		switch (state) {
+			case STATE_TIP: {
+				if (angle >= 180)
+					forward = false;
+				else if (angle <= 0)
+					forward = true;
+
+				rotateBy((forward ? TIP_SPEED : -TIP_SPEED));
+				if (angle > 90 && angle <= 180 - MAX_TIP_ANGLE) {
+					forward = true;
+				} else if (angle < 90 && angle >= MAX_TIP_ANGLE) {
+					forward = false;
+				}
+			}
+			break;
+			case STATE_TOUCH:
+				break;
+			case STATE_AUTO_ROTATE: {
+				animatedFrame++;
+				rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
+				if (angle >= 180 || angle <= 0)
+					setState(STATE_TIP);
+			}
+			break;
+			default:
+				AphidLog.e("Invalid state: " + state);
+				break;
 		}
 
 		if (angle < 90) {
@@ -198,19 +227,19 @@ public class FlipCards {
 		frontTexture = null;
 		backTexture = null;
 	}
-	
+
 	private float lastY = -1;
-	
+
 	public boolean handleTouchEvent(MotionEvent event) {
 		if (frontTexture == null)
 			return false;
 
 		float delta;
-		
-		switch(event.getAction()) {
+
+		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				lastY = event.getY();
-				setAnimating(false);
+				setState(STATE_TOUCH);
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				delta = lastY - event.getY();
@@ -221,15 +250,14 @@ public class FlipCards {
 			case MotionEvent.ACTION_CANCEL:
 				delta = lastY - event.getY();
 				rotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
-				if (angle < 90) {
+				if (angle < 90)
 					forward = false;
-				} else {
+				else
 					forward = true;
-				}
-				setAnimating(true);
+				setState(STATE_AUTO_ROTATE);
 				return true;
 		}
-		
+
 		return false;
 	}
 }
