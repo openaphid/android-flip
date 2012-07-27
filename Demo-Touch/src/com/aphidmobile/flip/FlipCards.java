@@ -3,7 +3,9 @@ package com.aphidmobile.flip;
 import static com.aphidmobile.flip.FlipRenderer.*;
 
 import android.graphics.Bitmap;
+import android.view.MotionEvent;
 import android.view.View;
+import com.aphidmobile.utils.AphidLog;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -26,7 +28,8 @@ limitations under the License.
 
 public class FlipCards {
 	private static final int MAX_ANGLE = 180;
-	private static final float SPEED = 1.5f;
+	private static final float ACCELERATION = 0.618f;
+	private static final float MOVEMENT_RATE = 1.5f;
 
 	private Texture frontTexture;
 	private Bitmap frontBitmap;
@@ -42,7 +45,8 @@ public class FlipCards {
 
 	private float angle = 0f;
 	private boolean forward = true;
-	private boolean animating = true;
+	private boolean animating = false;
+	private int animatedFrame = 0;
 
 	public FlipCards() {
 		frontTopCard = new Card();
@@ -51,16 +55,28 @@ public class FlipCards {
 		backTopCard = new Card();
 		backBottomCard = new Card();
 
-		//frontBottomCard.setAnimating(true);
-
-		//backTopCard.setAnimating(true);
-
+		frontBottomCard.setAxis(Card.AXIS_TOP);
 		backTopCard.setAxis(Card.AXIS_BOTTOM);
 	}
 
 	public void reloadTexture(View frontView, View backView) {
 		frontBitmap = GrabIt.takeScreenshot(frontView);
 		backBitmap = GrabIt.takeScreenshot(backView);
+	}
+	
+	public void rotateBy(float delta) {
+		angle += delta;
+		if (angle > 180)
+			angle = 180;
+		else if (angle < 0)
+			angle = 0;
+	}
+
+	public void setAnimating(boolean animating) {
+		if (this.animating != animating) {
+			this.animating = animating;
+			animatedFrame = 0;
+		}		
 	}
 
 	public void draw(GL10 gl) {
@@ -70,15 +86,10 @@ public class FlipCards {
 			return;
 
 		if (animating) {
-			if (angle >= MAX_ANGLE)
-				forward = false;
-			if (angle <= 1)
-				forward = true;
-
-			if (forward)
-				angle += SPEED;
-			else
-				angle -= SPEED;
+			animatedFrame++;
+			rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
+			if (angle >= 180 || angle <= 0)
+				setAnimating(false);
 		}
 
 		if (angle < 90) {
@@ -186,5 +197,39 @@ public class FlipCards {
 		//Texture is vanished when the gl context is gone, no need to delete it explicitly
 		frontTexture = null;
 		backTexture = null;
+	}
+	
+	private float lastY = -1;
+	
+	public boolean handleTouchEvent(MotionEvent event) {
+		if (frontTexture == null)
+			return false;
+
+		float delta;
+		
+		switch(event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				lastY = event.getY();
+				setAnimating(false);
+				return true;
+			case MotionEvent.ACTION_MOVE:
+				delta = lastY - event.getY();
+				rotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
+				lastY = event.getY();
+				return true;
+			case MotionEvent.ACTION_UP:
+			case MotionEvent.ACTION_CANCEL:
+				delta = lastY - event.getY();
+				rotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
+				if (angle < 90) {
+					forward = false;
+				} else {
+					forward = true;
+				}
+				setAnimating(true);
+				return true;
+		}
+		
+		return false;
 	}
 }

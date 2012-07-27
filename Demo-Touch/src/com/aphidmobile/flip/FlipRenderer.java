@@ -19,6 +19,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.LinkedList;
@@ -57,6 +58,10 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		cards = new FlipCards();
 		
 		//AphidLog.i("Renderer created");
+	}
+
+	public FlipCards getCards() {
+		return cards;
 	}
 
 	@Override

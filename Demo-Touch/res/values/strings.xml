@@ -3,36 +3,31 @@
 	<string name="app_name">Touch Flip Demo</string>
 	<string name="activity_title">Flip Demo By Aphid Mobile</string>
 
-	<string name="first_page_title">[1] OpenAphid 0.2 is Available</string>
-	<string name="first_page_description">AphidMobile is pleased to announce the availability of OpenAphid 0.2.
-		\n\n
-		Highlights of the 0.2 release include:
-		\n\n
-		- New binding system for exposing Objective-C methods to JavaScript
-		\n\n
-		- Hide constructor when enumerating attributs of an OpenAphid JavaScript object
-		\n\n
-		- Fix incorrect value of node.onframeupdate when it’s not set; should be null instead of an invalid empty value
-		\n\n
-		- Add a new target of ObjCBindingTest in Demos
-		\n\n
-		- Support Google Analytics iOS SDK in Boilerplate-iOS
+	<string name="first_page_title">[1] OpenAphid Android v0.1.5 Released</string>
+	<string name="first_page_description">We’re pleased to release v0.1.5 of OpenAphid Android.
+\n\n
+Highlights of this release includes:
+\n\n
+    Support multitouch on Android
+\n\n
+    Enhanced single touch handling when multiple fingers are on screen
+\n\n
+    Public APIs for Java to JavaScript method binding
+\n\n
+https://github.com/openaphid/Demos is also updated with two new demos: touch_test.js and binding_test.js
 	</string>
 
-	<string name="second_page_title">[2] JavaScript and Cocos2D-iPhone: A Sneak Peek of OpenAphid</string>
+	<string name="second_page_title">[2] OpenAphid Android v0.1 Released</string>
 	<string name="second_page_description">
-		OpenAphid is our secret OSS project to combine the power of JavaScript and Cocos2d-iPhone for native game
-		development on mobile devices. It allows developers to write fast and native quality games in JavaScript language.
+		We’re excited to release the first version of OpenAphid which supports Android OS. OpenAphid is now a cross platform 2D game engine with both iOS and Android support.
 		\n\n
-		A set of Cocos2D-style JavaScript APIs are provided for composing scenes, applying actions on nodes, handling
-		events, etc. The core runtime of OpenAphid is wrote in C++, which adopts the architecture of Cocos2d-iPhone. The
-		JavaScript binding module bridges the C++ runtime and the JavaScript engine, which allows games to use native
-		features in pure JavaScript.
+		It’s the beginning of cross platform support of OpenAphid. Please consider it as an alpha release. But we’d like to summarize some implementation highlights here:
 		\n\n
-		A set of Cocos2D-style JavaScript APIs are provided for composing scenes, applying actions on nodes, handling
-		events, etc. The core runtime of OpenAphid is wrote in C++, which adopts the architecture of Cocos2d-iPhone. The
-		JavaScript binding module bridges the C++ runtime and the JavaScript engine, which allows games to use native
-		features in pure JavaScript.
+    The core runtime shares the same code base with the iOS version, which makes new features can be added to both platforms in the future.
+		\n\n
+    The same JavaScript engine is used on both platforms, which saves us from building a proxy layer to support different engines on different platforms as other solutions do. It also brings better performance which we’ll prove later.
+		\n\n
+    The project is built with the standard Android NDK, no private or undocumented APIs are used.
 	</string>
 	<string name="item_about">about</string>
 

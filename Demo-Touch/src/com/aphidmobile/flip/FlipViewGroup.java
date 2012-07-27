@@ -7,8 +7,7 @@ import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Message;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import com.aphidmobile.utils.AphidLog;
 
 /*
@@ -137,5 +136,10 @@ public class FlipViewGroup extends ViewGroup {
 	
 	public void reloadTexture() {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return renderer.getCards().handleTouchEvent(event);
 	}
 }
