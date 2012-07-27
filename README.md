@@ -1,11 +1,13 @@
 android-flip
 ============
 
-Demo of flip animation on Android, which is similar to the effect of [Flipboard iPhone](http://www.flipboard.com)
+Demos of flip animation on Android, which is similar to the effect of [Flipboard iPhone](http://www.flipboard.com)
 
 A pre-built APK file for Android OS 2.2+ can be found at:
 
 [http://openaphid.github.com/images/AndroidFlip.apk](http://openaphid.github.com/images/AndroidFlip.apk)
+
+[https://github.com/openaphid/android-flip/Demo-Touch/APK/Flip-Touch.apk](https://github.com/openaphid/android-flip/Demo-Touch/APK/Flip-Touch.apk)
 
 ## Copyright and License
 
