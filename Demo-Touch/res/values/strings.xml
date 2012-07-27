@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Touch Flip Demo</string>
+	<string name="activity_title">Flip Demo By Aphid Mobile</string>
+
+	<string name="first_page_title">[1] OpenAphid Android v0.1.5 Released</string>
+	<string name="first_page_description">We’re pleased to release v0.1.5 of OpenAphid Android.
+\n\n
+Highlights of this release includes:
+\n\n
+    Support multitouch on Android
+\n\n
+    Enhanced single touch handling when multiple fingers are on screen
+\n\n
+    Public APIs for Java to JavaScript method binding
+\n\n
+https://github.com/openaphid/Demos is also updated with two new demos: touch_test.js and binding_test.js
+	</string>
+
+	<string name="second_page_title">[2] OpenAphid Android v0.1 Released</string>
+	<string name="second_page_description">
+		We’re excited to release the first version of OpenAphid which supports Android OS. OpenAphid is now a cross platform 2D game engine with both iOS and Android support.
+		\n\n
+		It’s the beginning of cross platform support of OpenAphid. Please consider it as an alpha release. But we’d like to summarize some implementation highlights here:
+		\n\n
+    The core runtime shares the same code base with the iOS version, which makes new features can be added to both platforms in the future.
+		\n\n
+    The same JavaScript engine is used on both platforms, which saves us from building a proxy layer to support different engines on different platforms as other solutions do. It also brings better performance which we’ll prove later.
+		\n\n
+    The project is built with the standard Android NDK, no private or undocumented APIs are used.
+	</string>
+	<string name="item_about">about</string>
+
+</resources>
