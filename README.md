@@ -7,7 +7,7 @@ A pre-built APK file for Android OS 2.2+ can be found at:
 
 [http://openaphid.github.com/images/AndroidFlip.apk](http://openaphid.github.com/images/AndroidFlip.apk)
 
-[https://github.com/openaphid/android-flip/Demo-Touch/APK/Flip-Touch.apk](https://github.com/openaphid/android-flip/Demo-Touch/APK/Flip-Touch.apk)
+[https://github.com/openaphid/android-flip/blob/master/Demo-Touch/APK/Flip-Touch.apk](https://github.com/openaphid/android-flip/blob/master/Demo-Touch/APK/Flip-Touch.apk)
 
 ## Copyright and License
 
