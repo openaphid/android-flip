@@ -46,7 +46,7 @@ public class Texture {
 		t.width = w;
 		t.height = h;
 
-		AphidLog.i("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
+		AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
 
 
 		gl.glGenTextures(1, t.id, 0);

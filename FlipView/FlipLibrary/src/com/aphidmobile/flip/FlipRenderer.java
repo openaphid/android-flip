@@ -48,7 +48,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	public FlipRenderer(FlipViewController flipViewController) {
 		this.flipViewController = flipViewController;
 
-		cards = new FlipCards();
+		cards = new FlipCards(flipViewController);
 		
 		//AphidLog.i("Renderer created");
 	}

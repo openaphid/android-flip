@@ -1,8 +1,7 @@
 package com.aphidmobile.flip;
 
-import java.util.LinkedList;
-
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
@@ -11,6 +10,9 @@ import android.os.Message;
 import android.view.*;
 import android.widget.*;
 import com.aphidmobile.utils.AphidLog;
+import junit.framework.Assert;
+
+import java.util.LinkedList;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -30,20 +32,18 @@ limitations under the License.
  */
 
 public class FlipViewController extends AdapterView<Adapter> {
-	
-	private static final int MSG_SURFACE_CREATED = 1;
 
-	private LinkedList<View> flipViews = new LinkedList<View>();
+	private static final int MSG_SURFACE_CREATED = 1;
 
 	private GLSurfaceView surfaceView;
 	private FlipRenderer renderer;
-	
+
 	private int width;
 	private int height;
 
 	private boolean flipping = false;
-	
-	private Handler handler = new Handler(new Handler.Callback() {		
+
+	private Handler handler = new Handler(new Handler.Callback() {
 		@Override
 		public boolean handleMessage(Message msg) {
 			if (msg.what == MSG_SURFACE_CREATED) {
@@ -55,7 +55,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			return false;
 		}
 	});
-	
+
 	//AdapterView Related
 	private Adapter adapter;
 	private DataSetObserver adapterDataObserver = new DataSetObserver() {
@@ -74,27 +74,39 @@ public class FlipViewController extends AdapterView<Adapter> {
 		}
 	};
 
-	private LinkedList<View> bufferedViews = new LinkedList<View>();
+	private final LinkedList<View> bufferedViews = new LinkedList<View>();
 	private int bufferIndex = -1;
 	private int adapterIndex = -1;
+	private int sideBufferSize = 1;
+
+	float touchSlop;
+	float maxVelocity;
 
 	public FlipViewController(Context context) {
 		super(context);
+		AphidLog.d("Creating FlipViewController");
+		init();
+	}
+
+	private void init() {
+		ViewConfiguration configuration = ViewConfiguration.get(getContext());
+		touchSlop = configuration.getScaledTouchSlop();
+		maxVelocity = configuration.getScaledMaximumFlingVelocity();
+
 		setupSurfaceView();
 	}
 
 	private void setupSurfaceView() {
 		surfaceView = new GLSurfaceView(getContext());
-		
+
 		renderer = new FlipRenderer(this);
-		
+
 		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		surfaceView.setZOrderOnTop(true);
 		surfaceView.setRenderer(renderer);
 		surfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
 		surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-		
-		
+
 		addViewInLayout(surfaceView, -1, new AbsListView.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT), false);
 	}
 
@@ -106,35 +118,33 @@ public class FlipViewController extends AdapterView<Adapter> {
 		return renderer;
 	}
 
-	public void addFlipView(View v) {
-		flipViews.add(v);
-		addView(v);
-	}
-
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		AphidLog.i("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, flipViews.size());
-		
-		for (View child : flipViews)
+		AphidLog.d("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, bufferedViews.size());
+
+		for (View child : bufferedViews) //todo: test visibility?
 			child.layout(0, 0, r - l, b - t);
 
 		if (changed || width == 0) {
 			int w = r - l;
 			int h = b - t;
 			surfaceView.layout(0, 0, w, h);
-			
+
 			if (width != w || height != h) {
 				width = w;
 				height = h;
-
-				if (flipping && flipViews.size() >= 2) {
-					View frontView = flipViews.get(flipViews.size() - 1);
-					View backView = flipViews.get(flipViews.size() - 2);
-					renderer.updateTexture(frontView, backView);
-					frontView.setVisibility(View.INVISIBLE);
-					backView.setVisibility(View.INVISIBLE);
-				}
 			}
+		}
+
+		if (flipping && bufferedViews.size() >= 2) {
+			View frontView = bufferedViews.get(bufferIndex);
+			View backView = null;
+			if (bufferIndex < bufferedViews.size() - 1)
+				backView = bufferedViews.get(bufferIndex + 1);
+			renderer.updateTexture(frontView, backView);
+			frontView.setVisibility(View.INVISIBLE);
+			if (backView != null)
+				backView.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -142,15 +152,17 @@ public class FlipViewController extends AdapterView<Adapter> {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		//Logger.i( String.format("onMeasure: %d, %d, ; child %d", widthMeasureSpec, heightMeasureSpec, flipViews.size()));
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		
-		for (View child : flipViews)
+
+		for (View child : bufferedViews) //todo: test visibility?
 			child.measure(widthMeasureSpec, heightMeasureSpec);
+
+		surfaceView.measure(widthMeasureSpec, heightMeasureSpec);
 	}
 
 	public void startFlipping() {
 		flipping = true;
 	}
-	
+
 	public void onResume() {
 		surfaceView.onResume();
 	}
@@ -158,16 +170,30 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public void onPause() {
 		surfaceView.onPause();
 	}
-	
+
 	public void reloadTexture() {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
+	}
+
+	//--------------------------------------------------------------------------------------------------------------------
+	// Touch Event
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		return super.onInterceptTouchEvent(ev);    //XXX: Auto-generated super call
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		return renderer.getCards().handleTouchEvent(event);
-	}	
-	
+	}
+
+	//--------------------------------------------------------------------------------------------------------------------
+	// Orientation
+	@Override
+	protected void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);    //XXX: Auto-generated super call
+	}
+
 	//--------------------------------------------------------------------------------------------------------------------
 	// AdapterView<Adapter>
 	@Override
@@ -177,9 +203,20 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	public void setAdapter(Adapter adapter) {
+		setAdapter(adapter, 0);
+	}
+
+	public void setAdapter(Adapter adapter, int initialPosition) {
+		if (this.adapter != null)
+			this.adapter.unregisterDataSetObserver(adapterDataObserver);
+
 		this.adapter = adapter;
-		//XXX unregister observer
-		//XXX: Auto-generated implementation
+
+		if (this.adapter != null) {
+			this.adapter.registerDataSetObserver(adapterDataObserver);
+			if (this.adapter.getCount() > 0)
+				setSelection(initialPosition);
+		}
 	}
 
 	@Override
@@ -188,8 +225,33 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	@Override
-	public void setSelection(int i) {
+	public void setSelection(int position) {
 		//XXX: Auto-generated implementation
+		if (adapter == null)
+			return;
+
+		Assert.assertTrue("Invalid selection position", position >= 0 && position < adapter.getCount());
+
+		releaseViews();
+
+		View selectedView = viewFromAdapter(position, true);
+		bufferedViews.add(selectedView);
+
+		for (int i = 1; i <= sideBufferSize; i++) {
+			int previous = position - i;
+			int next = position + i;
+
+			if (previous >= 0)
+				bufferedViews.addFirst(viewFromAdapter(previous, false));
+			if (next < adapter.getCount())
+				bufferedViews.addLast(viewFromAdapter(next, true));
+		}
+
+		bufferIndex = bufferedViews.indexOf(selectedView);
+		adapterIndex = position;
+
+		requestLayout();
+		updateVisibleView(bufferIndex);
 	}
 
 	@Override
@@ -197,7 +259,99 @@ public class FlipViewController extends AdapterView<Adapter> {
 		return adapterIndex; //XXX: super class returns mNextSelectedPosition, why?
 	}
 
+	//--------------------------------------------------------------------------------------------------------------------
+	// Internals
+
 	private void resetFocus() {
 		//XXX: Auto-generated method body
+	}
+
+	private void releaseViews() {
+		for (View view : bufferedViews)
+			releaseView(view);
+		bufferedViews.clear();
+	}
+
+	private void releaseView(View view) {
+		Assert.assertNotNull(view);
+		detachViewFromParent(view);
+		//XXX: add it to a released view buffer?
+	}
+
+	private View viewFromAdapter(int position, boolean addToTop) {
+		Assert.assertNotNull(adapter);
+
+		View view = adapter.getView(position, null, this); //XXX: replace null with a released view instance
+		setupAdapterView(view, addToTop);
+		return view;
+	}
+
+	private void setupAdapterView(View view, boolean addToTop) {
+		LayoutParams params = view.getLayoutParams();
+		if (params == null) {
+			params = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 0);
+		}
+
+		//XXX: 0 should be 1?
+		addViewInLayout(view, addToTop ? -1 : 0, params, true); //XXX: different logic for released view?		
+	}
+
+	private void updateVisibleView(int index) {
+		for (int i = 0; i < bufferedViews.size(); i++) {
+			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
+		}
+
+		//invalidate(); //XXX: is this necessary?
+	}
+
+	public void postFlippedToView(final View view, final boolean forward) {
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				flippedToView(view, forward);
+			}
+		});
+	}
+
+	private void debugBufferedViews() {
+		AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
+	}
+
+	public void flippedToView(View view, boolean forward) {
+		AphidLog.d("flippedToView: %s, forward, %s", view, forward);
+		if (view != null) {
+			Assert.assertTrue("bufferedViews should contain the flipped view: " + view, bufferedViews.contains(view));
+			if (bufferedViews.get(bufferIndex) == view)
+				return;
+		}
+
+		debugBufferedViews();
+
+		if (forward) {
+			if (adapterIndex < adapter.getCount() - 1) {
+				adapterIndex++;
+				View old = bufferedViews.get(bufferIndex);
+				if (bufferIndex > 0)
+					releaseView(bufferedViews.removeFirst());
+				if (adapterIndex + sideBufferSize < adapter.getCount())
+					bufferedViews.addLast(viewFromAdapter(adapterIndex + sideBufferSize, true));
+				bufferIndex = bufferedViews.indexOf(old) + 1;
+				requestLayout();
+				updateVisibleView(bufferIndex);
+			}
+		} else {
+			if (adapterIndex > 0) {
+				adapterIndex--;
+				View old = bufferedViews.get(bufferIndex);
+				if (bufferIndex < bufferedViews.size() - 1)
+					releaseView(bufferedViews.removeLast());
+				if (adapterIndex - sideBufferSize >= 0)
+					bufferedViews.addFirst(viewFromAdapter(adapterIndex - sideBufferSize, false));
+				bufferIndex = bufferedViews.indexOf(old) - 1;
+				requestLayout();
+				updateVisibleView(bufferIndex);
+			}
+		}
+		debugBufferedViews();
 	}
 }

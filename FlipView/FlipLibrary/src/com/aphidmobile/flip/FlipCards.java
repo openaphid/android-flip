@@ -1,13 +1,13 @@
 package com.aphidmobile.flip;
 
-import static com.aphidmobile.flip.FlipRenderer.checkError;
-
-import javax.microedition.khronos.opengles.GL10;
+import static com.aphidmobile.flip.FlipRenderer.*;
 
 import android.graphics.Bitmap;
 import android.view.*;
-
 import com.aphidmobile.utils.AphidLog;
+
+import javax.microedition.khronos.opengles.GL10;
+import java.lang.ref.WeakReference;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -53,10 +53,16 @@ public class FlipCards {
 	//	private boolean animating = false;
 	private int animatedFrame = 0;
 	private int state = STATE_TIP;
-	
-	private VelocityTracker velocityTracker;
 
-	public FlipCards() {
+	private VelocityTracker velocityTracker;
+	private WeakReference<View> frontViewRef;
+	private WeakReference<View> backViewRef;
+	private FlipViewController controller;
+
+	private boolean asyncAngleUpdate = false;
+
+	public FlipCards(FlipViewController controller) {
+		this.controller = controller;
 		frontTopCard = new Card();
 		frontBottomCard = new Card();
 
@@ -67,9 +73,53 @@ public class FlipCards {
 		backTopCard.setAxis(Card.AXIS_BOTTOM);
 	}
 
+	public View getFrontView() {
+		return frontViewRef != null ? frontViewRef.get() : null;
+	}
+
+	public View getBackView() {
+		return backViewRef != null ? backViewRef.get() : null;
+	}
+
 	public void reloadTexture(View frontView, View backView) {
-		frontBitmap = GrabIt.takeScreenshot(frontView);
-		backBitmap = GrabIt.takeScreenshot(backView);
+		synchronized (this) {
+			AphidLog.i("reloading texture: %s and %s; old views: %s, %s", frontView, backView, getFrontView(), getBackView());
+
+			frontBitmap = GrabIt.takeScreenshot(frontView);
+			backBitmap = GrabIt.takeScreenshot(backView);
+
+			boolean viewChanged = false;
+
+			View oldFrontView = getFrontView();
+			View oldBackView = getBackView();
+
+			if (oldFrontView != frontView) {
+				frontViewRef = null;
+				if (frontView != null)
+					frontViewRef = new WeakReference<View>(frontView);
+				viewChanged = true;
+			}
+
+			if (oldBackView != backView) {
+				backViewRef = null;
+
+				if (backView != null)
+					backViewRef = new WeakReference<View>(backView);
+				viewChanged = true;
+			}
+
+			if (viewChanged) {
+				//angle = 0;
+				if (asyncAngleUpdate) {
+					if (angle >= 180)
+						angle -= 180;
+					else if (angle <= 0)
+						angle += 180;
+					asyncAngleUpdate = false;
+				}
+				AphidLog.d("View changed: front %s, back %s, angle %s", frontView, backView, angle);
+			}
+		}
 	}
 
 	public void rotateBy(float delta) {
@@ -80,6 +130,14 @@ public class FlipCards {
 			angle = 0;
 	}
 
+	public synchronized void touchRotateBy(float delta) {
+		angle += delta;
+		if (angle < 0) {
+			asyncAngleUpdate = true;
+			controller.flippedToView(null, false);
+		}
+	}
+
 	public void setState(int state) {
 		if (this.state != state) {
 			this.state = state;
@@ -87,7 +145,7 @@ public class FlipCards {
 		}
 	}
 
-	public void draw(GL10 gl) {
+	public synchronized void draw(GL10 gl) {
 		applyTexture(gl);
 
 		if (frontTexture == null)
@@ -95,16 +153,18 @@ public class FlipCards {
 
 		switch (state) {
 			case STATE_TIP: {
-				if (angle >= 180)
-					forward = false;
-				else if (angle <= 0)
-					forward = true;
+				if (false) { //XXX: debug only
+					if (angle >= 180)
+						forward = false;
+					else if (angle <= 0)
+						forward = true;
 
-				rotateBy((forward ? TIP_SPEED : -TIP_SPEED));
-				if (angle > 90 && angle <= 180 - MAX_TIP_ANGLE) {
-					forward = true;
-				} else if (angle < 90 && angle >= MAX_TIP_ANGLE) {
-					forward = false;
+					rotateBy((forward ? TIP_SPEED : -TIP_SPEED));
+					if (angle > 90 && angle <= 180 - MAX_TIP_ANGLE) {
+						forward = true;
+					} else if (angle < 90 && angle >= MAX_TIP_ANGLE) {
+						forward = false;
+					}
 				}
 			}
 			break;
@@ -113,8 +173,13 @@ public class FlipCards {
 			case STATE_AUTO_ROTATE: {
 				animatedFrame++;
 				rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
-				if (angle >= 180 || angle <= 0)
+				if (angle >= 180 || angle <= 0) {
 					setState(STATE_TIP);
+					if (angle >= 180) {
+						asyncAngleUpdate = true;
+						controller.postFlippedToView(backViewRef != null ? backViewRef.get() : null, true);
+					}
+				}
 			}
 			break;
 			default:
@@ -244,7 +309,7 @@ public class FlipCards {
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				delta = lastY - event.getY();
-				rotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
+				touchRotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
 				lastY = event.getY();
 				return true;
 			case MotionEvent.ACTION_UP:
