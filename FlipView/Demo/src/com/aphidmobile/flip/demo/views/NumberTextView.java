@@ -15,7 +15,7 @@ public class NumberTextView extends TextView{
 	public NumberTextView(Context context, int number) {
 		super(context);
 		setNumber(number);
-		setTextSize(480);
+		setTextSize(360);
 		setTextColor(Color.BLACK);
 		setBackgroundColor(Color.WHITE);
 		setGravity(Gravity.CENTER);

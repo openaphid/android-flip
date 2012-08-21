@@ -21,6 +21,8 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.view.View;
 
+import java.util.LinkedList;
+
 /*
 Copyright 2012 Aphid Mobile
 
@@ -44,6 +46,8 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	private FlipCards cards;
 	
 	private boolean created = false;
+	
+	private final LinkedList<Texture> postDestroyTextures = new LinkedList<Texture>();
 
 	public FlipRenderer(FlipViewController flipViewController) {
 		this.flipViewController = flipViewController;
@@ -113,13 +117,25 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	public void onDrawFrame(GL10 gl) {		
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		cards.draw(gl);
+		synchronized (postDestroyTextures) {
+			for (Texture texture : postDestroyTextures)
+				texture.destroy(gl);
+			postDestroyTextures.clear();
+		}
+		
+		cards.draw(this, gl);
+	}
+	
+	public void postDestroyTexture(Texture texture) {
+		synchronized (postDestroyTextures) {
+			postDestroyTextures.add(texture);
+		}
 	}
 
-	public void updateTexture(View frontView, View backView) {
+	public void updateTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		if (created) {
 			//Logger.i("updateTexture");
-			cards.reloadTexture(frontView, backView);
+			cards.reloadTexture(frontIndex, frontView, backIndex, backView);
 		}
 		//flipViewController.getSurfaceView().requestRender();
 	}

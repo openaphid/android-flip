@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.aphidmobile.utils;
 
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -36,6 +37,11 @@ public class UI {
 	public static void assertInMainThread() {
 		if (!isMainThread())
 			throw new RuntimeException("Main thread assertion failed");
+	}
+	
+	public static void recycleBitmap(Bitmap bm) {
+		if (bm != null)
+			bm.recycle();
 	}
 	
 	public static <T> T callInMainThread(Callable<T> call) throws Exception {

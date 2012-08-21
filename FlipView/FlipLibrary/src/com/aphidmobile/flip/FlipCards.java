@@ -1,14 +1,3 @@
-package com.aphidmobile.flip;
-
-import static com.aphidmobile.flip.FlipRenderer.*;
-
-import android.graphics.Bitmap;
-import android.view.*;
-import com.aphidmobile.utils.AphidLog;
-
-import javax.microedition.khronos.opengles.GL10;
-import java.lang.ref.WeakReference;
-
 /*
 Copyright 2012 Aphid Mobile
 
@@ -26,6 +15,13 @@ limitations under the License.
 
  */
 
+package com.aphidmobile.flip;
+
+import android.view.*;
+import com.aphidmobile.utils.AphidLog;
+
+import javax.microedition.khronos.opengles.GL10;
+
 public class FlipCards {
 	private static final float ACCELERATION = 0.618f;
 	private static final float TIP_SPEED = 1f;
@@ -36,106 +32,86 @@ public class FlipCards {
 	private static final int STATE_TOUCH = 1;
 	private static final int STATE_AUTO_ROTATE = 2;
 
-	private Texture frontTexture;
-	private Bitmap frontBitmap;
-
-	private Texture backTexture;
-	private Bitmap backBitmap;
-
-	private Card frontTopCard;
-	private Card frontBottomCard;
-
-	private Card backTopCard;
-	private Card backBottomCard;
+	private ViewDualCards frontCards;
+	private ViewDualCards backCards;
 
 	private float angle = 0f;
 	private boolean forward = true;
-	//	private boolean animating = false;
 	private int animatedFrame = 0;
 	private int state = STATE_TIP;
 
+	private float lastY = -1;
+
 	private VelocityTracker velocityTracker;
-	private WeakReference<View> frontViewRef;
-	private WeakReference<View> backViewRef;
 	private FlipViewController controller;
 
-	private boolean asyncAngleUpdate = false;
+	private int activeIndex = -1;
 
 	public FlipCards(FlipViewController controller) {
 		this.controller = controller;
-		frontTopCard = new Card();
-		frontBottomCard = new Card();
 
-		backTopCard = new Card();
-		backBottomCard = new Card();
+		frontCards = new ViewDualCards();
+		backCards = new ViewDualCards();
 
-		frontBottomCard.setAxis(Card.AXIS_TOP);
-		backTopCard.setAxis(Card.AXIS_BOTTOM);
+		resetAxises();
 	}
 
-	public View getFrontView() {
-		return frontViewRef != null ? frontViewRef.get() : null;
-	}
-
-	public View getBackView() {
-		return backViewRef != null ? backViewRef.get() : null;
-	}
-
-	public void reloadTexture(View frontView, View backView) {
+	public void reloadTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		synchronized (this) {
-			AphidLog.i("reloading texture: %s and %s; old views: %s, %s", frontView, backView, getFrontView(), getBackView());
-
-			frontBitmap = GrabIt.takeScreenshot(frontView);
-			backBitmap = GrabIt.takeScreenshot(backView);
-
-			boolean viewChanged = false;
-
-			View oldFrontView = getFrontView();
-			View oldBackView = getBackView();
-
-			if (oldFrontView != frontView) {
-				frontViewRef = null;
-				if (frontView != null)
-					frontViewRef = new WeakReference<View>(frontView);
-				viewChanged = true;
+			if (frontView != null) {
+				if (backCards.getView() == frontView) {
+					frontCards.setView(-1, null);
+					swapCards();
+				}
 			}
 
-			if (oldBackView != backView) {
-				backViewRef = null;
-
-				if (backView != null)
-					backViewRef = new WeakReference<View>(backView);
-				viewChanged = true;
+			if (backView != null) {
+				if (frontCards.getView() == backView) {
+					backCards.setView(-1, null);
+					swapCards();
+				}
 			}
 
-			if (viewChanged) {
-				//angle = 0;
-				if (asyncAngleUpdate) {
+			boolean frontChanged = frontCards.setView(frontIndex, frontView);
+			boolean backChanged = backCards.setView(backIndex, backView);
+
+			AphidLog.i("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
+
+			if (frontChanged || backChanged || true) {
+				if (frontIndex == activeIndex) {
 					if (angle >= 180)
 						angle -= 180;
-					else if (angle <= 0)
+					else if (angle < 0)
 						angle += 180;
-					asyncAngleUpdate = false;
+				} else if (backIndex == activeIndex) {
+					if (angle < 0)
+						angle += 180;
 				}
-				AphidLog.d("View changed: front %s, back %s, angle %s", frontView, backView, angle);
+
+				AphidLog.i("View changed: front (%d, %s), back (%d, %s), angle %s, activeIndex %d", frontIndex, frontView, backIndex, backView, angle, activeIndex);
 			}
 		}
+	}
+
+	private void swapCards() {
+		ViewDualCards tmp = frontCards;
+		frontCards = backCards;
+		backCards = tmp;
+		resetAxises();
 	}
 
 	public void rotateBy(float delta) {
 		angle += delta;
+
+		if (backCards.getIndex() == -1) {
+			if (angle >= MAX_TIP_ANGLE)
+				angle = MAX_TIP_ANGLE;
+		}
+
 		if (angle > 180)
 			angle = 180;
 		else if (angle < 0)
 			angle = 0;
-	}
-
-	public synchronized void touchRotateBy(float delta) {
-		angle += delta;
-		if (angle < 0) {
-			asyncAngleUpdate = true;
-			controller.flippedToView(null, false);
-		}
 	}
 
 	public void setState(int state) {
@@ -145,10 +121,10 @@ public class FlipCards {
 		}
 	}
 
-	public synchronized void draw(GL10 gl) {
-		applyTexture(gl);
+	public synchronized void draw(FlipRenderer renderer, GL10 gl) {
+		applyTexture(renderer, gl);
 
-		if (frontTexture == null)
+		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
 			return;
 
 		switch (state) {
@@ -175,9 +151,12 @@ public class FlipCards {
 				rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
 				if (angle >= 180 || angle <= 0) {
 					setState(STATE_TIP);
-					if (angle >= 180) {
-						asyncAngleUpdate = true;
-						controller.postFlippedToView(backViewRef != null ? backViewRef.get() : null, true);
+					if (angle >= 180) { //flip to next page
+						if (backCards.getIndex() != -1) {
+							activeIndex = backCards.getIndex();
+							controller.postFlippedToView(activeIndex);
+						} else
+							angle = 180;
 					}
 				}
 			}
@@ -187,120 +166,46 @@ public class FlipCards {
 				break;
 		}
 
-		if (angle < 90) {
-			frontTopCard.draw(gl);
-			backBottomCard.draw(gl);
-			frontBottomCard.setAngle(angle);
-			frontBottomCard.draw(gl);
-		} else {
-			frontTopCard.draw(gl);
-			backTopCard.setAngle(180 - angle);
-			backTopCard.draw(gl);
-			backBottomCard.draw(gl);
+		if (angle < 90) { //render front view over back view
+			frontCards.getTopCard().setAngle(0);
+			frontCards.getTopCard().draw(gl);
+
+			backCards.getBottomCard().setAngle(0);
+			backCards.getBottomCard().draw(gl);
+
+			frontCards.getBottomCard().setAngle(angle);
+			frontCards.getBottomCard().draw(gl);
+		} else { //render back view first
+			frontCards.getTopCard().setAngle(0);
+			frontCards.getTopCard().draw(gl);
+
+			backCards.getTopCard().setAngle(180 - angle);
+			backCards.getTopCard().draw(gl);
+
+			backCards.getBottomCard().setAngle(0);
+			backCards.getBottomCard().draw(gl);
 		}
 	}
 
-	private void applyTexture(GL10 gl) {
-		if (frontBitmap != null) {
-			if (frontTexture != null)
-				frontTexture.destroy(gl);
-
-			frontTexture = Texture.createTexture(frontBitmap, gl);
-
-			frontTopCard.setTexture(frontTexture);
-			frontBottomCard.setTexture(frontTexture);
-
-			frontTopCard.setCardVertices(new float[]{
-				0f, frontBitmap.getHeight(), 0f,                     //top left
-				0f, frontBitmap.getHeight() / 2.0f, 0f,              //bottom left
-				frontBitmap.getWidth(), frontBitmap.getHeight() / 2f, 0f, //bottom right
-				frontBitmap.getWidth(), frontBitmap.getHeight(), 0f       //top right
-			});
-
-			frontTopCard.setTextureCoordinates(new float[]{
-				0f, 0f,
-				0f, frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
-				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
-				frontBitmap.getWidth() / (float) frontTexture.getWidth(), 0f
-			});
-
-			frontBottomCard.setCardVertices(new float[]{
-				0f, frontBitmap.getHeight() / 2f, 0f,                //top left
-				0f, 0f, 0f,                                      //bottom left
-				frontBitmap.getWidth(), 0f, 0f,                      //bottom right
-				frontBitmap.getWidth(), frontBitmap.getHeight() / 2f, 0f  //top right
-			});
-
-			frontBottomCard.setTextureCoordinates(new float[]{
-				0f, frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight(),
-				0f, frontBitmap.getHeight() / (float) frontTexture.getHeight(),
-				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / (float) frontTexture.getHeight(),
-				frontBitmap.getWidth() / (float) frontTexture.getWidth(), frontBitmap.getHeight() / 2f / (float) frontTexture.getHeight()
-			});
-
-			checkError(gl);
-
-			frontBitmap.recycle();
-			frontBitmap = null;
-		}
-
-		if (backBitmap != null) {
-			if (backTexture != null)
-				backTexture.destroy(gl);
-
-			backTexture = Texture.createTexture(backBitmap, gl);
-
-			backTopCard.setTexture(backTexture);
-			backBottomCard.setTexture(backTexture);
-
-			backTopCard.setCardVertices(new float[]{
-				0f, backBitmap.getHeight(), 0f,                     //top left
-				0f, backBitmap.getHeight() / 2.0f, 0f,              //bottom left
-				backBitmap.getWidth(), backBitmap.getHeight() / 2f, 0f, //bottom right
-				backBitmap.getWidth(), backBitmap.getHeight(), 0f       //top right
-			});
-
-			backTopCard.setTextureCoordinates(new float[]{
-				0f, 0f,
-				0f, backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
-				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
-				backBitmap.getWidth() / (float) backTexture.getWidth(), 0f
-			});
-
-			backBottomCard.setCardVertices(new float[]{
-				0f, backBitmap.getHeight() / 2f, 0f,                //top left
-				0f, 0f, 0f,                                      //bottom left
-				backBitmap.getWidth(), 0f, 0f,                      //bottom right
-				backBitmap.getWidth(), backBitmap.getHeight() / 2f, 0f  //top right
-			});
-
-			backBottomCard.setTextureCoordinates(new float[]{
-				0f, backBitmap.getHeight() / 2f / (float) backTexture.getHeight(),
-				0f, backBitmap.getHeight() / (float) backTexture.getHeight(),
-				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / (float) backTexture.getHeight(),
-				backBitmap.getWidth() / (float) backTexture.getWidth(), backBitmap.getHeight() / 2f / (float) backTexture.getHeight()
-			});
-
-			checkError(gl);
-
-			backBitmap.recycle();
-			backBitmap = null;
-		}
+	private void applyTexture(FlipRenderer renderer, GL10 gl) {
+		frontCards.buildTexture(renderer, gl);
+		backCards.buildTexture(renderer, gl);
 	}
 
 	public void invalidateTexture() {
-		//Texture is vanished when the gl context is gone, no need to delete it explicitly
-		frontTexture = null;
-		backTexture = null;
+		frontCards.abandonTexture();
+		backCards.abandonTexture();
 	}
 
-	private float lastY = -1;
-
-	public boolean handleTouchEvent(MotionEvent event) {
-		if (frontTexture == null)
+	public synchronized boolean handleTouchEvent(MotionEvent event) {
+		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
 			return false;
 
 		float delta;
+
+		Texture texture = frontCards.getTexture();
+		if (texture == null)
+			texture = backCards.getTexture();
 
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
@@ -309,21 +214,45 @@ public class FlipCards {
 				return true;
 			case MotionEvent.ACTION_MOVE:
 				delta = lastY - event.getY();
-				touchRotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
+				final float angleDelta = 180 * delta / texture.getContentHeight() * MOVEMENT_RATE;
+				angle += angleDelta;
+				if (backCards.getIndex() == -1) {
+					if (angle >= MAX_TIP_ANGLE)
+						angle = MAX_TIP_ANGLE;
+				} else if (backCards.getIndex() == 0) {
+					if (angle <= 180 - MAX_TIP_ANGLE)
+						angle = 180 - MAX_TIP_ANGLE;
+				}
+				if (angle < 0) {
+					if (frontCards.getIndex() > 0) {
+						activeIndex = frontCards.getIndex() - 1; //xxx
+						controller.flippedToView(activeIndex);
+					} else {
+						swapCards();
+						frontCards.setView(-1, null);
+						if (-angle >= MAX_TIP_ANGLE)
+							angle = -MAX_TIP_ANGLE;
+						angle += 180;
+					}
+				}
 				lastY = event.getY();
 				return true;
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_CANCEL:
 				delta = lastY - event.getY();
-				rotateBy(180 * delta / frontTexture.getContentHeight() * MOVEMENT_RATE);
-				if (angle < 90)
-					forward = false;
-				else
-					forward = true;
+				rotateBy(180 * delta / texture.getContentHeight() * MOVEMENT_RATE);
+				forward = angle >= 90;
 				setState(STATE_AUTO_ROTATE);
 				return true;
 		}
 
 		return false;
+	}
+
+	private void resetAxises() {
+		frontCards.getTopCard().setAxis(Card.AXIS_TOP);
+		frontCards.getBottomCard().setAxis(Card.AXIS_TOP);
+		backCards.getBottomCard().setAxis(Card.AXIS_TOP);
+		backCards.getTopCard().setAxis(Card.AXIS_BOTTOM);
 	}
 }

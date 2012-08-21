@@ -3,6 +3,7 @@ package com.aphidmobile.flip;
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
 import com.aphidmobile.utils.AphidLog;
+import junit.framework.Assert;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -25,6 +26,8 @@ limitations under the License.
 
  */
 public class Texture {
+	private FlipRenderer renderer;
+	
 	private int[] id = {0};
 
 	private int width, height;
@@ -35,8 +38,11 @@ public class Texture {
 	private Texture() {
 	}
 
-	public static Texture createTexture(Bitmap bitmap, GL10 gl) {
+	public static Texture createTexture(Bitmap bitmap, FlipRenderer renderer, GL10 gl) {
 		Texture t = new Texture();
+		t.renderer = renderer;
+
+		Assert.assertTrue("bitmap should not be null or recycled", bitmap != null && !bitmap.isRecycled());
 
 		int w = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
 		int h = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
@@ -62,12 +68,19 @@ public class Texture {
 
 		return t;
 	}
+	
+	public void postDestroy() {
+		renderer.postDestroyTexture(this);
+	}
 
 	public void destroy(GL10 gl) {
-		if (id[0] != 0)
+		if (id[0] != 0) {
 			gl.glDeleteTextures(1, id, 0);
+			AphidLog.d("Destroy texture: %d", id[0]);
+		}
 
 		id[0] = 0;
+		destroyed = true;
 	}
 
 	public boolean isDestroyed() {

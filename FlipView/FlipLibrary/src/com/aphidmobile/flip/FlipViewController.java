@@ -141,7 +141,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			View backView = null;
 			if (bufferIndex < bufferedViews.size() - 1)
 				backView = bufferedViews.get(bufferIndex + 1);
-			renderer.updateTexture(frontView, backView);
+			renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1, backView);
 			frontView.setVisibility(View.INVISIBLE);
 			if (backView != null)
 				backView.setVisibility(View.INVISIBLE);
@@ -226,7 +226,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	public void setSelection(int position) {
-		//XXX: Auto-generated implementation
 		if (adapter == null)
 			return;
 
@@ -304,11 +303,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 		//invalidate(); //XXX: is this necessary?
 	}
 
-	public void postFlippedToView(final View view, final boolean forward) {
+	public void postFlippedToView(final int indexInAdapter) {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				flippedToView(view, forward);
+				flippedToView(indexInAdapter);
 			}
 		});
 	}
@@ -317,41 +316,44 @@ public class FlipViewController extends AdapterView<Adapter> {
 		AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
 	}
 
-	public void flippedToView(View view, boolean forward) {
-		AphidLog.d("flippedToView: %s, forward, %s", view, forward);
-		if (view != null) {
-			Assert.assertTrue("bufferedViews should contain the flipped view: " + view, bufferedViews.contains(view));
-			if (bufferedViews.get(bufferIndex) == view)
-				return;
-		}
+	public void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
+		AphidLog.d("flippedToView: %d", indexInAdapter);
+
+		if (indexInAdapter == adapterIndex && false)
+			return;
 
 		debugBufferedViews();
 
-		if (forward) {
-			if (adapterIndex < adapter.getCount() - 1) {
-				adapterIndex++;
-				View old = bufferedViews.get(bufferIndex);
-				if (bufferIndex > 0)
-					releaseView(bufferedViews.removeFirst());
-				if (adapterIndex + sideBufferSize < adapter.getCount())
-					bufferedViews.addLast(viewFromAdapter(adapterIndex + sideBufferSize, true));
-				bufferIndex = bufferedViews.indexOf(old) + 1;
-				requestLayout();
-				updateVisibleView(bufferIndex);
-			}
-		} else {
-			if (adapterIndex > 0) {
-				adapterIndex--;
-				View old = bufferedViews.get(bufferIndex);
-				if (bufferIndex < bufferedViews.size() - 1)
-					releaseView(bufferedViews.removeLast());
-				if (adapterIndex - sideBufferSize >= 0)
-					bufferedViews.addFirst(viewFromAdapter(adapterIndex - sideBufferSize, false));
-				bufferIndex = bufferedViews.indexOf(old) - 1;
-				requestLayout();
-				updateVisibleView(bufferIndex);
-			}
-		}
+		if (indexInAdapter >= 0 && indexInAdapter < adapter.getCount()) {
+
+			if (indexInAdapter == adapterIndex + 1) { //forward one page
+				if (adapterIndex < adapter.getCount() - 1) {
+					adapterIndex++;
+					View old = bufferedViews.get(bufferIndex);
+					if (bufferIndex > 0)
+						releaseView(bufferedViews.removeFirst());
+					if (adapterIndex + sideBufferSize < adapter.getCount())
+						bufferedViews.addLast(viewFromAdapter(adapterIndex + sideBufferSize, true));
+					bufferIndex = bufferedViews.indexOf(old) + 1;
+					requestLayout();
+					updateVisibleView(bufferIndex);
+				}
+			} else if (indexInAdapter == adapterIndex - 1) {
+				if (adapterIndex > 0) {
+					adapterIndex--;
+					View old = bufferedViews.get(bufferIndex);
+					if (bufferIndex < bufferedViews.size() - 1)
+						releaseView(bufferedViews.removeLast());
+					if (adapterIndex - sideBufferSize >= 0)
+						bufferedViews.addFirst(viewFromAdapter(adapterIndex - sideBufferSize, false));
+					bufferIndex = bufferedViews.indexOf(old) - 1;
+					requestLayout();
+					updateVisibleView(bufferIndex);
+				}
+			} else 
+				setSelection(indexInAdapter);
+		} else
+			Assert.assertTrue("Invalid indexInAdapter: " + indexInAdapter, false);
 		debugBufferedViews();
 	}
 }
