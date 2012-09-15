@@ -19,6 +19,7 @@ package com.aphidmobile.utils;
 import java.io.*;
 import java.nio.charset.Charset;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -98,6 +99,15 @@ public class IO {
 			return null;
 		} finally {
 			close(input);
+		}
+	}
+	
+	public static Bitmap readBitmap(AssetManager manager, String name) {
+		try {
+			return readBitmap(manager.open(name));
+		} catch (IOException e) {
+			AphidLog.e(e, "Failed to read bitmap '%s' from assets", name);
+			return null;
 		}
 	}
 }

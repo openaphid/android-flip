@@ -79,8 +79,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private int adapterIndex = -1;
 	private int sideBufferSize = 1;
 
-	float touchSlop;
-	float maxVelocity;
+	private float touchSlop;
+	private float maxVelocity;
 
 	public FlipViewController(Context context) {
 		super(context);
@@ -94,6 +94,10 @@ public class FlipViewController extends AdapterView<Adapter> {
 		maxVelocity = configuration.getScaledMaximumFlingVelocity();
 
 		setupSurfaceView();
+	}
+
+	public float getTouchSlop() {
+		return touchSlop;
 	}
 
 	private void setupSurfaceView() {
@@ -178,13 +182,17 @@ public class FlipViewController extends AdapterView<Adapter> {
 	//--------------------------------------------------------------------------------------------------------------------
 	// Touch Event
 	@Override
-	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		return super.onInterceptTouchEvent(ev);    //XXX: Auto-generated super call
+	public boolean onInterceptTouchEvent(MotionEvent event) { //XXX not correct
+		boolean ret = renderer.getCards().handleTouchEvent(event, false);
+		return ret;
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		return renderer.getCards().handleTouchEvent(event);
+		boolean ret = renderer.getCards().handleTouchEvent(event, true);
+		if (ret)
+			showFlipAnimation();
+		return ret;
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -319,8 +327,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
 		AphidLog.d("flippedToView: %d", indexInAdapter);
 
-		if (indexInAdapter == adapterIndex && false)
-			return;
+/*		if (indexInAdapter == adapterIndex && false)
+			return;*/
 
 		debugBufferedViews();
 
@@ -350,10 +358,45 @@ public class FlipViewController extends AdapterView<Adapter> {
 					requestLayout();
 					updateVisibleView(bufferIndex);
 				}
-			} else 
+			} else
 				setSelection(indexInAdapter);
 		} else
 			Assert.assertTrue("Invalid indexInAdapter: " + indexInAdapter, false);
 		debugBufferedViews();
+	}
+
+	public void postHideFlipAnimation() {
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				hideFlipAnimation();
+			}
+		});
+	}
+
+	private void showFlipAnimation() {
+		if (surfaceView.getVisibility() != View.VISIBLE) {
+			surfaceView.setVisibility(View.VISIBLE);
+			handler.post(new Runnable() { //use posted message here to avoid flicker
+				@Override
+				public void run() {
+					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+					updateVisibleView(-1);
+				}
+			});
+		}
+	}
+
+	private void hideFlipAnimation() {
+		if (surfaceView.getVisibility() == View.VISIBLE) {
+			updateVisibleView(bufferIndex);
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+					surfaceView.setVisibility(View.INVISIBLE);
+				}
+			});			
+		}
 	}
 }

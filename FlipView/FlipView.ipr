@@ -40,6 +40,7 @@
       <profile version="1.0" is_locked="false">
         <option name="myName" value="Project Default" />
         <option name="myLocal" value="false" />
+        <inspection_tool class="AndroidLintContentDescription" enabled="false" level="WARNING" enabled_by_default="false" />
         <inspection_tool class="AssertEqualsBetweenInconvertibleTypes" enabled="false" level="WARNING" enabled_by_default="false" />
         <inspection_tool class="BoundFieldAssignment" level="WARNING" enabled="false" />
         <inspection_tool class="CanBeFinal" enabled="false" level="WARNING" enabled_by_default="false">

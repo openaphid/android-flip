@@ -77,20 +77,20 @@ public class FlipCards {
 
 			AphidLog.i("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
 
-			if (frontChanged || backChanged || true) {
-				if (frontIndex == activeIndex) {
-					if (angle >= 180)
-						angle -= 180;
-					else if (angle < 0)
-						angle += 180;
-				} else if (backIndex == activeIndex) {
-					if (angle < 0)
-						angle += 180;
-				}
-
-				AphidLog.i("View changed: front (%d, %s), back (%d, %s), angle %s, activeIndex %d", frontIndex, frontView, backIndex, backView, angle, activeIndex);
+//			if (frontChanged || backChanged || true) {
+			if (frontIndex == activeIndex) {
+				if (angle >= 180)
+					angle -= 180;
+				else if (angle < 0)
+					angle += 180;
+			} else if (backIndex == activeIndex) {
+				if (angle < 0)
+					angle += 180;
 			}
+
+			AphidLog.i("View changed: front (%d, %s), back (%d, %s), angle %s, activeIndex %d", frontIndex, frontView, backIndex, backView, angle, activeIndex);
 		}
+//		}
 	}
 
 	private void swapCards() {
@@ -158,6 +158,8 @@ public class FlipCards {
 						} else
 							angle = 180;
 					}
+
+					controller.postHideFlipAnimation();
 				}
 			}
 			break;
@@ -197,7 +199,7 @@ public class FlipCards {
 		backCards.abandonTexture();
 	}
 
-	public synchronized boolean handleTouchEvent(MotionEvent event) {
+	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
 		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
 			return false;
 
@@ -210,40 +212,47 @@ public class FlipCards {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				lastY = event.getY();
-				setState(STATE_TOUCH);
-				return true;
+				return isOnTouchEvent;
 			case MotionEvent.ACTION_MOVE:
 				delta = lastY - event.getY();
-				final float angleDelta = 180 * delta / texture.getContentHeight() * MOVEMENT_RATE;
-				angle += angleDelta;
-				if (backCards.getIndex() == -1) {
-					if (angle >= MAX_TIP_ANGLE)
-						angle = MAX_TIP_ANGLE;
-				} else if (backCards.getIndex() == 0) {
-					if (angle <= 180 - MAX_TIP_ANGLE)
-						angle = 180 - MAX_TIP_ANGLE;
-				}
-				if (angle < 0) {
-					if (frontCards.getIndex() > 0) {
-						activeIndex = frontCards.getIndex() - 1; //xxx
-						controller.flippedToView(activeIndex);
-					} else {
-						swapCards();
-						frontCards.setView(-1, null);
-						if (-angle >= MAX_TIP_ANGLE)
-							angle = -MAX_TIP_ANGLE;
-						angle += 180;
+				if (Math.abs(delta) > controller.getTouchSlop())
+					setState(STATE_TOUCH); //XXX: initialize views?
+				if (state == STATE_TOUCH) {
+					final float angleDelta = 180 * delta / texture.getContentHeight() * MOVEMENT_RATE;
+					angle += angleDelta;
+					if (backCards.getIndex() == -1) {
+						if (angle >= MAX_TIP_ANGLE)
+							angle = MAX_TIP_ANGLE;
+					} else if (backCards.getIndex() == 0) {
+						if (angle <= 180 - MAX_TIP_ANGLE)
+							angle = 180 - MAX_TIP_ANGLE;
 					}
+					if (angle < 0) {
+						if (frontCards.getIndex() > 0) {
+							activeIndex = frontCards.getIndex() - 1; //xxx
+							controller.flippedToView(activeIndex);
+						} else {
+							swapCards();
+							frontCards.setView(-1, null);
+							if (-angle >= MAX_TIP_ANGLE)
+								angle = -MAX_TIP_ANGLE;
+							angle += 180;
+						}
+					}
+					lastY = event.getY();
+					return true;
 				}
-				lastY = event.getY();
-				return true;
+
+				return isOnTouchEvent;
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_CANCEL:
-				delta = lastY - event.getY();
-				rotateBy(180 * delta / texture.getContentHeight() * MOVEMENT_RATE);
-				forward = angle >= 90;
-				setState(STATE_AUTO_ROTATE);
-				return true;
+				if (state == STATE_TOUCH) {
+					delta = lastY - event.getY();
+					rotateBy(180 * delta / texture.getContentHeight() * MOVEMENT_RATE);
+					forward = angle >= 90;
+					setState(STATE_AUTO_ROTATE);
+				}				
+				return isOnTouchEvent;
 		}
 
 		return false;

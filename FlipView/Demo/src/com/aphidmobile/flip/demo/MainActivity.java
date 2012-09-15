@@ -1,59 +1,32 @@
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
-import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.views.NumberTextView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import com.aphidmobile.flipview.demo.R;
 
-public class MainActivity extends Activity {
-	private FlipViewController flipView;
+import java.util.*;
 
-	/**
-	 * Called when the activity is first created.
-	 */
+/**
+ * @author Bo Hu
+ *         created at 9/15/12, 4:17 PM
+ */
+public class MainActivity extends ListActivity {
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		setTitle(R.string.activity_title);
-
-		flipView = new FlipViewController(this);
-
-		flipView.setAdapter(new BaseAdapter() {
-			@Override
-			public int getCount() {
-				return 10;
-			}
-
-			@Override
-			public Object getItem(int position) {
-				return position;
-			}
-
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				NumberTextView view = new NumberTextView(parent.getContext(), position);
-				return view;
-			}
-		});
-
-		setContentView(flipView);
-
-		flipView.startFlipping();
+		setListAdapter(
+			new SimpleAdapter(
+				this, getData(), android.R.layout.simple_list_item_1, new String[]{"title"}, new int[]{android.R.id.text1}
+			)
+		);
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -72,14 +45,24 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Map<String, Object> map = (Map<String, Object>) l.getItemAtPosition(position);
+		Intent intent = new Intent(this, (Class<? extends Activity>)map.get("activity"));
+		startActivity(intent);
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
+	private List<? extends Map<String, ?>> getData() {
+		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+		addItem(data, "Flip Text Views", FlipTextViewActivity.class);
+		addItem(data, "Flip Buttons", FlipButtonActivity.class);
+		addItem(data, "Flip Complex Layouts", FlipComplexLayoutActivity.class);
+		return data;
+	}
+
+	private void addItem(List<Map<String, Object>> data, String title, Class<? extends Activity> activityClass) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("title", title);
+		map.put("activity", activityClass);
+		data.add(map);
 	}
 }
