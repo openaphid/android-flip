@@ -30,4 +30,9 @@ public class NumberButton extends Button {
 		this.number = number;
 		setText(Integer.toString(number));
 	}
+	
+	@Override
+	public String toString() {
+		return "NumberButton: " + number;
+	}
 }

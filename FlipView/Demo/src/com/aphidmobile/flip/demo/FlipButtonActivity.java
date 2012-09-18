@@ -1,8 +1,6 @@
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.BaseAdapter;
@@ -53,8 +51,6 @@ public class FlipButtonActivity extends Activity {
 		});
 
 		setContentView(flipView);
-
-		flipView.startFlipping();
 	}
 
 	@Override

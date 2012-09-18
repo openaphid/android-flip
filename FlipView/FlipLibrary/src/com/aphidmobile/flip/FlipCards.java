@@ -218,6 +218,8 @@ public class FlipCards {
 				if (Math.abs(delta) > controller.getTouchSlop())
 					setState(STATE_TOUCH); //XXX: initialize views?
 				if (state == STATE_TOUCH) {
+					controller.showFlipAnimation();
+					
 					final float angleDelta = 180 * delta / texture.getContentHeight() * MOVEMENT_RATE;
 					angle += angleDelta;
 					if (backCards.getIndex() == -1) {

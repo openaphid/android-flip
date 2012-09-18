@@ -35,8 +35,6 @@ public class FlipComplexLayoutActivity extends Activity {
 		flipView.setAdapter(new MyBaseAdapter(this));
 
 		setContentView(flipView);
-
-		flipView.startFlipping();
 	}
 
 	@Override
@@ -85,10 +83,13 @@ public class FlipComplexLayoutActivity extends Activity {
 			View layout = inflater.inflate(R.layout.complex1, null);
 
 			final Data data = IMG_DESCRIPTIONS.get(position);
+			
 			ImageView photoView = (ImageView) layout.findViewById(R.id.photo);
 			photoView.setImageBitmap(IO.readBitmap(inflater.getContext().getAssets(), data.imageFilename));
+			
 			TextView textView = (TextView) layout.findViewById(R.id.description);
 			textView.setText(data.description);
+			
 			Button wikipedia = (Button) layout.findViewById(R.id.wikipedia);
 			wikipedia.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -100,6 +101,7 @@ public class FlipComplexLayoutActivity extends Activity {
 					inflater.getContext().startActivity(intent);
 				}
 			});
+			
 			return layout;
 		}
 

@@ -41,8 +41,10 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private int width;
 	private int height;
 
-	private boolean flipping = false;
-
+	private boolean enableFlipAnimation = true;
+	
+	private boolean inFlipAnimation = false;
+	
 	private Handler handler = new Handler(new Handler.Callback() {
 		@Override
 		public boolean handleMessage(Message msg) {
@@ -140,15 +142,12 @@ public class FlipViewController extends AdapterView<Adapter> {
 			}
 		}
 
-		if (flipping && bufferedViews.size() >= 2) {
+		if (enableFlipAnimation && bufferedViews.size() >= 1) { //XXX: check inFlipAnimation?
 			View frontView = bufferedViews.get(bufferIndex);
 			View backView = null;
 			if (bufferIndex < bufferedViews.size() - 1)
 				backView = bufferedViews.get(bufferIndex + 1);
 			renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1, backView);
-			frontView.setVisibility(View.INVISIBLE);
-			if (backView != null)
-				backView.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -163,8 +162,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 		surfaceView.measure(widthMeasureSpec, heightMeasureSpec);
 	}
 
-	public void startFlipping() {
-		flipping = true;
+	public void setEnableFlipAnimation(boolean enable) {
+		enableFlipAnimation = enable;
 	}
 
 	public void onResume() {
@@ -189,10 +188,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		boolean ret = renderer.getCards().handleTouchEvent(event, true);
-		if (ret)
-			showFlipAnimation();
-		return ret;
+		return renderer.getCards().handleTouchEvent(event, true);
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -258,7 +254,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 		adapterIndex = position;
 
 		requestLayout();
-		updateVisibleView(bufferIndex);
+		updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 	}
 
 	@Override
@@ -304,6 +300,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void updateVisibleView(int index) {
+		AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
 		for (int i = 0; i < bufferedViews.size(); i++) {
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 		}
@@ -344,7 +341,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 						bufferedViews.addLast(viewFromAdapter(adapterIndex + sideBufferSize, true));
 					bufferIndex = bufferedViews.indexOf(old) + 1;
 					requestLayout();
-					updateVisibleView(bufferIndex);
+					updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 				}
 			} else if (indexInAdapter == adapterIndex - 1) {
 				if (adapterIndex > 0) {
@@ -356,7 +353,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 						bufferedViews.addFirst(viewFromAdapter(adapterIndex - sideBufferSize, false));
 					bufferIndex = bufferedViews.indexOf(old) - 1;
 					requestLayout();
-					updateVisibleView(bufferIndex);
+					updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 				}
 			} else
 				setSelection(indexInAdapter);
@@ -374,9 +371,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 		});
 	}
 
-	private void showFlipAnimation() {
-		if (surfaceView.getVisibility() != View.VISIBLE) {
-			surfaceView.setVisibility(View.VISIBLE);
+	protected void showFlipAnimation() {
+		if (!inFlipAnimation) {
+			inFlipAnimation = true;
+			surfaceView.setVisibility(View.VISIBLE);			
+			
 			handler.post(new Runnable() { //use posted message here to avoid flicker
 				@Override
 				public void run() {
@@ -388,15 +387,17 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void hideFlipAnimation() {
-		if (surfaceView.getVisibility() == View.VISIBLE) {
+		if (inFlipAnimation) {
+			inFlipAnimation = false;
 			updateVisibleView(bufferIndex);
+			
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); //XXX: disabling this line causes deadlock in GLThread, why?
 					surfaceView.setVisibility(View.INVISIBLE);
 				}
-			});			
+			});
 		}
 	}
 }

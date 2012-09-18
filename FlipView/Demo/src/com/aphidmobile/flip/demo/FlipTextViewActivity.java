@@ -1,13 +1,9 @@
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
@@ -51,8 +47,6 @@ public class FlipTextViewActivity extends Activity {
 		});
 
 		setContentView(flipView);
-
-		flipView.startFlipping();
 	}
 
 	@Override
