@@ -37,6 +37,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private GLSurfaceView surfaceView;
 	private FlipRenderer renderer;
+	private FlipCards cards;
 
 	private int width;
 	private int height;
@@ -86,11 +87,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	public FlipViewController(Context context) {
 		super(context);
-		AphidLog.d("Creating FlipViewController");
-		init();
-	}
-
-	private void init() {
 		ViewConfiguration configuration = ViewConfiguration.get(getContext());
 		touchSlop = configuration.getScaledTouchSlop();
 		maxVelocity = configuration.getScaledMaximumFlingVelocity();
@@ -105,7 +101,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void setupSurfaceView() {
 		surfaceView = new GLSurfaceView(getContext());
 
-		renderer = new FlipRenderer(this);
+		cards = new FlipCards(this);
+		renderer = new FlipRenderer(this, cards);
 
 		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 		surfaceView.setZOrderOnTop(true);
@@ -182,13 +179,13 @@ public class FlipViewController extends AdapterView<Adapter> {
 	// Touch Event
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) { //XXX not correct
-		boolean ret = renderer.getCards().handleTouchEvent(event, false);
+		boolean ret = cards.handleTouchEvent(event, false);
 		return ret;
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		return renderer.getCards().handleTouchEvent(event, true);
+		return cards.handleTouchEvent(event, true);
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------

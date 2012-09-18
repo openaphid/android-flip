@@ -49,12 +49,9 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	
 	private final LinkedList<Texture> postDestroyTextures = new LinkedList<Texture>();
 
-	public FlipRenderer(FlipViewController flipViewController) {
+	public FlipRenderer(FlipViewController flipViewController, FlipCards cards) {
 		this.flipViewController = flipViewController;
-
-		cards = new FlipCards(flipViewController);
-		
-		//AphidLog.i("Renderer created");
+		this.cards = cards;
 	}
 
 	public FlipCards getCards() {
