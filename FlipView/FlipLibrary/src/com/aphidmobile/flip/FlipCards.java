@@ -46,6 +46,8 @@ public class FlipCards {
 	private FlipViewController controller;
 
 	private int activeIndex = -1;
+	
+	private boolean visible = false;
 
 	public FlipCards(FlipViewController controller) {
 		this.controller = controller;
@@ -54,6 +56,16 @@ public class FlipCards {
 		backCards = new ViewDualCards();
 
 		resetAxises();
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 	public void reloadTexture(int frontIndex, View frontView, int backIndex, View backView) {
@@ -121,10 +133,13 @@ public class FlipCards {
 		}
 	}
 
-	public synchronized void draw(FlipRenderer renderer, GL10 gl) {
+	public synchronized void draw(FlipRenderer renderer, GL10 gl) {		
 		applyTexture(renderer, gl);
 
 		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
+			return;
+		
+		if (!visible)
 			return;
 
 		switch (state) {
@@ -149,6 +164,7 @@ public class FlipCards {
 			case STATE_AUTO_ROTATE: {
 				animatedFrame++;
 				rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
+				controller.getSurfaceView().requestRender();
 				if (angle >= 180 || angle <= 0) {
 					setState(STATE_TIP);
 					if (angle >= 180) { //flip to next page
@@ -200,8 +216,10 @@ public class FlipCards {
 	}
 
 	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
-		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
+		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture())) {
+			AphidLog.d("Ignore touch event as there is no valid textures");
 			return false;
+		}
 
 		float delta;
 
@@ -242,6 +260,7 @@ public class FlipCards {
 						}
 					}
 					lastY = event.getY();
+					controller.getSurfaceView().requestRender();
 					return true;
 				}
 
@@ -253,6 +272,7 @@ public class FlipCards {
 					rotateBy(180 * delta / texture.getContentHeight() * MOVEMENT_RATE);
 					forward = angle >= 90;
 					setState(STATE_AUTO_ROTATE);
+					controller.getSurfaceView().requestRender();
 				}				
 				return isOnTouchEvent;
 		}

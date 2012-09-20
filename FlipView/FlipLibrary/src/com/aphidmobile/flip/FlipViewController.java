@@ -52,6 +52,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			if (msg.what == MSG_SURFACE_CREATED) {
 				width = 0;
 				height = 0;
+				AphidLog.d("requestLayout after got MSG_SURFACE_CREATED");
 				requestLayout();
 				return true;
 			}
@@ -108,9 +109,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 		surfaceView.setZOrderOnTop(true);
 		surfaceView.setRenderer(renderer);
 		surfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
-		surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+		surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
 		addViewInLayout(surfaceView, -1, new AbsListView.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT), false);
+		
+		requestLayout();
 	}
 
 	public GLSurfaceView getSurfaceView() {
@@ -145,7 +148,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 			if (bufferIndex < bufferedViews.size() - 1)
 				backView = bufferedViews.get(bufferIndex + 1);
 			renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1, backView);
-		}
+		} else
+			AphidLog.d("Ignore updateTexture");
 	}
 
 	@Override
@@ -371,28 +375,27 @@ public class FlipViewController extends AdapterView<Adapter> {
 	protected void showFlipAnimation() {
 		if (!inFlipAnimation) {
 			inFlipAnimation = true;
-			surfaceView.setVisibility(View.VISIBLE);			
+			cards.setVisible(true);
+			surfaceView.requestRender();
 			
-			handler.post(new Runnable() { //use posted message here to avoid flicker
-				@Override
+			handler.postDelayed(new Runnable() { //use a delayed message to avoid flicker
 				public void run() {
-					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-					updateVisibleView(-1);
+					if (inFlipAnimation)
+						updateVisibleView(-1);
 				}
-			});
+			}, 100);
 		}
 	}
 
 	private void hideFlipAnimation() {
 		if (inFlipAnimation) {
 			inFlipAnimation = false;
-			updateVisibleView(bufferIndex);
 			
+			updateVisibleView(bufferIndex);
 			handler.post(new Runnable() {
-				@Override
 				public void run() {
-					surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); //XXX: disabling this line causes deadlock in GLThread, why?
-					surfaceView.setVisibility(View.INVISIBLE);
+					if (!inFlipAnimation)
+						cards.setVisible(false);
 				}
 			});
 		}

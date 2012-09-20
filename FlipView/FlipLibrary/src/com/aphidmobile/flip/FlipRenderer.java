@@ -17,6 +17,8 @@ import static javax.microedition.khronos.opengles.GL10.GL_SMOOTH;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import com.aphidmobile.utils.AphidLog;
+
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.view.View;
@@ -72,7 +74,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		cards.invalidateTexture();
 		flipViewController.reloadTexture();
 		
-		//AphidLog.i("onSurfaceCreated");
+		AphidLog.i("onSurfaceCreated");
 	}
 
 	public static float[] light0Position = {0, 0, 100f, 0f};
@@ -131,10 +133,10 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 
 	public void updateTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		if (created) {
-			//Logger.i("updateTexture");
+			AphidLog.d("updateTexture: %d, %d", frontIndex, backIndex);
 			cards.reloadTexture(frontIndex, frontView, backIndex, backView);
-		}
-		//flipViewController.getSurfaceView().requestRender();
+			flipViewController.getSurfaceView().requestRender();
+		}		
 	}
 
 	public static void checkError(GL10 gl) {

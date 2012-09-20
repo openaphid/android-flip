@@ -16,8 +16,7 @@ limitations under the License.
  */
 package com.aphidmobile.flip;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.*;
 import android.view.View;
 import com.aphidmobile.utils.AphidLog;
 
@@ -31,6 +30,7 @@ public class GrabIt {
 			Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), config);
 			Canvas canvas = new Canvas(bitmap);
 			view.draw(canvas);
+			//canvas.drawColor(Color.RED, PorterDuff.Mode.LIGHTEN); //XXX: debug option
 
 			AphidLog.d("create bitmap %dx%d", view.getWidth(), view.getHeight());
 
