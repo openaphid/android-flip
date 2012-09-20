@@ -80,7 +80,9 @@ public class FlipComplexLayoutActivity extends Activity {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			View layout = inflater.inflate(R.layout.complex1, null);
+			View layout = convertView;
+			if (convertView == null)
+				layout = inflater.inflate(R.layout.complex1, null);
 
 			final Data data = IMG_DESCRIPTIONS.get(position);
 			

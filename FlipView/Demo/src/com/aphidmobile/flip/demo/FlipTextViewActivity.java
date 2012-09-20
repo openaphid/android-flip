@@ -2,7 +2,8 @@ package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.*;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberTextView;
@@ -17,7 +18,7 @@ public class FlipTextViewActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setTitle(R.string.activity_title);
 
 		flipView = new FlipViewController(this);
@@ -40,8 +41,16 @@ public class FlipTextViewActivity extends Activity {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				NumberTextView view = new NumberTextView(parent.getContext(), position);
-				view.setTextSize(360);
+				NumberTextView view;
+				if (convertView == null) {
+					view = new NumberTextView(parent.getContext(), position);
+					view.setTextSize(360);
+				}
+				else {
+					view = (NumberTextView) convertView;
+					view.setNumber(position);
+				}
+				
 				return view;
 			}
 		});

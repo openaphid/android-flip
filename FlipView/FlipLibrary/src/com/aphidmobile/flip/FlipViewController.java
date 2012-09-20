@@ -77,6 +77,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	};
 
 	private final LinkedList<View> bufferedViews = new LinkedList<View>();
+	private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to remember the related view indices?
 	private int bufferIndex = -1;
 	private int adapterIndex = -1;
 	private int sideBufferSize = 1;
@@ -285,35 +286,39 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void releaseView(View view) {
 		Assert.assertNotNull(view);
 		detachViewFromParent(view);
-		//XXX: add it to a released view buffer?
+		releasedViews.add(view);
 	}
 
 	private View viewFromAdapter(int position, boolean addToTop) {
 		Assert.assertNotNull(adapter);
 
-		View view = adapter.getView(position, null, this); //XXX: replace null with a released view instance
-		setupAdapterView(view, addToTop);
+		View releasedView = releasedViews.isEmpty() ? null : releasedViews.removeFirst();
+		View view = adapter.getView(position, releasedView, this);
+		if (view != releasedView)
+			releasedViews.add(releasedView);
+		
+		setupAdapterView(view, addToTop, view == releasedView);
 		return view;
 	}
 
-	private void setupAdapterView(View view, boolean addToTop) {
+	private void setupAdapterView(View view, boolean addToTop, boolean isReusedView) {
 		LayoutParams params = view.getLayoutParams();
 		if (params == null) {
 			params = new AbsListView.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 0);
 		}
 
-		//XXX: 0 should be 1?
-		addViewInLayout(view, addToTop ? -1 : 0, params, true); //XXX: different logic for released view?		
+		if (isReusedView)
+			attachViewToParent(view, addToTop ? 0 : 1, params);
+		else
+			addViewInLayout(view, addToTop ? 0 : 1, params, true);		
 	}
 
 	private void updateVisibleView(int index) {
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
-		for (int i = 0; i < bufferedViews.size(); i++) {
+		
+		for (int i = 0; i < bufferedViews.size(); i++)
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
-		}
-
-		//invalidate(); //XXX: is this necessary?
 	}
 
 	public void postFlippedToView(final int indexInAdapter) {

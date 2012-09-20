@@ -44,8 +44,16 @@ public class FlipButtonActivity extends Activity {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				NumberButton button = new NumberButton(parent.getContext(), position);
-				button.setTextSize(360);
+				NumberButton button;
+				if (convertView == null) {
+					button = new NumberButton(parent.getContext(), position);
+					button.setTextSize(360);
+				}
+				else {
+					button = (NumberButton) convertView;
+					button.setNumber(position);
+				}
+				
 				return button;
 			}
 		});
