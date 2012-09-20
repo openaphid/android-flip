@@ -21,6 +21,7 @@ import static com.aphidmobile.flip.FlipRenderer.*;
 
 import android.graphics.Bitmap;
 import android.view.View;
+import com.aphidmobile.utils.TextureUtils;
 import com.aphidmobile.utils.UI;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -48,7 +49,7 @@ public class ViewDualCards {
 	public boolean setView(int index, View view) {
 		UI.assertInMainThread();
 		this.index = index;
-		if (getView() == view)
+		if (getView() == view && (screenshot != null || TextureUtils.isValidTexture(texture)))
 			return false;
 		viewRef = null;
 		if (texture != null) {
