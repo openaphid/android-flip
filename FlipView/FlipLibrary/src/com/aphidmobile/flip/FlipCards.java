@@ -19,6 +19,7 @@ package com.aphidmobile.flip;
 
 import android.view.*;
 import com.aphidmobile.utils.AphidLog;
+import com.aphidmobile.utils.TextureUtils;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -28,7 +29,7 @@ public class FlipCards {
 	private static final float MOVEMENT_RATE = 1.5f;
 	private static final int MAX_TIP_ANGLE = 60;
 
-	private static final int STATE_TIP = 0;
+	private static final int STATE_INIT = 0;
 	private static final int STATE_TOUCH = 1;
 	private static final int STATE_AUTO_ROTATE = 2;
 
@@ -38,10 +39,11 @@ public class FlipCards {
 	private float angle = 0f;
 	private boolean forward = true;
 	private int animatedFrame = 0;
-	private int state = STATE_TIP;
+	private int state = STATE_INIT;
 
 	private float lastY = -1;
 
+	@SuppressWarnings("unused")
 	private VelocityTracker velocityTracker;
 	private FlipViewController controller;
 
@@ -61,8 +63,6 @@ public class FlipCards {
 	public boolean isVisible() {
 		return visible;
 	}
-
-
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
@@ -87,9 +87,9 @@ public class FlipCards {
 			boolean frontChanged = frontCards.setView(frontIndex, frontView);
 			boolean backChanged = backCards.setView(backIndex, backView);
 
-			AphidLog.i("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
+			if (AphidLog.ENABLE_DEBUG)
+				AphidLog.d("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
 
-//			if (frontChanged || backChanged || true) {
 			if (frontIndex == activeIndex) {
 				if (angle >= 180)
 					angle -= 180;
@@ -100,16 +100,8 @@ public class FlipCards {
 					angle += 180;
 			}
 
-			AphidLog.i("View changed: front (%d, %s), back (%d, %s), angle %s, activeIndex %d", frontIndex, frontView, backIndex, backView, angle, activeIndex);
+//			AphidLog.i("View changed: front (%d, %s), back (%d, %s), angle %s, activeIndex %d", frontIndex, frontView, backIndex, backView, angle, activeIndex);
 		}
-//		}
-	}
-
-	private void swapCards() {
-		ViewDualCards tmp = frontCards;
-		frontCards = backCards;
-		backCards = tmp;
-		resetAxises();
 	}
 
 	public void rotateBy(float delta) {
@@ -136,15 +128,15 @@ public class FlipCards {
 	public synchronized void draw(FlipRenderer renderer, GL10 gl) {		
 		applyTexture(renderer, gl);
 
-		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture()))
+		if (!TextureUtils.isValidTexture(frontCards.getTexture()) && !TextureUtils.isValidTexture(backCards.getTexture()))
 			return;
 		
 		if (!visible)
 			return;
 
 		switch (state) {
-			case STATE_TIP: {
-				if (false) { //XXX: debug only
+			case STATE_INIT: {
+				/*if (false) { //XXX: debug only
 					if (angle >= 180)
 						forward = false;
 					else if (angle <= 0)
@@ -156,7 +148,7 @@ public class FlipCards {
 					} else if (angle < 90 && angle >= MAX_TIP_ANGLE) {
 						forward = false;
 					}
-				}
+				}*/
 			}
 			break;
 			case STATE_TOUCH:
@@ -164,9 +156,9 @@ public class FlipCards {
 			case STATE_AUTO_ROTATE: {
 				animatedFrame++;
 				rotateBy((forward ? ACCELERATION : -ACCELERATION) * animatedFrame);
-				controller.getSurfaceView().requestRender();
+				
 				if (angle >= 180 || angle <= 0) {
-					setState(STATE_TIP);
+					setState(STATE_INIT);
 					if (angle >= 180) { //flip to next page
 						if (backCards.getIndex() != -1) {
 							activeIndex = backCards.getIndex();
@@ -174,9 +166,9 @@ public class FlipCards {
 						} else
 							angle = 180;
 					}
-
 					controller.postHideFlipAnimation();
-				}
+				} else
+					controller.getSurfaceView().requestRender();
 			}
 			break;
 			default:
@@ -205,27 +197,13 @@ public class FlipCards {
 		}
 	}
 
-	private void applyTexture(FlipRenderer renderer, GL10 gl) {
-		frontCards.buildTexture(renderer, gl);
-		backCards.buildTexture(renderer, gl);
-	}
-
 	public void invalidateTexture() {
 		frontCards.abandonTexture();
 		backCards.abandonTexture();
 	}
 
 	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
-		if (!Utils.isValidTexture(frontCards.getTexture()) && !Utils.isValidTexture(backCards.getTexture())) {
-			AphidLog.d("Ignore touch event as there is no valid textures");
-			return false;
-		}
-
 		float delta;
-
-		Texture texture = frontCards.getTexture();
-		if (texture == null)
-			texture = backCards.getTexture();
 
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
@@ -238,7 +216,7 @@ public class FlipCards {
 				if (state == STATE_TOUCH) {
 					controller.showFlipAnimation();
 					
-					final float angleDelta = 180 * delta / texture.getContentHeight() * MOVEMENT_RATE;
+					final float angleDelta = 180 * delta / controller.getContentHeight() * MOVEMENT_RATE;
 					angle += angleDelta;
 					if (backCards.getIndex() == -1) {
 						if (angle >= MAX_TIP_ANGLE)
@@ -269,7 +247,7 @@ public class FlipCards {
 			case MotionEvent.ACTION_CANCEL:
 				if (state == STATE_TOUCH) {
 					delta = lastY - event.getY();
-					rotateBy(180 * delta / texture.getContentHeight() * MOVEMENT_RATE);
+					rotateBy(180 * delta / controller.getContentHeight() * MOVEMENT_RATE);
 					forward = angle >= 90;
 					setState(STATE_AUTO_ROTATE);
 					controller.getSurfaceView().requestRender();
@@ -285,5 +263,17 @@ public class FlipCards {
 		frontCards.getBottomCard().setAxis(Card.AXIS_TOP);
 		backCards.getBottomCard().setAxis(Card.AXIS_TOP);
 		backCards.getTopCard().setAxis(Card.AXIS_BOTTOM);
+	}
+	
+	private void swapCards() {
+		ViewDualCards tmp = frontCards;
+		frontCards = backCards;
+		backCards = tmp;
+		resetAxises();
+	}
+	
+	private void applyTexture(FlipRenderer renderer, GL10 gl) {
+		frontCards.buildTexture(renderer, gl);
+		backCards.buildTexture(renderer, gl);
 	}
 }

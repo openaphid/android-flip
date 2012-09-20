@@ -22,6 +22,7 @@ import com.aphidmobile.utils.AphidLog;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.view.View;
+import com.aphidmobile.utils.TextureUtils;
 
 import java.util.LinkedList;
 
@@ -56,10 +57,6 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		this.cards = cards;
 	}
 
-	public FlipCards getCards() {
-		return cards;
-	}
-
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -74,7 +71,8 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		cards.invalidateTexture();
 		flipViewController.reloadTexture();
 		
-		AphidLog.i("onSurfaceCreated");
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.i("onSurfaceCreated");
 	}
 
 	public static float[] light0Position = {0, 0, 100f, 0f};
@@ -87,7 +85,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		gl.glLoadIdentity();
 
 		float fovy = 20f;
-		float eyeZ = height / 2f / (float) Math.tan(Utils.d2r(fovy / 2));
+		float eyeZ = height / 2f / (float) Math.tan(TextureUtils.d2r(fovy / 2));
 
 		GLU.gluPerspective(gl, fovy, (float) width / (float) height, 0.5f, Math.max(2500.0f, eyeZ));
 
@@ -109,7 +107,8 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		light0Position = new float[]{0, 0, eyeZ, 0f};
 		gl.glLightfv(GL_LIGHT0, GL_POSITION, light0Position, 0);
 
-		//AphidLog.i(String.format("onSurfaceChanged: %d, %d", width, height));
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.i("onSurfaceChanged: %d, %d", width, height);
 	}
 
 	@Override
@@ -133,7 +132,6 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 
 	public void updateTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		if (created) {
-			AphidLog.d("updateTexture: %d, %d", frontIndex, backIndex);
 			cards.reloadTexture(frontIndex, frontView, backIndex, backView);
 			flipViewController.getSurfaceView().requestRender();
 		}		
@@ -141,8 +139,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 
 	public static void checkError(GL10 gl) {
 		int error = gl.glGetError();
-		if (error != 0) {
+		if (error != 0)
 			throw new RuntimeException(GLU.gluErrorString(error));
-		}
 	}
 }

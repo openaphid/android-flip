@@ -52,7 +52,8 @@ public class Texture {
 		t.width = w;
 		t.height = h;
 
-		AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
 
 
 		gl.glGenTextures(1, t.id, 0);
@@ -76,7 +77,8 @@ public class Texture {
 	public void destroy(GL10 gl) {
 		if (id[0] != 0) {
 			gl.glDeleteTextures(1, id, 0);
-			AphidLog.d("Destroy texture: %d", id[0]);
+			if (AphidLog.ENABLE_DEBUG)
+				AphidLog.d("Destroy texture: %d", id[0]);
 		}
 
 		id[0] = 0;

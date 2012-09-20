@@ -1,19 +1,3 @@
-package com.aphidmobile.flip;
-
-import android.content.Context;
-import android.content.res.Configuration;
-import android.database.DataSetObserver;
-import android.graphics.PixelFormat;
-import android.opengl.GLSurfaceView;
-import android.os.Handler;
-import android.os.Message;
-import android.view.*;
-import android.widget.*;
-import com.aphidmobile.utils.AphidLog;
-import junit.framework.Assert;
-
-import java.util.LinkedList;
-
 /*
 Copyright 2012 Aphid Mobile
 
@@ -31,28 +15,31 @@ limitations under the License.
 
  */
 
+package com.aphidmobile.flip;
+
+import android.content.Context;
+import android.content.res.Configuration;
+import android.database.DataSetObserver;
+import android.graphics.PixelFormat;
+import android.opengl.GLSurfaceView;
+import android.os.Handler;
+import android.os.Message;
+import android.view.*;
+import android.widget.*;
+import com.aphidmobile.utils.AphidLog;
+import junit.framework.Assert;
+
+import java.util.LinkedList;
+
 public class FlipViewController extends AdapterView<Adapter> {
 
 	private static final int MSG_SURFACE_CREATED = 1;
-
-	private GLSurfaceView surfaceView;
-	private FlipRenderer renderer;
-	private FlipCards cards;
-
-	private int width;
-	private int height;
-
-	private boolean enableFlipAnimation = true;
-	
-	private boolean inFlipAnimation = false;
-	
 	private Handler handler = new Handler(new Handler.Callback() {
 		@Override
 		public boolean handleMessage(Message msg) {
 			if (msg.what == MSG_SURFACE_CREATED) {
-				width = 0;
-				height = 0;
-				AphidLog.d("requestLayout after got MSG_SURFACE_CREATED");
+				contentWidth = 0;
+				contentHeight = 0;
 				requestLayout();
 				return true;
 			}
@@ -60,12 +47,23 @@ public class FlipViewController extends AdapterView<Adapter> {
 		}
 	});
 
+	private GLSurfaceView surfaceView;
+	private FlipRenderer renderer;
+	private FlipCards cards;
+
+	private int contentWidth;
+	private int contentHeight;
+
+	private boolean enableFlipAnimation = true;
+
+	private boolean inFlipAnimation = false;
+
 	//AdapterView Related
 	private Adapter adapter;
 	private DataSetObserver adapterDataObserver = new DataSetObserver() {
 		@Override
 		public void onChanged() {
-			View v = getChildAt(bufferIndex);
+			View v = bufferedViews.get(bufferIndex);
 			if (v != null) {
 				for (int i = 0; i < adapter.getCount(); i++) {
 					if (v.equals(adapter.getItem(i))) {
@@ -74,7 +72,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 					}
 				}
 			}
-			resetFocus();
+			reloadAllViews();
 		}
 	};
 
@@ -84,6 +82,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private int sideBufferSize = 1;
 
 	private float touchSlop;
+	@SuppressWarnings("unused")
 	private float maxVelocity;
 
 	public FlipViewController(Context context) {
@@ -99,23 +98,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 		return touchSlop;
 	}
 
-	private void setupSurfaceView() {
-		surfaceView = new GLSurfaceView(getContext());
-
-		cards = new FlipCards(this);
-		renderer = new FlipRenderer(this, cards);
-
-		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-		surfaceView.setZOrderOnTop(true);
-		surfaceView.setRenderer(renderer);
-		surfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
-		surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-
-		addViewInLayout(surfaceView, -1, new AbsListView.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT), false);
-		
-		requestLayout();
-	}
-
 	public GLSurfaceView getSurfaceView() {
 		return surfaceView;
 	}
@@ -124,43 +106,12 @@ public class FlipViewController extends AdapterView<Adapter> {
 		return renderer;
 	}
 
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		AphidLog.d("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, bufferedViews.size());
-
-		for (View child : bufferedViews) //todo: test visibility?
-			child.layout(0, 0, r - l, b - t);
-
-		if (changed || width == 0) {
-			int w = r - l;
-			int h = b - t;
-			surfaceView.layout(0, 0, w, h);
-
-			if (width != w || height != h) {
-				width = w;
-				height = h;
-			}
-		}
-
-		if (enableFlipAnimation && bufferedViews.size() >= 1) { //XXX: check inFlipAnimation?
-			View frontView = bufferedViews.get(bufferIndex);
-			View backView = null;
-			if (bufferIndex < bufferedViews.size() - 1)
-				backView = bufferedViews.get(bufferIndex + 1);
-			renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1, backView);
-		} else
-			AphidLog.d("Ignore updateTexture");
+	public int getContentWidth() {
+		return contentWidth;
 	}
 
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//Logger.i( String.format("onMeasure: %d, %d, ; child %d", widthMeasureSpec, heightMeasureSpec, flipViews.size()));
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-		for (View child : bufferedViews) //todo: test visibility?
-			child.measure(widthMeasureSpec, heightMeasureSpec);
-
-		surfaceView.measure(widthMeasureSpec, heightMeasureSpec);
+	public int getContentHeight() {
+		return contentHeight;
 	}
 
 	public void setEnableFlipAnimation(boolean enable) {
@@ -175,16 +126,15 @@ public class FlipViewController extends AdapterView<Adapter> {
 		surfaceView.onPause();
 	}
 
-	public void reloadTexture() {
+	void reloadTexture() {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
 	// Touch Event
 	@Override
-	public boolean onInterceptTouchEvent(MotionEvent event) { //XXX not correct
-		boolean ret = cards.handleTouchEvent(event, false);
-		return ret;
+	public boolean onInterceptTouchEvent(MotionEvent event) {
+		return cards.handleTouchEvent(event, false);
 	}
 
 	@Override
@@ -196,7 +146,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	// Orientation
 	@Override
 	protected void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);    //XXX: Auto-generated super call
+		super.onConfigurationChanged(newConfig);
+		//XXX: adds a global layout listener?
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -264,10 +215,65 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
-	// Internals
+	// Layout
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.d("onLayout: %d, %d, %d, %d; child %d", l, t, r, b, bufferedViews.size());
 
-	private void resetFocus() {
-		//XXX: Auto-generated method body
+		for (View child : bufferedViews)
+			child.layout(0, 0, r - l, b - t);
+
+		if (changed || contentWidth == 0) {
+			int w = r - l;
+			int h = b - t;
+			surfaceView.layout(0, 0, w, h);
+
+			if (contentWidth != w || contentHeight != h) {
+				contentWidth = w;
+				contentHeight = h;
+			}
+		}
+
+		if (enableFlipAnimation && bufferedViews.size() >= 1) {
+			View frontView = bufferedViews.get(bufferIndex);
+			View backView = null;
+			if (bufferIndex < bufferedViews.size() - 1)
+				backView = bufferedViews.get(bufferIndex + 1);
+			renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1, backView);
+		}
+	}
+
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		//Logger.i( String.format("onMeasure: %d, %d, ; child %d", widthMeasureSpec, heightMeasureSpec, flipViews.size()));
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+		for (View child : bufferedViews)
+			child.measure(widthMeasureSpec, heightMeasureSpec);
+
+		surfaceView.measure(widthMeasureSpec, heightMeasureSpec);
+	}
+
+	//--------------------------------------------------------------------------------------------------------------------
+	// Internals
+	private void setupSurfaceView() {
+		surfaceView = new GLSurfaceView(getContext());
+
+		cards = new FlipCards(this);
+		renderer = new FlipRenderer(this, cards);
+
+		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+		surfaceView.setZOrderOnTop(true);
+		surfaceView.setRenderer(renderer);
+		surfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+		surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+		addViewInLayout(surfaceView, -1, new AbsListView.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT), false);
+	}
+
+	private void reloadAllViews() {
+		//XXX: remove all old views and then add new views back
 	}
 
 	private void releaseViews() {
@@ -301,7 +307,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void updateVisibleView(int index) {
-		AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
 		for (int i = 0; i < bufferedViews.size(); i++) {
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 		}
@@ -319,14 +326,13 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void debugBufferedViews() {
-		AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
 	}
 
 	public void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
-		AphidLog.d("flippedToView: %d", indexInAdapter);
-
-/*		if (indexInAdapter == adapterIndex && false)
-			return;*/
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.d("flippedToView: %d", indexInAdapter);
 
 		debugBufferedViews();
 
@@ -375,10 +381,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 	protected void showFlipAnimation() {
 		if (!inFlipAnimation) {
 			inFlipAnimation = true;
+
 			cards.setVisible(true);
 			surfaceView.requestRender();
-			
-			handler.postDelayed(new Runnable() { //use a delayed message to avoid flicker
+
+			handler.postDelayed(new Runnable() { //use a delayed message to avoid flicker, the perfect solution would be sending a message from the GL thread 
 				public void run() {
 					if (inFlipAnimation)
 						updateVisibleView(-1);
@@ -390,8 +397,9 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void hideFlipAnimation() {
 		if (inFlipAnimation) {
 			inFlipAnimation = false;
-			
+
 			updateVisibleView(bufferIndex);
+
 			handler.post(new Runnable() {
 				public void run() {
 					if (!inFlipAnimation)

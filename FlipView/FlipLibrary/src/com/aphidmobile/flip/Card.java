@@ -1,15 +1,3 @@
-package com.aphidmobile.flip;
-
-import static com.aphidmobile.flip.FlipRenderer.*;
-import static com.aphidmobile.flip.Utils.*;
-import static javax.microedition.khronos.opengles.GL10.*;
-
-import android.util.FloatMath;
-
-import javax.microedition.khronos.opengles.GL10;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-
 /*
 Copyright 2012 Aphid Mobile
 
@@ -26,6 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
  */
+
+package com.aphidmobile.flip;
+
+import static com.aphidmobile.flip.FlipRenderer.*;
+import static com.aphidmobile.utils.TextureUtils.*;
+import static javax.microedition.khronos.opengles.GL10.*;
+
+import android.util.FloatMath;
+
+import javax.microedition.khronos.opengles.GL10;
+import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 public class Card {
 	public static final int AXIS_TOP = 0;

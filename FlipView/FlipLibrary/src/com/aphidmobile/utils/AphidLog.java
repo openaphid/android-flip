@@ -21,6 +21,8 @@ import java.util.Formatter;
 import android.util.Log;
 
 public class AphidLog {
+	public static final boolean ENABLE_DEBUG = true;
+	
 	private AphidLog() {
 	}
 

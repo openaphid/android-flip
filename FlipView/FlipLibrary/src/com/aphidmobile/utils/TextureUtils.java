@@ -1,4 +1,6 @@
-package com.aphidmobile.flip;
+package com.aphidmobile.utils;
+
+import com.aphidmobile.flip.Texture;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,7 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
  */
-public class Utils {
+public class TextureUtils {
 	public static boolean isValidTexture(Texture t) {
 		return t != null && !t.isDestroyed();
 	}
@@ -30,7 +32,7 @@ public class Utils {
 		return degree * (float) Math.PI / 180f;
 	}
 
-	static FloatBuffer toFloatBuffer(float[] v) {
+	public static FloatBuffer toFloatBuffer(float[] v) {
 		ByteBuffer buf = ByteBuffer.allocateDirect(v.length * 4);
 		buf.order(ByteOrder.nativeOrder());
 		FloatBuffer buffer = buf.asFloatBuffer();
@@ -39,7 +41,7 @@ public class Utils {
 		return buffer;
 	}
 
-	static ShortBuffer toShortBuffer(short[] v) {
+	public static ShortBuffer toShortBuffer(short[] v) {
 		ByteBuffer buf = ByteBuffer.allocateDirect(v.length * 2);
 		buf.order(ByteOrder.nativeOrder());
 		ShortBuffer buffer = buf.asShortBuffer();
