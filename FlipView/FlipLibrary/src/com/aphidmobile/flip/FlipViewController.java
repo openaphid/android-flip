@@ -77,7 +77,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	};
 
 	private final LinkedList<View> bufferedViews = new LinkedList<View>();
-	private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to remember the related view indices?
+	private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to log the related view indices?
 	private int bufferIndex = -1;
 	private int adapterIndex = -1;
 	private int sideBufferSize = 1;
@@ -95,23 +95,23 @@ public class FlipViewController extends AdapterView<Adapter> {
 		setupSurfaceView();
 	}
 
-	public float getTouchSlop() {
+	float getTouchSlop() {
 		return touchSlop;
 	}
 
-	public GLSurfaceView getSurfaceView() {
+	GLSurfaceView getSurfaceView() {
 		return surfaceView;
 	}
 
-	public FlipRenderer getRenderer() {
+	FlipRenderer getRenderer() {
 		return renderer;
 	}
 
-	public int getContentWidth() {
+	int getContentWidth() {
 		return contentWidth;
 	}
 
-	public int getContentHeight() {
+	int getContentHeight() {
 		return contentHeight;
 	}
 
@@ -212,7 +212,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	public int getSelectedItemPosition() {
-		return adapterIndex; //XXX: super class returns mNextSelectedPosition, why?
+		return adapterIndex;
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -321,7 +321,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 	}
 
-	public void postFlippedToView(final int indexInAdapter) {
+	void postFlippedToView(final int indexInAdapter) {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -335,7 +335,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
 	}
 
-	public void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
+	void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("flippedToView: %d", indexInAdapter);
 
@@ -374,7 +374,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 		debugBufferedViews();
 	}
 
-	public void postHideFlipAnimation() {
+	void postHideFlipAnimation() {
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -383,7 +383,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 		});
 	}
 
-	protected void showFlipAnimation() {
+	void showFlipAnimation() {
 		if (!inFlipAnimation) {
 			inFlipAnimation = true;
 

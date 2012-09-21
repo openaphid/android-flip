@@ -56,7 +56,6 @@ public class AphidLog {
 	};
 
 	public static String format(String msg, Object... args) {
-		//TODO: String.format is extremely slow on Android, replace it with a custom/simplified implementation
 		ReusableFormatter formatter = thread_local_formatter.get();
 		return formatter.format(msg, args);
 	}

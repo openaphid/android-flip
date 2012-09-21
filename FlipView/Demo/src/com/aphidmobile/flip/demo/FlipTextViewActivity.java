@@ -22,7 +22,7 @@ public class FlipTextViewActivity extends Activity {
 		setTitle(R.string.activity_title);
 
 		flipView = new FlipViewController(this);
-
+		
 		flipView.setAdapter(new BaseAdapter() {
 			@Override
 			public int getCount() {
