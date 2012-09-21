@@ -1,3 +1,19 @@
+/*
+Copyright 2012 Aphid Mobile
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+ 
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+ */
+
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
@@ -12,10 +28,6 @@ import com.aphidmobile.flipview.demo.R;
 
 import java.util.*;
 
-/**
- * @author Bo Hu
- *         created at 9/15/12, 4:17 PM
- */
 public class MainActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +49,7 @@ public class MainActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = new Intent(
 			Intent.ACTION_VIEW,
-			Uri.parse("http://openaphid.github.com/blog/2012/05/21/how-to-implement-flipboard-animation-on-android/")
+			Uri.parse("http://openaphid.github.com/")
 		);
 		startActivity(intent);
 
