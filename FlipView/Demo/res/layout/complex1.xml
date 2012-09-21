@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:background="@android:color/white"
+    >
+  
+  <TextView android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:id="@+id/title"            
+      />
+  
+  <ImageView android:layout_gravity="center_horizontal"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:scaleType="centerCrop"
+             android:layout_margin="5dp"
+             android:id="@+id/photo"
+      />
+  
+  <Button android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="Go to Wikipedia"
+          android:textAppearance="@android:style/TextAppearance.Large"
+          android:layout_margin="5dp"
+          android:id="@+id/wikipedia"
+      />
+  
+  <TextView android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:layout_margin="5dp"
+            android:id="@+id/description"            
+      />
+
+</LinearLayout>

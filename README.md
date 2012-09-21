@@ -1,13 +1,15 @@
 android-flip
 ============
 
-Demos of flip animation on Android, which is similar to the effect of [Flipboard iPhone](http://www.flipboard.com)
+Aphid FlipView is a UI component to accomplish the flipping animation like [Flipboard](http://www.flipboard.com) does.
 
-A pre-built APK file for Android OS 2.2+ can be found at:
+A pre-built demo APK file for Android OS 2.2+ can be found at:
 
-[http://openaphid.github.com/images/AndroidFlip.apk](http://openaphid.github.com/images/AndroidFlip.apk)
+[https://github.com/openaphid/android-flip/tree/master/FlipView/Demo/APK](https://github.com/openaphid/android-flip/tree/master/FlipView/Demo/APK)
 
-[https://github.com/openaphid/android-flip/blob/master/Demo-Touch/APK/Flip-Touch.apk](https://github.com/openaphid/android-flip/blob/master/Demo-Touch/APK/Flip-Touch.apk)
+Please also refer to our blog post for more details:
+
+[http://openaphid.github.com/blog/2012/09/21/aphid-flipview-for-android-v0-dot-9-beta-released/](http://openaphid.github.com/blog/2012/09/21/aphid-flipview-for-android-v0-dot-9-beta-released/)
 
 ## Copyright and License
 

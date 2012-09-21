@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">FlipView Demo</string>
+	<string name="activity_title">FlipView Demo By Aphid Mobile</string>
+	
+	<string name="item_about">about</string>
+
+</resources>

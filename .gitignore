@@ -7,9 +7,13 @@
 # Java class files
 *.class
 
+*.iws
+
 # generated files
 bin/
 gen/
+out/
+.idea/
 
 # Local configuration file (sdk path, etc)
 local.properties
