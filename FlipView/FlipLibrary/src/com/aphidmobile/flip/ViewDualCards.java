@@ -62,8 +62,20 @@ public class ViewDualCards {
 			screenshot = GrabIt.takeScreenshot(view);
 		} else {
 			UI.recycleBitmap(screenshot);
+			screenshot = null;
 		}
 		return true;
+	}
+
+	void markForceReload() {
+		UI.assertInMainThread();
+
+		UI.recycleBitmap(screenshot);
+		screenshot = null;
+		if (texture != null) {
+			texture.postDestroy();
+			texture = null;
+		}
 	}
 
 	public Texture getTexture() {

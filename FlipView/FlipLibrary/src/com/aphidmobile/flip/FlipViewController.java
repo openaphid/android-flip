@@ -131,6 +131,18 @@ public class FlipViewController extends AdapterView<Adapter> {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
 	}
 
+	/**
+	 * Request the animator to update display if the pageView is active.
+	 * 
+	 * If the pageView is being used in the animation or its content has been buffered, the animator reloads it forcibly.
+	 * 
+	 * The reloading process is a bit heavy for an active page, so please don't invoke it too frequently for an active page. The cost is trivial for inactive pages.
+	 * @param pageView
+	 */
+	public void refreshPage(View pageView) {
+		cards.refreshView(pageView);
+	}
+
 	//--------------------------------------------------------------------------------------------------------------------
 	// Touch Event
 	@Override

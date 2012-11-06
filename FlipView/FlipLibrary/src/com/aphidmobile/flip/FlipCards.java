@@ -67,6 +67,13 @@ public class FlipCards {
 	public void setVisible(boolean visible) {
 		this.visible = visible;
 	}
+	
+	void refreshView(View view) {
+		if (frontCards.getView() == view)
+			frontCards.markForceReload();
+		if (backCards.getView() == view)
+			backCards.markForceReload();
+	}
 
 	public void reloadTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		synchronized (this) {

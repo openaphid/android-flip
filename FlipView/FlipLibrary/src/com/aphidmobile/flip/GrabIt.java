@@ -25,14 +25,17 @@ public class GrabIt {
 	}
 
 	public static Bitmap takeScreenshot(View view) {
-		if (view != null && view.getWidth() > 0 && view.getHeight() > 0) {
+		int width = view.getWidth();
+		int height = view.getHeight();
+		
+		if (view != null && width > 0 && height > 0) {
 			Bitmap.Config config = Bitmap.Config.ARGB_8888;
-			Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), config);
+			Bitmap bitmap = Bitmap.createBitmap(width, height, config);
 			Canvas canvas = new Canvas(bitmap);
 			view.draw(canvas);
 			//canvas.drawColor(Color.RED, PorterDuff.Mode.LIGHTEN); //XXX: debug option
 
-			AphidLog.d("create bitmap %dx%d", view.getWidth(), view.getHeight());
+			AphidLog.d("create bitmap %dx%d", width, height);
 
 			return bitmap;
 		} else {

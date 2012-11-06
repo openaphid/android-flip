@@ -4,6 +4,12 @@
           android:versionName="1.0">
 
   <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15"/>
+  
+  <!-- Required by ImageLoader library -->
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <!-- end -->
 
   <application android:label="@string/app_name"
                android:icon="@drawable/ic_launcher"
@@ -19,7 +25,10 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipButtonActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipComplexLayoutActivity"/>
-
+    <activity android:name="com.aphidmobile.flip.demo.FlipAsyncContentActivity"/>
+    
   </application>
+  
+  
 
 </manifest>
