@@ -13,10 +13,6 @@ import com.novoda.imageloader.core.*;
 import com.novoda.imageloader.core.model.ImageTag;
 import com.novoda.imageloader.core.model.ImageTagFactory;
 
-/**
- * @author Bo Hu
- *         created at 11/5/12, 10:23 PM
- */
 public class FlipAsyncContentActivity extends Activity {
 	private static ImageManager GLOBAL_IMAGE_MANAGER = null;
 
@@ -33,8 +29,6 @@ public class FlipAsyncContentActivity extends Activity {
 	
 	private FlipViewController flipView;
 	private OnImageLoadedListener imageLoadedListener;
-	
-	private Handler handler = new Handler();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

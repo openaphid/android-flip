@@ -33,7 +33,6 @@ public class ViewDualCards {
 	private Texture texture;
 
 	private Bitmap screenshot;
-	private boolean dirty = true;
 
 	private Card topCard = new Card();
 	private Card bottomCard = new Card();
@@ -84,14 +83,6 @@ public class ViewDualCards {
 
 	public Bitmap getScreenshot() {
 		return screenshot;
-	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
 	}
 
 	public Card getTopCard() {
