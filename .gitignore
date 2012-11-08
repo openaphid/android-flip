@@ -17,3 +17,6 @@ out/
 
 # Local configuration file (sdk path, etc)
 local.properties
+
+#Mac folder files
+.DS_Store

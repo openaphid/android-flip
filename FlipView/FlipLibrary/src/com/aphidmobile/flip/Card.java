@@ -49,6 +49,8 @@ public class Card {
 
 	private int axis = AXIS_TOP;
 
+	private boolean orientationVertical = true;
+	
 	private boolean dirty = false;
 
 	public Texture getTexture() {
@@ -89,6 +91,10 @@ public class Card {
 		this.axis = axis;
 	}
 
+	public void setOrientation(boolean orientationVertical) {
+		this.orientationVertical = orientationVertical;
+	}
+	
 	public void draw(GL10 gl) {
 		if (dirty)
 			updateVertices();
@@ -121,17 +127,33 @@ public class Card {
 
 		gl.glPushMatrix();
 
-		if (angle > 0) {
-			if (axis == AXIS_TOP) {
-				gl.glTranslatef(0, cardVertices[1], 0f);
-				gl.glRotatef(-angle, 1f, 0f, 0f);
-				gl.glTranslatef(0, -cardVertices[1], 0f);
-			} else {
-				gl.glTranslatef(0, cardVertices[7], 0f);
-				gl.glRotatef(angle, 1f, 0f, 0f);
-				gl.glTranslatef(0, -cardVertices[7], 0f);
+		if(orientationVertical){
+			if (angle > 0) {
+				if (axis == AXIS_TOP) {
+					gl.glTranslatef(0, cardVertices[1], 0f);
+					gl.glRotatef(-angle, 1f, 0f, 0f);
+					gl.glTranslatef(0, -cardVertices[1], 0f);
+				} else {
+					gl.glTranslatef(0, cardVertices[7], 0f);
+					gl.glRotatef(angle, 1f, 0f, 0f);
+					gl.glTranslatef(0, -cardVertices[7], 0f);
+				}
+			}			
+		} else {
+			if (angle > 0) {
+				if (axis == AXIS_TOP) {
+					gl.glTranslatef(cardVertices[0], 0,  0f);
+					gl.glRotatef(-angle, 0f, 1f, 0f);
+					gl.glTranslatef(-cardVertices[0], 0, 0f);
+				} else {
+					gl.glTranslatef(cardVertices[6], 0, 0f);
+					gl.glRotatef(angle, 0f, 1f, 0f);
+					gl.glTranslatef(-cardVertices[6], 0, 0f);
+				}
 			}
+
 		}
+		
 
 		gl.glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
 		gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
@@ -150,15 +172,31 @@ public class Card {
 			gl.glDisable(GL_DEPTH_TEST);
 
 			if (axis == AXIS_TOP) {
-				float w = cardVertices[9] - cardVertices[0];
-				float h = (cardVertices[1] - cardVertices[4]) * (1f - FloatMath.cos(d2r(angle)));
-				float z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
-				float[] shadowVertices = new float[]{
-					cardVertices[0], h + cardVertices[4], z,
-					cardVertices[3], cardVertices[4], 0f,
-					w, cardVertices[7], 0f,
-					w, h + cardVertices[4], z
-				};
+				float w,h,z;
+				float[] shadowVertices;
+				if(orientationVertical){
+					w = cardVertices[9] - cardVertices[0];
+					h = (cardVertices[1] - cardVertices[4]) * (1f - FloatMath.cos(d2r(angle)));
+					z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
+					shadowVertices = new float[]{
+						cardVertices[0], h + cardVertices[4], z,
+						cardVertices[3], cardVertices[4], 0f,
+						w, cardVertices[7], 0f,
+						w, h + cardVertices[4], z
+					};
+				} else {
+					w = (cardVertices[9] - cardVertices[0]) * (1f - FloatMath.cos(d2r(angle)));
+					h = (cardVertices[1] - cardVertices[4]);
+					z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
+					
+					shadowVertices = new float[]{
+						cardVertices[9] - w, cardVertices[1], z,
+						cardVertices[6] - w, cardVertices[4], z,
+						cardVertices[6], cardVertices[7], 0f,
+						cardVertices[9], cardVertices[10], 0f
+					};
+
+				}
 
 				float alpha = 1f * (90f - angle) / 90f;
 
@@ -166,16 +204,29 @@ public class Card {
 				gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
 				gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 			} else {
-				float w = cardVertices[9] - cardVertices[0];
-				float h = (cardVertices[1] - cardVertices[4]) * (1f - FloatMath.cos(d2r(angle)));
-				float z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
-				float[] shadowVertices = new float[]{
-					cardVertices[0], cardVertices[1], 0f,
-					cardVertices[3], cardVertices[1] - h, z,
-					w, cardVertices[1] - h, z,
-					w, cardVertices[1], 0f
-				};
-
+				float w,h,z;
+				float[] shadowVertices;
+				if(orientationVertical){
+					w = cardVertices[9] - cardVertices[0];
+					h = (cardVertices[1] - cardVertices[4]) * (1f - FloatMath.cos(d2r(angle)));
+					z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
+					shadowVertices = new float[]{
+						cardVertices[0], cardVertices[1], 0f,
+						cardVertices[3], cardVertices[1] - h, z,
+						w, cardVertices[1] - h, z,
+						w, cardVertices[1], 0f
+					};
+				} else {
+					w = (cardVertices[9] - cardVertices[0])  * (1f - FloatMath.cos(d2r(angle)));
+					h = (cardVertices[1] - cardVertices[4]);
+					z = (cardVertices[1] - cardVertices[4]) * FloatMath.sin(d2r(angle));
+					shadowVertices = new float[]{
+						cardVertices[0], cardVertices[1], 0f,
+						cardVertices[3], cardVertices[4], 0f,
+						cardVertices[0] + w, cardVertices[7], z,
+						cardVertices[3] + w, cardVertices[10], z
+					};
+				}
 				float alpha = 1f * (90f - angle) / 90f;
 
 				gl.glColor4f(0f, 0.0f, 0f, alpha);
