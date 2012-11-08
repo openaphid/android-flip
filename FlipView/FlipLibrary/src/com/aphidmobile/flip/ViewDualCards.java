@@ -38,6 +38,14 @@ public class ViewDualCards {
 	private Card topCard = new Card();
 	private Card bottomCard = new Card();
 
+	private boolean orientationVertical = true;
+
+	public ViewDualCards(boolean orientationVertical) {
+		topCard.setOrientation(orientationVertical);
+		bottomCard.setOrientation(orientationVertical);
+		this.orientationVertical = orientationVertical;
+	}
+
 	public int getIndex() {
 		return index;
 	}
@@ -49,7 +57,8 @@ public class ViewDualCards {
 	public boolean setView(int index, View view) {
 		UI.assertInMainThread();
 		this.index = index;
-		if (getView() == view && (screenshot != null || TextureUtils.isValidTexture(texture)))
+		if (getView() == view
+				&& (screenshot != null || TextureUtils.isValidTexture(texture)))
 			return false;
 		viewRef = null;
 		if (texture != null) {
@@ -106,33 +115,60 @@ public class ViewDualCards {
 			final float textureHeight = texture.getHeight();
 			final float textureWidth = texture.getWidth();
 
-			topCard.setCardVertices(new float[]{
-				0f, viewHeight, 0f,                     //top left
-				0f, viewHeight / 2.0f, 0f,              //bottom left
-				viewWidth, viewHeight / 2f, 0f, //bottom right
-				viewWidth, viewHeight, 0f       //top right
-			});
+			if (orientationVertical) {
+				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top
+																			// left
+						0f, viewHeight / 2.0f, 0f, // bottom left
+						viewWidth, viewHeight / 2f, 0f, // bottom right
+						viewWidth, viewHeight, 0f // top right
+				});
 
-			topCard.setTextureCoordinates(new float[]{
-				0f, 0f,
-				0f, viewHeight / 2f / textureHeight,
-				viewWidth / textureWidth, viewHeight / 2f / textureHeight,
-				viewWidth / textureWidth, 0f
-			});
+				topCard.setTextureCoordinates(new float[] { 0f, 0f, 0f,
+						viewHeight / 2f / textureHeight,
+						viewWidth / textureWidth,
+						viewHeight / 2f / textureHeight,
+						viewWidth / textureWidth, 0f });
 
-			bottomCard.setCardVertices(new float[]{
-				0f, viewHeight / 2f, 0f,                //top left
-				0f, 0f, 0f,                                      //bottom left
-				viewWidth, 0f, 0f,                      //bottom right
-				viewWidth, viewHeight / 2f, 0f  //top right
-			});
+				bottomCard.setCardVertices(new float[] { 0f, viewHeight / 2f,
+						0f, // top left
+						0f, 0f, 0f, // bottom left
+						viewWidth, 0f, 0f, // bottom right
+						viewWidth, viewHeight / 2f, 0f // top right
+						});
 
-			bottomCard.setTextureCoordinates(new float[]{
-				0f, viewHeight / 2f / textureHeight,
-				0f, viewHeight / textureHeight,
-				viewWidth / textureWidth, viewHeight / textureHeight,
-				viewWidth / textureWidth, viewHeight / 2f / textureHeight
-			});
+				bottomCard.setTextureCoordinates(new float[] { 0f,
+						viewHeight / 2f / textureHeight, 0f,
+						viewHeight / textureHeight, viewWidth / textureWidth,
+						viewHeight / textureHeight, viewWidth / textureWidth,
+						viewHeight / 2f / textureHeight });
+			} else {
+				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top
+																			// left
+						0f, 0f, 0f, // bottom left
+						viewWidth / 2f, 0f, 0f, // bottom right
+						viewWidth / 2f, viewHeight, 0f // top right
+				});
+
+				topCard.setTextureCoordinates(new float[] { 0f, 0f, 0f,
+						viewHeight / textureHeight,
+						viewWidth / 2f / textureWidth,
+						viewHeight / textureHeight,
+						viewWidth / 2f / textureWidth, 0f });
+
+				bottomCard.setCardVertices(new float[] { viewWidth / 2f,
+						viewHeight, 0f, // top left
+						viewWidth / 2f, 0f, 0f, // bottom left
+						viewWidth, 0f, 0f, // bottom right
+						viewWidth, viewHeight, 0f // top right
+						});
+
+				bottomCard.setTextureCoordinates(new float[] {
+						viewWidth / 2f / textureWidth, 0f,
+						viewWidth / 2f / textureWidth,
+						viewHeight / textureHeight, viewWidth / textureWidth,
+						viewHeight / textureHeight, viewWidth / textureWidth,
+						0f });
+			}
 
 			checkError(gl);
 		}
