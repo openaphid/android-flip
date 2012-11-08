@@ -5,12 +5,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
 
 public class FlipTextViewActivity extends Activity {
-	private FlipViewController flipView;
+	protected FlipViewController flipView;
 
 	/**
 	 * Called when the activity is first created.

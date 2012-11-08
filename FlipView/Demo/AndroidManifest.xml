@@ -26,6 +26,7 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipButtonActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipComplexLayoutActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipAsyncContentActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipTextViewAltActivity"/>
     
   </application>
   
