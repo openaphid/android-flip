@@ -140,7 +140,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 	 * @param pageView
 	 */
 	public void refreshPage(View pageView) {
-		cards.refreshView(pageView);
+		cards.refreshPageView(pageView);
+	}
+	
+	public void refreshPage(int pageIndex) {
+		cards.refreshPage(pageIndex);
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------

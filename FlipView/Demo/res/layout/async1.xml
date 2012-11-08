@@ -22,7 +22,7 @@
              android:layout_height="wrap_content"
              android:scaleType="fitStart"
              android:layout_margin="5dp"
-             android:id="@+id/photo"
+             android:id="@+id/async_photo"
       />
 
 </LinearLayout>

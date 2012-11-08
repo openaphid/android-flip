@@ -25,6 +25,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class FlipCards {
 	private static final float ACCELERATION = 0.618f;
+	@SuppressWarnings("unused")
 	private static final float TIP_SPEED = 1f;
 	private static final float MOVEMENT_RATE = 1.5f;
 	private static final int MAX_TIP_ANGLE = 60;
@@ -68,10 +69,17 @@ public class FlipCards {
 		this.visible = visible;
 	}
 	
-	void refreshView(View view) {
+	void refreshPageView(View view) {
 		if (frontCards.getView() == view)
 			frontCards.markForceReload();
 		if (backCards.getView() == view)
+			backCards.markForceReload();
+	}
+	
+	void refreshPage(int pageIndex) {
+		if (frontCards.getIndex() == pageIndex)
+			frontCards.markForceReload();
+		if (backCards.getIndex() == pageIndex)
 			backCards.markForceReload();
 	}
 
