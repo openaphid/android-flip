@@ -33,10 +33,13 @@ import java.io.BufferedInputStream;
 import java.util.LinkedList;
 
 public class FlipViewController extends AdapterView<Adapter> {
+
+	public static final int ORIENTATION_VERTICAL = 0;
+	public static final int ORIENTATION_HORIZONTAL = 1;
 	
 	public static interface ViewFlipListener {
 		void onViewFlipped(View view, int position);
-	}
+	}	
 
 	private static final int MSG_SURFACE_CREATED = 1;
 	private Handler handler = new Handler(new Handler.Callback() {
@@ -58,6 +61,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private int contentWidth;
 	private int contentHeight;
+	
+	private boolean orientationVertical;
 
 	private boolean enableFlipAnimation = true;
 
@@ -94,11 +99,16 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private ViewFlipListener onViewFlipListener;
 
 	public FlipViewController(Context context) {
+		this(context, true);
+	}
+
+	
+	public FlipViewController(Context context, boolean orientationVertical) {
 		super(context);
 		ViewConfiguration configuration = ViewConfiguration.get(getContext());
 		touchSlop = configuration.getScaledTouchSlop();
 		maxVelocity = configuration.getScaledMaximumFlingVelocity();
-
+		this.orientationVertical = orientationVertical;
 		setupSurfaceView();
 	}
 	
@@ -294,7 +304,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void setupSurfaceView() {
 		surfaceView = new GLSurfaceView(getContext());
 
-		cards = new FlipCards(this);
+		cards = new FlipCards(this, orientationVertical);
 		renderer = new FlipRenderer(this, cards);
 
 		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
