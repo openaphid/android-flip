@@ -19,7 +19,8 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipButtonActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipComplexLayoutActivity"/>
-
+    <activity android:name="com.aphidmobile.flip.demo.FlipHorizontalLayoutActivity"/>
+    
   </application>
 
 </manifest>

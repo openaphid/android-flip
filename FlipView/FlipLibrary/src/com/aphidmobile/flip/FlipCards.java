@@ -41,7 +41,9 @@ public class FlipCards {
 	private int animatedFrame = 0;
 	private int state = STATE_INIT;
 
+	private boolean orientationVertical = true;
 	private float lastY = -1;
+	private float lastX = -1;
 
 	@SuppressWarnings("unused")
 	private VelocityTracker velocityTracker;
@@ -51,12 +53,12 @@ public class FlipCards {
 	
 	private boolean visible = false;
 
-	public FlipCards(FlipViewController controller) {
+	public FlipCards(FlipViewController controller, boolean orientationVertical) {
 		this.controller = controller;
 
-		frontCards = new ViewDualCards();
-		backCards = new ViewDualCards();
-
+		frontCards = new ViewDualCards(orientationVertical);
+		backCards = new ViewDualCards(orientationVertical);
+		this.orientationVertical = orientationVertical;
 		resetAxises();
 	}
 
@@ -67,6 +69,7 @@ public class FlipCards {
 	public void setVisible(boolean visible) {
 		this.visible = visible;
 	}
+	
 
 	public void reloadTexture(int frontIndex, View frontView, int backIndex, View backView) {
 		synchronized (this) {
@@ -208,15 +211,24 @@ public class FlipCards {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
 				lastY = event.getY();
+				lastX = event.getX();
 				return isOnTouchEvent;
 			case MotionEvent.ACTION_MOVE:
-				delta = lastY - event.getY();
+				if(orientationVertical){
+					delta = lastY - event.getY();
+				} else {
+					delta = lastX - event.getX();		
+				}
 				if (Math.abs(delta) > controller.getTouchSlop())
 					setState(STATE_TOUCH); //XXX: initialize views?
 				if (state == STATE_TOUCH) {
 					controller.showFlipAnimation();
-					
-					final float angleDelta = 180 * delta / controller.getContentHeight() * MOVEMENT_RATE;
+					final float angleDelta ;
+					if(orientationVertical){
+						angleDelta = 180 * delta / controller.getContentHeight() * MOVEMENT_RATE;
+					} else {
+						angleDelta = 180 * delta / controller.getContentWidth() * MOVEMENT_RATE;
+					}
 					angle += angleDelta;
 					if (backCards.getIndex() == -1) {
 						if (angle >= MAX_TIP_ANGLE)
@@ -237,7 +249,11 @@ public class FlipCards {
 							angle += 180;
 						}
 					}
-					lastY = event.getY();
+					if(orientationVertical){
+						lastY = event.getY();						
+					} else {
+						lastX = event.getX();
+					}
 					controller.getSurfaceView().requestRender();
 					return true;
 				}
@@ -246,8 +262,13 @@ public class FlipCards {
 			case MotionEvent.ACTION_UP:
 			case MotionEvent.ACTION_CANCEL:
 				if (state == STATE_TOUCH) {
-					delta = lastY - event.getY();
-					rotateBy(180 * delta / controller.getContentHeight() * MOVEMENT_RATE);
+					if(orientationVertical){
+						delta = lastY - event.getY();
+						rotateBy(180 * delta / controller.getContentHeight() * MOVEMENT_RATE);						
+					} else {
+						delta = lastX - event.getX();
+						rotateBy(180 * delta / controller.getContentWidth() * MOVEMENT_RATE);	
+					}
 					forward = angle >= 90;
 					setState(STATE_AUTO_ROTATE);
 					controller.getSurfaceView().requestRender();

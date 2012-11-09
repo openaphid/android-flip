@@ -68,6 +68,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Flip Text Views", FlipTextViewActivity.class);
 		addItem(data, "Flip Buttons", FlipButtonActivity.class);
 		addItem(data, "Flip Complex Layouts", FlipComplexLayoutActivity.class);
+		addItem(data, "Flip Horizontal", FlipHorizontalLayoutActivity.class);
 		return data;
 	}
 
