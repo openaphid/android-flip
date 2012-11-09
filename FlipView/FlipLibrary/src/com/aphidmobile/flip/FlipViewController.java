@@ -29,12 +29,17 @@ import android.widget.*;
 import com.aphidmobile.utils.AphidLog;
 import junit.framework.Assert;
 
+import java.io.BufferedInputStream;
 import java.util.LinkedList;
 
 public class FlipViewController extends AdapterView<Adapter> {
-	
+
 	public static final int ORIENTATION_VERTICAL = 0;
 	public static final int ORIENTATION_HORIZONTAL = 1;
+	
+	public static interface ViewFlipListener {
+		void onViewFlipped(View view, int position);
+	}	
 
 	private static final int MSG_SURFACE_CREATED = 1;
 	private Handler handler = new Handler(new Handler.Callback() {
@@ -90,6 +95,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private float touchSlop;
 	@SuppressWarnings("unused")
 	private float maxVelocity;
+	
+	private ViewFlipListener onViewFlipListener;
 
 	public FlipViewController(Context context) {
 		this(context, true);
@@ -104,6 +111,16 @@ public class FlipViewController extends AdapterView<Adapter> {
 		this.orientationVertical = orientationVertical;
 		setupSurfaceView();
 	}
+	
+	public ViewFlipListener getOnViewFlipListener() {
+		return onViewFlipListener;
+	}
+
+
+	public void setOnViewFlipListener(ViewFlipListener onViewFlipListener) {
+		this.onViewFlipListener = onViewFlipListener;
+	}
+
 
 	float getTouchSlop() {
 		return touchSlop;
@@ -139,6 +156,22 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	void reloadTexture() {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
+	}
+
+	/**
+	 * Request the animator to update display if the pageView is active.
+	 * 
+	 * If the pageView is being used in the animation or its content has been buffered, the animator reloads it forcibly.
+	 * 
+	 * The reloading process is a bit heavy for an active page, so please don't invoke it too frequently for an active page. The cost is trivial for inactive pages.
+	 * @param pageView
+	 */
+	public void refreshPage(View pageView) {
+		cards.refreshPageView(pageView);
+	}
+	
+	public void refreshPage(int pageIndex) {
+		cards.refreshPage(pageIndex);
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -345,7 +378,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
 	}
 
-	void flippedToView(int indexInAdapter) { //XXX: can be simplified and unified with setSelection
+	void flippedToView(final int indexInAdapter) { //XXX: can be simplified and unified with setSelection
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("flippedToView: %d", indexInAdapter);
 
@@ -414,6 +447,9 @@ public class FlipViewController extends AdapterView<Adapter> {
 			inFlipAnimation = false;
 
 			updateVisibleView(bufferIndex);
+			
+			if (onViewFlipListener != null)
+				onViewFlipListener.onViewFlipped(bufferedViews.get(bufferIndex), adapterIndex);
 
 			handler.post(new Runnable() {
 				public void run() {
