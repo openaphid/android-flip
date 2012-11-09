@@ -11,6 +11,23 @@ Please also refer to our blog post for more details:
 
 [http://openaphid.github.com/blog/2012/09/21/aphid-flipview-for-android-v0-dot-9-beta-released/](http://openaphid.github.com/blog/2012/09/21/aphid-flipview-for-android-v0-dot-9-beta-released/)
 
+## Release Notes
+
+### v0.9.5, Nov 9th 2012
+
+#### New Features:
+- Supports flipping horizontally. ([Pull Request 6.](https://github.com/openaphid/android-flip/pull/6). Thanks to [@axexmedearis](https://github.com/alexmedearis) for the contribution)
+
+- Supports event listener to get notified when flipping finishes. ([Issue #3](https://github.com/openaphid/android-flip/issues/3))
+
+- Supports content reloading when flipping. ([Issue #4](https://github.com/openaphid/android-flip/issues/3))
+
+#### Bug Fixes
+- Incorrect rendering of shadow in horizontal mode. ([Issue #7](https://github.com/openaphid/android-flip/issues/7))
+
+### v0.9, Sep 21st 2012
+First release
+
 ## Copyright and License
 
 ```
