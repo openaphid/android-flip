@@ -116,8 +116,7 @@ public class ViewDualCards {
 			final float textureWidth = texture.getWidth();
 
 			if (orientationVertical) {
-				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top
-																			// left
+				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top left
 						0f, viewHeight / 2.0f, 0f, // bottom left
 						viewWidth, viewHeight / 2f, 0f, // bottom right
 						viewWidth, viewHeight, 0f // top right
@@ -142,8 +141,7 @@ public class ViewDualCards {
 						viewHeight / textureHeight, viewWidth / textureWidth,
 						viewHeight / 2f / textureHeight });
 			} else {
-				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top
-																			// left
+				topCard.setCardVertices(new float[] { 0f, viewHeight, 0f, // top left
 						0f, 0f, 0f, // bottom left
 						viewWidth / 2f, 0f, 0f, // bottom right
 						viewWidth / 2f, viewHeight, 0f // top right
