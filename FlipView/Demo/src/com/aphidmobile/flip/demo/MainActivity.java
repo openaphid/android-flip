@@ -71,6 +71,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Flip Async Content", FlipAsyncContentActivity.class);
 		addItem(data, "Flip with Event Listener", FlipTextViewAltActivity.class);
 		addItem(data, "Flip Horizontal", FlipHorizontalLayoutActivity.class);
+		addItem(data, "Flip XML", FlipTextViewXmlActivity.class);
 		return data;
 	}
 
