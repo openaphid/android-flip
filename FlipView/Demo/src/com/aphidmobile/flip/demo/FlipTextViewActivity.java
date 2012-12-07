@@ -1,6 +1,7 @@
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,8 +45,9 @@ public class FlipTextViewActivity extends Activity {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				NumberTextView view;
 				if (convertView == null) {
-					view = new NumberTextView(parent.getContext(), position);
-					view.setTextSize(360);
+					final Context context = parent.getContext();
+					view = new NumberTextView(context, position);
+					view.setTextSize(context.getResources().getDimension(R.dimen.textSize));
 				}
 				else {
 					view = (NumberTextView) convertView;

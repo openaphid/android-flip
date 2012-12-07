@@ -236,6 +236,7 @@ public class FlipCards {
 				if (Math.abs(delta) > controller.getTouchSlop())
 					setState(STATE_TOUCH); //XXX: initialize views?
 				if (state == STATE_TOUCH) {
+					forward = delta > 0; // We only want to know the direction of the last movement
 					controller.showFlipAnimation();
 					final float angleDelta ;
 					if(orientationVertical){
@@ -283,7 +284,10 @@ public class FlipCards {
 						delta = lastX - event.getX();
 						rotateBy(180 * delta / controller.getContentWidth() * MOVEMENT_RATE);	
 					}
-					forward = angle >= 90;
+					if (frontCards.getIndex() == -1) // If at the first or last card
+						forward = true;
+					else if (backCards.getIndex() == -1) 
+						forward = false;
 					setState(STATE_AUTO_ROTATE);
 					controller.getSurfaceView().requestRender();
 				}				

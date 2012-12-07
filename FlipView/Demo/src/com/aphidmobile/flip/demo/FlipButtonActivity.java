@@ -17,11 +17,13 @@ limitations under the License.
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.BaseAdapter;
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberButton;
+import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
 
 public class FlipButtonActivity extends Activity {
@@ -58,8 +60,9 @@ public class FlipButtonActivity extends Activity {
 			public View getView(int position, View convertView, ViewGroup parent) {
 				NumberButton button;
 				if (convertView == null) {
-					button = new NumberButton(parent.getContext(), position);
-					button.setTextSize(360);
+					final Context context = parent.getContext();
+					button = new NumberButton(context, position);
+					button.setTextSize(context.getResources().getDimension(R.dimen.textSize));
 				}
 				else {
 					button = (NumberButton) convertView;
