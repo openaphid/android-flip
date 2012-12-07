@@ -19,14 +19,18 @@ package com.aphidmobile.flip;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.view.*;
 import android.widget.*;
 import com.aphidmobile.utils.AphidLog;
+import com.openaphid.flip.R;
+
 import junit.framework.Assert;
 
 import java.io.BufferedInputStream;
@@ -101,15 +105,52 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public FlipViewController(Context context) {
 		this(context, true);
 	}
-
 	
 	public FlipViewController(Context context, boolean orientationVertical) {
 		super(context);
+		init(context, orientationVertical);
+	}
+	
+	/**
+	 * Constructor required for XML inflation.
+	 */
+	public FlipViewController(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		init(context, isOrientationVertical(context, attrs));
+	}
+
+	/**
+	 * Constructor required for XML inflation.
+	 */
+	public FlipViewController(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context, isOrientationVertical(context, attrs));
+	}
+	
+	/**
+	 * Check the attributes for a declared orientation. (Defaults to true)
+	 */
+	private boolean isOrientationVertical(Context context, AttributeSet attrs) {
+		boolean vertical = true;
+		TypedArray a = context.getTheme().obtainStyledAttributes(
+				attrs,
+				R.styleable.FlipViewController,
+				0, 0);
+		try {
+			vertical = a.getInteger(R.styleable.FlipViewController_orientation,
+					0) == 0 ? true : false;
+		} finally {
+			a.recycle();
+		}
+		return vertical;
+	}
+	
+	private void init(Context context, boolean orientationVertical) {
 		ViewConfiguration configuration = ViewConfiguration.get(getContext());
 		touchSlop = configuration.getScaledTouchSlop();
 		maxVelocity = configuration.getScaledMaximumFlingVelocity();
 		this.orientationVertical = orientationVertical;
-		setupSurfaceView();
+		setupSurfaceView();		
 	}
 	
 	public ViewFlipListener getOnViewFlipListener() {
