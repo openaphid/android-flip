@@ -46,8 +46,6 @@ public class FlipCards {
 	private float lastY = -1;
 	private float lastX = -1;
 
-	@SuppressWarnings("unused")
-	private VelocityTracker velocityTracker;
 	private FlipViewController controller;
 
 	private int activeIndex = -1;

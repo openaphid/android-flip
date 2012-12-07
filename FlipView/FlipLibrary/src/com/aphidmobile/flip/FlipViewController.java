@@ -331,7 +331,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//Logger.i( String.format("onMeasure: %d, %d, ; child %d", widthMeasureSpec, heightMeasureSpec, flipViews.size()));
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
 		for (View child : bufferedViews)
@@ -399,7 +398,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private void updateVisibleView(int index) {
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
+			AphidLog.d("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
 		
 		for (int i = 0; i < bufferedViews.size(); i++)
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);

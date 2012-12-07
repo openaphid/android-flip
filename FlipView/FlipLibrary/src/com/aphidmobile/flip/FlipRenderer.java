@@ -72,7 +72,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		flipViewController.reloadTexture();
 		
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.i("onSurfaceCreated");
+			AphidLog.d("onSurfaceCreated");
 	}
 
 	public static float[] light0Position = {0, 0, 100f, 0f};
@@ -108,7 +108,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		gl.glLightfv(GL_LIGHT0, GL_POSITION, light0Position, 0);
 
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.i("onSurfaceChanged: %d, %d", width, height);
+			AphidLog.d("onSurfaceChanged: %d, %d", width, height);
 	}
 
 	@Override

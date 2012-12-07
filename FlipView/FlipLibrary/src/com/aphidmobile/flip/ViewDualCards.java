@@ -21,6 +21,7 @@ import static com.aphidmobile.flip.FlipRenderer.*;
 
 import android.graphics.Bitmap;
 import android.view.View;
+
 import com.aphidmobile.utils.TextureUtils;
 import com.aphidmobile.utils.UI;
 
@@ -55,10 +56,14 @@ public class ViewDualCards {
 
 	public boolean setView(int index, View view) {
 		UI.assertInMainThread();
-		this.index = index;
-		if (getView() == view
-				&& (screenshot != null || TextureUtils.isValidTexture(texture)))
+
+		if (this.index == index 
+				&& getView() == view
+				&& (screenshot != null || TextureUtils.isValidTexture(texture))
+				)
 			return false;
+		
+		this.index = index;
 		viewRef = null;
 		if (texture != null) {
 			texture.postDestroy();
@@ -72,6 +77,7 @@ public class ViewDualCards {
 			UI.recycleBitmap(screenshot);
 			screenshot = null;
 		}
+
 		return true;
 	}
 
@@ -177,5 +183,10 @@ public class ViewDualCards {
 
 	public void abandonTexture() {
 		texture = null;
+	}
+	
+	@Override
+	public String toString() {
+		return "ViewDualCards: (" + index + ", view: " + getView() + ")";
 	}
 }
