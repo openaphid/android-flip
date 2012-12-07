@@ -54,7 +54,7 @@ public class ViewDualCards {
 		return viewRef != null ? viewRef.get() : null;
 	}
 
-	public boolean setView(int index, View view) {
+	public synchronized boolean setView(int index, View view) {
 		UI.assertInMainThread();
 
 		if (this.index == index 
@@ -71,21 +71,19 @@ public class ViewDualCards {
 		}
 		if (view != null) {
 			viewRef = new WeakReference<View>(view);
-			UI.recycleBitmap(screenshot);
+			recycleScreenshot();
 			screenshot = GrabIt.takeScreenshot(view);
 		} else {
-			UI.recycleBitmap(screenshot);
-			screenshot = null;
+			recycleScreenshot();
 		}
 
 		return true;
 	}
 
-	void markForceReload() {
+	synchronized void markForceReload() {
 		UI.assertInMainThread();
 
-		UI.recycleBitmap(screenshot);
-		screenshot = null;
+		recycleScreenshot();
 		if (texture != null) {
 			texture.postDestroy();
 			texture = null;
@@ -108,13 +106,12 @@ public class ViewDualCards {
 		return bottomCard;
 	}
 
-	public void buildTexture(FlipRenderer renderer, GL10 gl) {
+	public synchronized void buildTexture(FlipRenderer renderer, GL10 gl) {
 		if (screenshot != null) {
 			if (texture != null)
 				texture.destroy(gl);
 			texture = Texture.createTexture(screenshot, renderer, gl);
-			UI.recycleBitmap(screenshot);
-			screenshot = null;
+			recycleScreenshot();
 
 			topCard.setTexture(texture);
 			bottomCard.setTexture(texture);
@@ -181,12 +178,17 @@ public class ViewDualCards {
 		}
 	}
 
-	public void abandonTexture() {
+	public synchronized void abandonTexture() {
 		texture = null;
 	}
 	
 	@Override
 	public String toString() {
 		return "ViewDualCards: (" + index + ", view: " + getView() + ")";
+	}
+	
+	private void recycleScreenshot() {
+		UI.recycleBitmap(screenshot);
+		screenshot = null;
 	}
 }

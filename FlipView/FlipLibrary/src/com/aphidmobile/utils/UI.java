@@ -40,8 +40,12 @@ public class UI {
 	}
 	
 	public static void recycleBitmap(Bitmap bm) {
-		if (bm != null)
-			bm.recycle();
+		if (bm != null) {
+			if (bm.isRecycled())
+				AphidLog.w("Bitmap is recycled already?");
+			else
+				bm.recycle();
+		}
 	}
 	
 	public static <T> T callInMainThread(Callable<T> call) throws Exception {
