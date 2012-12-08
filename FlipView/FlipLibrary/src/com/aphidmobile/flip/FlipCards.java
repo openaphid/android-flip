@@ -27,8 +27,10 @@ public class FlipCards {
 	private static final float ACCELERATION = 0.618f;
 	@SuppressWarnings("unused")
 	private static final float TIP_SPEED = 1f;
+	
 	private static final float MOVEMENT_RATE = 1.5f;
 	private static final int MAX_TIP_ANGLE = 60;
+	private static final int MAX_TOUCH_MOVE_ANGLE = 15;
 
 	private static final int STATE_INIT = 0;
 	private static final int STATE_TOUCH = 1;
@@ -236,20 +238,27 @@ public class FlipCards {
 				if (state == STATE_TOUCH) {
 					forward = delta > 0; // We only want to know the direction of the last movement
 					controller.showFlipAnimation();
-					final float angleDelta ;
+					
+					float angleDelta ;
 					if(orientationVertical){
 						angleDelta = 180 * delta / controller.getContentHeight() * MOVEMENT_RATE;
 					} else {
 						angleDelta = 180 * delta / controller.getContentWidth() * MOVEMENT_RATE;
 					}
+					if (Math.abs(angleDelta) > MAX_TOUCH_MOVE_ANGLE) //prevent large delta when moving too fast
+						angleDelta = Math.signum(angleDelta) * MAX_TOUCH_MOVE_ANGLE;
+					
 					angle += angleDelta;
-					if (backCards.getIndex() == -1) {
+					
+					//Bounce the page for the first and the last page
+					if (backCards.getIndex() == -1) { //the last page
 						if (angle >= MAX_TIP_ANGLE)
 							angle = MAX_TIP_ANGLE;
-					} else if (backCards.getIndex() == 0) {
+					} else if (backCards.getIndex() == 0) { //the first page
 						if (angle <= 180 - MAX_TIP_ANGLE)
 							angle = 180 - MAX_TIP_ANGLE;
 					}
+					
 					if (angle < 0) {
 						if (frontCards.getIndex() > 0) {
 							activeIndex = frontCards.getIndex() - 1; //xxx
