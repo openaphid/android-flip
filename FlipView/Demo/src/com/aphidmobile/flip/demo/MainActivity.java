@@ -56,6 +56,7 @@ public class MainActivity extends ListActivity {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Map<String, Object> map = (Map<String, Object>) l.getItemAtPosition(position);
@@ -72,6 +73,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Flip with Event Listener", FlipTextViewAltActivity.class);
 		addItem(data, "Flip Horizontal", FlipHorizontalLayoutActivity.class);
 		addItem(data, "Flip XML", FlipTextViewXmlActivity.class);
+		addItem(data, "Issue #5", Issue5Activity.class);
 		return data;
 	}
 

@@ -19,6 +19,7 @@ package com.aphidmobile.utils;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -56,5 +57,10 @@ public class UI {
 			getHandler().post(task);
 			return task.get();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T findViewById(View parent, int id) {
+		return (T)parent.findViewById(id);
 	}
 }
