@@ -24,13 +24,11 @@ import com.aphidmobile.utils.TextureUtils;
 import javax.microedition.khronos.opengles.GL10;
 
 public class FlipCards {
-	private static final float ACCELERATION = 1f;
-	@SuppressWarnings("unused")
-	private static final float TIP_SPEED = 1f;
-	
+	private static final float ACCELERATION = 1f;	
 	private static final float MOVEMENT_RATE = 1.5f;
 	private static final int MAX_TIP_ANGLE = 60;
 	private static final int MAX_TOUCH_MOVE_ANGLE = 15;
+	private static final float MIN_MOVEMENT = 4f;
 
 	private static final int STATE_INIT = 0;
 	private static final int STATE_TOUCH = 1;
@@ -229,10 +227,14 @@ public class FlipCards {
 					return isOnTouchEvent;
 				float delta = orientationVertical ? (lastPosition - event.getY()) : (lastPosition - event.getX());
 				
-				if (Math.abs(delta) > controller.getTouchSlop())
+				if (Math.abs(delta) > controller.getTouchSlop()) {
 					setState(STATE_TOUCH); //XXX: initialize views?
+					forward = delta > 0;
+				}
 				if (state == STATE_TOUCH) {
-					forward = delta > 0; // We only want to know the direction of the last movement
+					if (Math.abs(delta) > MIN_MOVEMENT)
+						forward = delta > 0;					
+					
 					controller.showFlipAnimation();
 					
 					float angleDelta ;
