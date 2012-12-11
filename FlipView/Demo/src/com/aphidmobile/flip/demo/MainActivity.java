@@ -73,6 +73,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Flip with Event Listener", FlipTextViewAltActivity.class);
 		addItem(data, "Flip Horizontal", FlipHorizontalLayoutActivity.class);
 		addItem(data, "Flip XML", FlipTextViewXmlActivity.class);
+		addItem(data, "Fragment Demo", FlipFragmentActivity.class);
 		addItem(data, "Issue #5", Issue5Activity.class);
 		return data;
 	}
