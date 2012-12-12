@@ -33,7 +33,6 @@ import com.openaphid.flip.R;
 
 import junit.framework.Assert;
 
-import java.io.BufferedInputStream;
 import java.util.LinkedList;
 
 public class FlipViewController extends AdapterView<Adapter> {
@@ -331,7 +330,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//Logger.i( String.format("onMeasure: %d, %d, ; child %d", widthMeasureSpec, heightMeasureSpec, flipViews.size()));
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
 		for (View child : bufferedViews)
@@ -399,29 +397,30 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private void updateVisibleView(int index) {
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.i("Update visible views, index %d, buffered: %d", index, bufferedViews.size());
+			AphidLog.d("Update visible views, index %d, buffered: %d, adapter %d", index, bufferedViews.size(), adapterIndex);
 		
 		for (int i = 0; i < bufferedViews.size(); i++)
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 	}
 
 	void postFlippedToView(final int indexInAdapter) {
+		AphidLog.d("postFlippedToView: " + indexInAdapter);
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				flippedToView(indexInAdapter);
+				flippedToView(indexInAdapter, true);
 			}
 		});
 	}
 
 	private void debugBufferedViews() {
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("bufferedViews: " + bufferedViews + ", index: " + bufferIndex);
+			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
 	}
 
-	void flippedToView(final int indexInAdapter) { //XXX: can be simplified and unified with setSelection
+	void flippedToView(final int indexInAdapter, boolean isPost) { //XXX: can be simplified and unified with setSelection
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("flippedToView: %d", indexInAdapter);
+			AphidLog.d("flippedToView: %d, isPost %s", indexInAdapter, isPost);
 
 		debugBufferedViews();
 
@@ -451,20 +450,25 @@ public class FlipViewController extends AdapterView<Adapter> {
 					requestLayout();
 					updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 				}
-			} else
-				setSelection(indexInAdapter);
+			} else {
+				//Issue #17
+				if (indexInAdapter == 0 || indexInAdapter != adapterIndex) //indexInAdapter=0 is a special case after bouncing from edge
+					setSelection(indexInAdapter);
+			}
 		} else
 			Assert.assertTrue("Invalid indexInAdapter: " + indexInAdapter, false);
 		debugBufferedViews();
 	}
 
 	void postHideFlipAnimation() {
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				hideFlipAnimation();
-			}
-		});
+		if (inFlipAnimation) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					hideFlipAnimation();
+				}
+			});
+		}
 	}
 
 	void showFlipAnimation() {

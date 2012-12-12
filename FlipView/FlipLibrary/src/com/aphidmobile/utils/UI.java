@@ -19,6 +19,7 @@ package com.aphidmobile.utils;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -40,8 +41,12 @@ public class UI {
 	}
 	
 	public static void recycleBitmap(Bitmap bm) {
-		if (bm != null)
-			bm.recycle();
+		if (bm != null) {
+			if (bm.isRecycled())
+				AphidLog.w("Bitmap is recycled already?");
+			else
+				bm.recycle();
+		}
 	}
 	
 	public static <T> T callInMainThread(Callable<T> call) throws Exception {
@@ -52,5 +57,10 @@ public class UI {
 			getHandler().post(task);
 			return task.get();
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T findViewById(View parent, int id) {
+		return (T)parent.findViewById(id);
 	}
 }

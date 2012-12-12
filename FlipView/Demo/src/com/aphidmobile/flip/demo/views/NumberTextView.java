@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.TextView;
-import com.aphidmobile.utils.AphidLog;
 
 public class NumberTextView extends TextView{
 	private int number;
@@ -40,12 +39,6 @@ public class NumberTextView extends TextView{
 	public void setNumber(int number) {
 		this.number = number;
 		setText(String.valueOf(number));
-	}
-
-	@Override
-	public void setVisibility(int visibility) {
-		super.setVisibility(visibility);
-		AphidLog.i("View %d, visibility %d", number, visibility);
 	}
 
 	@Override

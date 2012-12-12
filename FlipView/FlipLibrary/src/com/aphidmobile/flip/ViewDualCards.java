@@ -21,6 +21,7 @@ import static com.aphidmobile.flip.FlipRenderer.*;
 
 import android.graphics.Bitmap;
 import android.view.View;
+
 import com.aphidmobile.utils.TextureUtils;
 import com.aphidmobile.utils.UI;
 
@@ -53,12 +54,16 @@ public class ViewDualCards {
 		return viewRef != null ? viewRef.get() : null;
 	}
 
-	public boolean setView(int index, View view) {
+	public synchronized boolean setView(int index, View view) {
 		UI.assertInMainThread();
-		this.index = index;
-		if (getView() == view
-				&& (screenshot != null || TextureUtils.isValidTexture(texture)))
+
+		if (this.index == index 
+				&& getView() == view
+				&& (screenshot != null || TextureUtils.isValidTexture(texture))
+				)
 			return false;
+		
+		this.index = index;
 		viewRef = null;
 		if (texture != null) {
 			texture.postDestroy();
@@ -66,20 +71,19 @@ public class ViewDualCards {
 		}
 		if (view != null) {
 			viewRef = new WeakReference<View>(view);
-			UI.recycleBitmap(screenshot);
+			recycleScreenshot();
 			screenshot = GrabIt.takeScreenshot(view);
 		} else {
-			UI.recycleBitmap(screenshot);
-			screenshot = null;
+			recycleScreenshot();
 		}
+
 		return true;
 	}
 
-	void markForceReload() {
+	synchronized void markForceReload() {
 		UI.assertInMainThread();
 
-		UI.recycleBitmap(screenshot);
-		screenshot = null;
+		recycleScreenshot();
 		if (texture != null) {
 			texture.postDestroy();
 			texture = null;
@@ -102,13 +106,12 @@ public class ViewDualCards {
 		return bottomCard;
 	}
 
-	public void buildTexture(FlipRenderer renderer, GL10 gl) {
+	public synchronized void buildTexture(FlipRenderer renderer, GL10 gl) {
 		if (screenshot != null) {
 			if (texture != null)
 				texture.destroy(gl);
 			texture = Texture.createTexture(screenshot, renderer, gl);
-			UI.recycleBitmap(screenshot);
-			screenshot = null;
+			recycleScreenshot();
 
 			topCard.setTexture(texture);
 			bottomCard.setTexture(texture);
@@ -175,7 +178,17 @@ public class ViewDualCards {
 		}
 	}
 
-	public void abandonTexture() {
+	public synchronized void abandonTexture() {
 		texture = null;
+	}
+	
+	@Override
+	public String toString() {
+		return "ViewDualCards: (" + index + ", view: " + getView() + ")";
+	}
+	
+	private void recycleScreenshot() {
+		UI.recycleBitmap(screenshot);
+		screenshot = null;
 	}
 }
