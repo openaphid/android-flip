@@ -498,8 +498,10 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 			handler.post(new Runnable() {
 				public void run() {
-					if (!inFlipAnimation)
+					if (!inFlipAnimation) {
 						cards.setVisible(false);
+						surfaceView.requestRender(); //ask OpenGL to clear its display
+					}
 				}
 			});
 		}
