@@ -40,6 +40,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public static final int ORIENTATION_VERTICAL = 0;
 	public static final int ORIENTATION_HORIZONTAL = 1;
 	
+	private static final int MAX_RELEASED_VIEW_SIZE = 4;
+	
 	public static interface ViewFlipListener {
 		void onViewFlipped(View view, int position);
 	}	
@@ -368,7 +370,12 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void releaseView(View view) {
 		Assert.assertNotNull(view);
 		detachViewFromParent(view);
-		releasedViews.add(view);
+		addReleasedView(view);
+	}
+	
+	private void addReleasedView(View view) {
+		if (releasedViews.size() < MAX_RELEASED_VIEW_SIZE)
+			releasedViews.add(view);
 	}
 
 	private View viewFromAdapter(int position, boolean addToTop) {
@@ -377,7 +384,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 		View releasedView = releasedViews.isEmpty() ? null : releasedViews.removeFirst();
 		View view = adapter.getView(position, releasedView, this);
 		if (view != releasedView)
-			releasedViews.add(releasedView);
+			addReleasedView(releasedView);
 		
 		setupAdapterView(view, addToTop, view == releasedView);
 		return view;
