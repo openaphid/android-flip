@@ -19,70 +19,46 @@ package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.*;
-import android.widget.*;
-
+import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import com.aphidmobile.flip.FlipViewController;
+import com.aphidmobile.flip.demo.data.Travels;
 import com.aphidmobile.flipview.demo.R;
 import com.aphidmobile.utils.AphidLog;
-import com.novoda.imageloader.core.*;
-import com.novoda.imageloader.core.model.ImageTag;
-import com.novoda.imageloader.core.model.ImageTagFactory;
+import com.aphidmobile.utils.IO;
+import com.aphidmobile.utils.UI;
+
+import java.lang.ref.WeakReference;
+import java.util.Random;
 
 public class FlipAsyncContentActivity extends Activity {
-	private static ImageManager GLOBAL_IMAGE_MANAGER = null;
-
-	private static void setupImageManager(Context application) {
-		if (GLOBAL_IMAGE_MANAGER == null) {
-			LoaderSettings settings = new LoaderSettings.SettingsBuilder().withDisconnectOnEveryCall(true).build(application);
-			GLOBAL_IMAGE_MANAGER = new ImageManager(application, settings);
-		}
-	}
-
-	public static final ImageManager getImageManager() {
-		return GLOBAL_IMAGE_MANAGER;
-	}
 
 	private FlipViewController flipView;
-	private OnImageLoadedListener imageLoadedListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setupImageManager(getApplicationContext());
-
 		setTitle(R.string.activity_title);
 
 		flipView = new FlipViewController(this);
-		flipView.setAdapter(new MyBaseAdapter(this));
-
-		imageLoadedListener = new OnImageLoadedListener() {
-			@Override
-			public void OnImageLoaded(ImageView view) {
-
-				//Since the listener monitors the progress globally, We have to verify that the ImageView instance is the one inside our flip animation
-				if (view.getId() == R.id.async_photo) {
-					/*
-					// One way to refresh the page is check up through its parent hierarchy and pass the correct container (which should be the exact view of the page returned in your adapter) to FlipViewController.refreshPage(pageView)
-					final ViewParent parent = view.getParent();
-					
-					if (parent instanceof LinearLayout && ((LinearLayout)parent).getId() == R.id.async_container) {
-						flipView.refreshPage((LinearLayout) parent);					
-					}
-					*/
-
-					// Another approach is to use the page index, which should be simpler for most scenarios.
-					Object tag = view.getTag(R.id.tag_async_image_view_position);
-					if (tag instanceof Integer) {
-						flipView.refreshPage((Integer) tag);
-					}
-				}
-			}
-		};
-
-		getImageManager().setOnImageLoadedListener(imageLoadedListener);
+		flipView.setAdapter(new MyBaseAdapter(this, flipView));
 
 		setContentView(flipView);
 	}
@@ -99,29 +75,28 @@ public class FlipAsyncContentActivity extends Activity {
 		flipView.onPause();
 	}
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		getImageManager().getCacheManager().clean();
-		getImageManager().getFileManager().clean();
-		getImageManager().unRegisterOnImageLoadedListener(imageLoadedListener);
-	}
-
 	private static class MyBaseAdapter extends BaseAdapter {
-		static final String[] CATEGORIES = { "abstract", "animals", "city", "food", "nightlife", "fashion", "people",
-				"nature", "sports", "technics", "transport" };
+
+		private FlipViewController controller;
+
+		private Context context;
 
 		private LayoutInflater inflater;
-		private ImageTagFactory imageTagFactory;
 
-		private MyBaseAdapter(Context context) {
+		private Bitmap placeholderBitmap;
+
+		private MyBaseAdapter(Context context, FlipViewController controller) {
 			inflater = LayoutInflater.from(context);
-			imageTagFactory = ImageTagFactory.getInstance(context, android.R.drawable.alert_dark_frame);
+			this.context = context;
+			this.controller = controller;
+
+			//Use a system resource as the placeholder
+			placeholderBitmap = BitmapFactory.decodeResource(context.getResources(), android.R.drawable.dark_header);
 		}
 
 		@Override
 		public int getCount() {
-			return CATEGORIES.length;
+			return Travels.IMG_DESCRIPTIONS.size();
 		}
 
 		@Override
@@ -138,20 +113,121 @@ public class FlipAsyncContentActivity extends Activity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View layout = convertView;
 			if (convertView == null)
-				layout = inflater.inflate(R.layout.async1, null);
+				layout = inflater.inflate(R.layout.complex1, null);
 
-			TextView titleView = (TextView) layout.findViewById(R.id.title);
-			ImageView photoView = (ImageView) layout.findViewById(R.id.async_photo);
+			final Travels.Data data = Travels.IMG_DESCRIPTIONS.get(position);
 
-			titleView.setText(CATEGORIES[position]);
-			
-			ImageTag tag = imageTagFactory
-					.build(AphidLog.format("http://lorempixel.com/400/400/%s/1/", CATEGORIES[position]));
-			photoView.setTag(tag);
-			photoView.setTag(R.id.tag_async_image_view_position, position);
-			FlipAsyncContentActivity.getImageManager().getLoader().load(photoView);
-			
+			UI
+				.<TextView>findViewById(layout, R.id.title)
+				.setText(AphidLog.format("%d. %s", position, data.title));
+
+			UI
+				.<TextView>findViewById(layout, R.id.description)
+				.setText(Html.fromHtml(data.description));
+
+			UI
+				.<Button>findViewById(layout, R.id.wikipedia)
+				.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent(
+							Intent.ACTION_VIEW,
+							Uri.parse(data.link)
+						);
+						inflater.getContext().startActivity(intent);
+					}
+				});
+
+			ImageView photoView = UI.findViewById(layout, R.id.photo);
+			//Use an async task to load the bitmap
+			boolean needReload = true;
+			AsyncImageTask previousTask = AsyncDrawable.getTask(photoView);
+			if (previousTask != null) {
+				if (previousTask.getPageIndex() == position && previousTask.getImageName().equals(data.imageFilename)) //check if the convertView happens to be previously used
+					needReload = false;
+				else
+					previousTask.cancel(true);
+			}
+
+			if (needReload) {
+				AsyncImageTask task = new AsyncImageTask(layout.getContext().getAssets(), photoView, controller, position, data.imageFilename);
+				photoView.setImageDrawable(new AsyncDrawable(context.getResources(), placeholderBitmap, task));
+
+				task.execute();
+			}
+
 			return layout;
+		}
+	}
+
+	/**
+	 * Borrowed from the official BitmapFun tutorial: http://developer.android.com/training/displaying-bitmaps/index.html
+	 */
+	private static final class AsyncDrawable extends BitmapDrawable {
+		private final WeakReference<AsyncImageTask> taskRef;
+
+		public AsyncDrawable(Resources res, Bitmap bitmap, AsyncImageTask task) {
+			super(res, bitmap);
+			this.taskRef = new WeakReference<AsyncImageTask>(task);
+		}
+
+		public static AsyncImageTask getTask(ImageView imageView) {
+			Drawable drawable = imageView.getDrawable();
+			if (drawable instanceof AsyncDrawable)
+				return ((AsyncDrawable) drawable).taskRef.get();
+			
+			return null;
+		}
+	}
+
+	private static final class AsyncImageTask extends AsyncTask<Void, Void, Bitmap> {
+		private static final Random RANDOM = new Random();
+
+		private final AssetManager assetManager;
+
+		private final WeakReference<ImageView> imageViewRef;
+		private final WeakReference<FlipViewController> controllerRef;
+		private final int pageIndex;
+		private final String imageName;
+
+		public AsyncImageTask(AssetManager assetManager, ImageView imageView, FlipViewController controller, int pageIndex, String imageName) {
+			this.assetManager = assetManager;
+			imageViewRef = new WeakReference<ImageView>(imageView);
+			controllerRef = new WeakReference<FlipViewController>(controller);
+			this.pageIndex = pageIndex;
+			this.imageName = imageName;
+		}
+
+		public int getPageIndex() {
+			return pageIndex;
+		}
+
+		public String getImageName() {
+			return imageName;
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			try {
+				Thread.sleep(500 + RANDOM.nextInt(2000)); //wait for a random time
+			} catch (InterruptedException e) {
+			}
+
+			return IO.readBitmap(assetManager, imageName);
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			if (isCancelled())
+				return;
+
+			ImageView imageView = imageViewRef.get();
+			if (imageView != null && AsyncDrawable.getTask(imageView) == this) { //the imageView can be reused for another page, so it's necessary to check its consistence
+				imageView.setImageBitmap(bitmap);
+				FlipViewController controller = controllerRef.get();
+				if (controller != null)
+					controller.refreshPage(pageIndex);
+			}
 		}
 	}
 }

@@ -71,18 +71,32 @@ public class FlipCards {
 			waitForTexture = false;
 	}
 	
-	void refreshPageView(View view) {
-		if (frontCards.getView() == view)
+	boolean refreshPageView(View view) {
+		boolean match = false;
+		if (frontCards.getView() == view) {
 			frontCards.markForceReload();
-		if (backCards.getView() == view)
+			match = true;
+		}
+		if (backCards.getView() == view) {
 			backCards.markForceReload();
+			match = true;
+		}
+		
+		return match;
 	}
 	
-	void refreshPage(int pageIndex) {
-		if (frontCards.getIndex() == pageIndex)
+	boolean refreshPage(int pageIndex) {
+		boolean match = false;
+		if (frontCards.getIndex() == pageIndex) {
 			frontCards.markForceReload();
-		if (backCards.getIndex() == pageIndex)
+			match = true;
+		}
+		if (backCards.getIndex() == pageIndex) {
 			backCards.markForceReload();
+			match = true;
+		}
+		
+		return match;
 	}
 
 	public void reloadTexture(int frontIndex, View frontView, int backIndex, View backView) {
