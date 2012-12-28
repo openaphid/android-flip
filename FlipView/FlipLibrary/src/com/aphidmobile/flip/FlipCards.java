@@ -24,7 +24,7 @@ import com.aphidmobile.utils.TextureUtils;
 import javax.microedition.khronos.opengles.GL10;
 
 public class FlipCards {
-	private static final float ACCELERATION = 1f;	
+	private static final float ACCELERATION = 0.65f;	
 	private static final float MOVEMENT_RATE = 1.5f;
 	private static final int MAX_TIP_ANGLE = 60;
 	private static final int MAX_TOUCH_MOVE_ANGLE = 15;
@@ -103,20 +103,20 @@ public class FlipCards {
 		synchronized (this) {
 			if (frontView != null) {
 				if (backCards.getView() == frontView) {
-					frontCards.setView(-1, null);
+					frontCards.setView(-1, null, controller.getAnimationBitmapFormat());
 					swapCards();
 				}
 			}
 
 			if (backView != null) {
 				if (frontCards.getView() == backView) {
-					backCards.setView(-1, null);
+					backCards.setView(-1, null, controller.getAnimationBitmapFormat());
 					swapCards();
 				}
 			}
 
-			boolean frontChanged = frontCards.setView(frontIndex, frontView);
-			boolean backChanged = backCards.setView(backIndex, backView);
+			boolean frontChanged = frontCards.setView(frontIndex, frontView, controller.getAnimationBitmapFormat());
+			boolean backChanged = backCards.setView(backIndex, backView, controller.getAnimationBitmapFormat());
 
 			if (AphidLog.ENABLE_DEBUG)
 				AphidLog.d("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
@@ -278,7 +278,7 @@ public class FlipCards {
 							controller.flippedToView(activeIndex, false);
 						} else {
 							swapCards();
-							frontCards.setView(-1, null);
+							frontCards.setView(-1, null, controller.getAnimationBitmapFormat());
 							if (-angle >= MAX_TIP_ANGLE)
 								angle = -MAX_TIP_ANGLE;
 							angle += 180;

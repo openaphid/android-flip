@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
@@ -102,6 +103,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private float maxVelocity;
 	
 	private ViewFlipListener onViewFlipListener;
+	
+	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
 
 	public FlipViewController(Context context) {
 		this(context, true);
@@ -128,6 +131,18 @@ public class FlipViewController extends AdapterView<Adapter> {
 		init(context, isOrientationVertical(context, attrs));
 	}
 	
+	public Bitmap.Config getAnimationBitmapFormat() {
+		return animationBitmapFormat;
+	}
+
+	/**
+	 * Set the bitmap config for the animation, default is ARGB_8888, which provides the best quality with large peak memory consumption.
+	 * @param animationBitmapFormat ALPHA_8 is not supported and will throw exception when binding textures
+	 */
+	public void setAnimationBitmapFormat(Bitmap.Config animationBitmapFormat) {
+		this.animationBitmapFormat = animationBitmapFormat;
+	}
+	
 	/**
 	 * Check the attributes for a declared orientation. (Defaults to true)
 	 */
@@ -138,14 +153,15 @@ public class FlipViewController extends AdapterView<Adapter> {
 				R.styleable.FlipViewController,
 				0, 0);
 		try {
-			vertical = a.getInteger(R.styleable.FlipViewController_orientation,
-					0) == 0 ? true : false;
+			vertical = a.getInteger(R.styleable.FlipViewController_orientation, 0) == 0;
 		} finally {
 			a.recycle();
 		}
 		return vertical;
 	}
+
 	
+
 	private void init(Context context, boolean orientationVertical) {
 		ViewConfiguration configuration = ViewConfiguration.get(getContext());
 		touchSlop = configuration.getScaledTouchSlop();

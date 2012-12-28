@@ -17,6 +17,7 @@ limitations under the License.
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.adapter.TravelAdapter;
@@ -35,6 +36,9 @@ public class FlipComplexLayoutActivity extends Activity {
 		setTitle(R.string.activity_title);
 
 		flipView = new FlipViewController(this);
+		
+		//Use RGB_565 to reduce peak memory usage on large screen device 
+		flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
 
 		flipView.setAdapter(new TravelAdapter(this));
 

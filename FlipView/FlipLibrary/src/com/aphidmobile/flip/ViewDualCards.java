@@ -54,7 +54,7 @@ public class ViewDualCards {
 		return viewRef != null ? viewRef.get() : null;
 	}
 
-	public synchronized boolean setView(int index, View view) {
+	public synchronized boolean setView(int index, View view, Bitmap.Config format) {
 		UI.assertInMainThread();
 
 		if (this.index == index 
@@ -72,7 +72,7 @@ public class ViewDualCards {
 		if (view != null) {
 			viewRef = new WeakReference<View>(view);
 			recycleScreenshot();
-			screenshot = GrabIt.takeScreenshot(view);
+			screenshot = GrabIt.takeScreenshot(view, format);
 		} else {
 			recycleScreenshot();
 		}
