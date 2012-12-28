@@ -33,10 +33,10 @@ public class GrabIt {
 			Canvas canvas = new Canvas(bitmap);
 			view.draw(canvas);
 			
-			//canvas.drawColor(Color.RED, PorterDuff.Mode.DARKEN); //XXX: debug option
+			//canvas.drawColor(Color.RED, PorterDuff.Mode.DARKEN); //NOTES: debug option
 
 			if (AphidLog.ENABLE_DEBUG)
-				AphidLog.d("create bitmap %dx%d", width, height);
+				AphidLog.d("create bitmap %dx%d, format %s", width, height, config);
 
 			return bitmap;
 		} else {

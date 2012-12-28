@@ -44,16 +44,16 @@ public class Texture {
 
 		Assert.assertTrue("bitmap should not be null or recycled", bitmap != null && !bitmap.isRecycled());
 
-		int w = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
-		int h = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
+		int potW = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
+		int potH = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
 
 		t.contentWidth = bitmap.getWidth();
 		t.contentHeight = bitmap.getHeight();
-		t.width = w;
-		t.height = h;
+		t.width = potW;
+		t.height = potH;
 
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
+			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), potW, potH);
 
 
 		gl.glGenTextures(1, t.id, 0);
@@ -66,15 +66,15 @@ public class Texture {
 
 		switch (bitmap.getConfig()) {
 			case ARGB_8888:
-				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
 				break;
 			case ARGB_4444:
-				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, null);
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, null);
 				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
 				break;
 			case RGB_565:
-				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, null);
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potW, potH, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, null);
 				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
 				break;
 			case ALPHA_8:

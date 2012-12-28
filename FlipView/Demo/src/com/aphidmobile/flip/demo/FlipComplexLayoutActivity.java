@@ -37,7 +37,7 @@ public class FlipComplexLayoutActivity extends Activity {
 
 		flipView = new FlipViewController(this);
 		
-		//Use RGB_565 to reduce peak memory usage on large screen device 
+		//Use RGB_565 can reduce peak memory usage on large screen device 
 		flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
 
 		flipView.setAdapter(new TravelAdapter(this));

@@ -43,8 +43,10 @@ public class TravelAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View layout = convertView;
-		if (convertView == null)
+		if (convertView == null) {
 			layout = inflater.inflate(R.layout.complex1, null);
+			AphidLog.d("created new view from adapter: %d", position);
+		}
 
 		final Travels.Data data = Travels.IMG_DESCRIPTIONS.get(position);
 		

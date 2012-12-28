@@ -41,7 +41,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public static final int ORIENTATION_VERTICAL = 0;
 	public static final int ORIENTATION_HORIZONTAL = 1;
 	
-	private static final int MAX_RELEASED_VIEW_SIZE = 4;
+	private static final int MAX_RELEASED_VIEW_SIZE = 1;
 	
 	public static interface ViewFlipListener {
 		void onViewFlipped(View view, int position);
@@ -217,9 +217,9 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	/**
-	 * Request the animator to update display if the pageView is active.
+	 * Request the animator to update display if the pageView has been preloaded.
 	 * 
-	 * If the pageView is being used in the animation or its content has been buffered, the animator reloads it forcibly.
+	 * If the pageView is being used in the animation or its content has been buffered, the animator forcibly reloads it.
 	 * 
 	 * The reloading process is a bit heavy for an active page, so please don't invoke it too frequently for an active page. The cost is trivial for inactive pages.
 	 * @param pageView
@@ -228,10 +228,22 @@ public class FlipViewController extends AdapterView<Adapter> {
 		if (cards.refreshPageView(pageView))
 			requestLayout();
 	}
-	
+
+	/**
+	 * @see #refreshPage(android.view.View) 
+	 * @param pageIndex
+	 */
 	public void refreshPage(int pageIndex) {
 		if (cards.refreshPage(pageIndex))
 			requestLayout();
+	}
+
+	/**
+	 * Force the animator reload all preloaded pages
+	 */
+	public void refreshAllPages() {
+		cards.refreshAllPages();
+		requestLayout();
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -311,6 +323,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 		requestLayout();
 		updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
+		
+		cards.resetSelection(position, adapter.getCount());
 	}
 
 	@Override
@@ -392,16 +406,18 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 	
 	private void addReleasedView(View view) {
+		Assert.assertNotNull(view);
 		if (releasedViews.size() < MAX_RELEASED_VIEW_SIZE)
 			releasedViews.add(view);
 	}
 
 	private View viewFromAdapter(int position, boolean addToTop) {
 		Assert.assertNotNull(adapter);
-
+		
 		View releasedView = releasedViews.isEmpty() ? null : releasedViews.removeFirst();
+		
 		View view = adapter.getView(position, releasedView, this);
-		if (view != releasedView)
+		if (releasedView != null && view != releasedView)
 			addReleasedView(releasedView);
 		
 		setupAdapterView(view, addToTop, view == releasedView);
@@ -421,15 +437,16 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void updateVisibleView(int index) {
+		/*
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("Update visible views, index %d, buffered: %d, adapter %d", index, bufferedViews.size(), adapterIndex);
+		*/
 		
 		for (int i = 0; i < bufferedViews.size(); i++)
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 	}
 
 	void postFlippedToView(final int indexInAdapter) {
-		AphidLog.d("postFlippedToView: " + indexInAdapter);
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -443,7 +460,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
 	}
 
-	void flippedToView(final int indexInAdapter, boolean isPost) { //XXX: can be simplified and unified with setSelection
+	void flippedToView(final int indexInAdapter, boolean isPost) {
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("flippedToView: %d, isPost %s", indexInAdapter, isPost);
 
@@ -476,13 +493,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 					updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 				}
 			} else {
-				//Issue #17
-				if (indexInAdapter == 0 || indexInAdapter != adapterIndex) //indexInAdapter=0 is a special case after bouncing from edge
-					setSelection(indexInAdapter);
+				AphidLog.e("Should not happen: indexInAdapter %d, adapterIndex %d", indexInAdapter, adapterIndex);
 			}
 		} else
-			Assert.assertTrue("Invalid indexInAdapter: " + indexInAdapter, false);
-		debugBufferedViews();
+			Assert.fail("Invalid indexInAdapter: " + indexInAdapter);
+		//debugBufferedViews();
 	}
 
 	void postHideFlipAnimation() {
