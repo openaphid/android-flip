@@ -50,9 +50,6 @@ public class FlipCards {
 
 	private FlipViewController controller;
 
-	//private int activeIndex = -1;
-	private boolean waitForTexture = false;
-
 	private boolean visible = false;
 
 	private int maxIndex = 0;
@@ -71,8 +68,6 @@ public class FlipCards {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-		if (!visible)
-			waitForTexture = false;
 	}
 
 	boolean refreshPageView(View view) {
@@ -102,7 +97,7 @@ public class FlipCards {
 
 		return match;
 	}
-	
+
 	void refreshAllPages() {
 		frontCards.resetWithIndex(frontCards.getIndex());
 		backCards.resetWithIndex(backCards.getIndex());
@@ -123,7 +118,7 @@ public class FlipCards {
 
 	synchronized void resetSelection(int selection, int maxIndex) {
 		UI.assertInMainThread();
-		
+
 		//stop flip animation when selection is manually changed
 
 		this.maxIndex = maxIndex;
@@ -150,55 +145,50 @@ public class FlipCards {
 			case STATE_TOUCH:
 				break;
 			case STATE_AUTO_ROTATE: {
-				if (waitForTexture)
-					controller.getSurfaceView().requestRender();
-				else {
-					animatedFrame++;
-					float delta = (forward ? ACCELERATION : -ACCELERATION) * animatedFrame % 180;
+				animatedFrame++;
+				float delta = (forward ? ACCELERATION : -ACCELERATION) * animatedFrame % 180;
 
-					float oldAngle = accumulatedAngle;
+				float oldAngle = accumulatedAngle;
 
-					accumulatedAngle += delta;
+				accumulatedAngle += delta;
 
-					if (oldAngle < 0) { //bouncing back after flip backward and over the first page
-						Assert.assertTrue(forward);
-						if (accumulatedAngle >= 0) {
-							accumulatedAngle = 0;
+				if (oldAngle < 0) { //bouncing back after flip backward and over the first page
+					Assert.assertTrue(forward);
+					if (accumulatedAngle >= 0) {
+						accumulatedAngle = 0;
+						setState(STATE_INIT);
+					}
+				} else {
+					if (frontCards.getIndex() == maxIndex - 1 && oldAngle > frontCards.getIndex() * 180) { //bouncing back after flip forward and over the last page
+						Assert.assertTrue(!forward);
+						if (accumulatedAngle <= frontCards.getIndex() * 180) {
 							setState(STATE_INIT);
+							accumulatedAngle = frontCards.getIndex() * 180;
 						}
 					} else {
-						if (frontCards.getIndex() == maxIndex - 1 && oldAngle > frontCards.getIndex() * 180) { //bouncing back after flip forward and over the last page
-							Assert.assertTrue(!forward);
-							if (accumulatedAngle <= frontCards.getIndex() * 180) {
+						if (forward) {
+							Assert.assertTrue("index of backCards should not be -1 when automatically flipping forward", backCards.getIndex() != -1);
+							if (accumulatedAngle >= backCards.getIndex() * 180) { //moved to the next page
+								accumulatedAngle = backCards.getIndex() * 180;
 								setState(STATE_INIT);
-								accumulatedAngle = frontCards.getIndex() * 180;
-							}
-						} else {
-							if (forward) {
-								Assert.assertTrue("index of backCards should not be -1 when automatically flipping forward", backCards.getIndex() != -1);
-								if (accumulatedAngle >= backCards.getIndex() * 180) { //moved to the next page
-									accumulatedAngle = backCards.getIndex() * 180;
-									waitForTexture = true;
-									setState(STATE_INIT);
-									controller.postFlippedToView(backCards.getIndex());
+								controller.postFlippedToView(backCards.getIndex());
 
-									swapCards();
-									backCards.resetWithIndex(frontCards.getIndex() + 1);
-								}
-							} else { //backward
-								if (accumulatedAngle <= frontCards.getIndex() * 180) { //firstCards restored
-									accumulatedAngle = frontCards.getIndex() * 180;
-									setState(STATE_INIT);
-								}
+								swapCards();
+								backCards.resetWithIndex(frontCards.getIndex() + 1);
+							}
+						} else { //backward
+							if (accumulatedAngle <= frontCards.getIndex() * 180) { //firstCards restored
+								accumulatedAngle = frontCards.getIndex() * 180;
+								setState(STATE_INIT);
 							}
 						}
-					} //ends of `if (oldAngle < 0) {} else {}`
+					}
+				} //ends of `if (oldAngle < 0) {} else {}`
 
-					if (state == STATE_INIT)
-						controller.postHideFlipAnimation();
-					else
-						controller.getSurfaceView().requestRender();
-				}
+				if (state == STATE_INIT)
+					controller.postHideFlipAnimation();
+				else
+					controller.getSurfaceView().requestRender();
 			}
 			break;
 			default:
@@ -214,7 +204,7 @@ public class FlipCards {
 
 			frontCards.getBottomCard().setAngle(0);
 			frontCards.getBottomCard().draw(gl);
-			
+
 			//no need to draw backCards here
 		} else {
 			if (angle < 90) { //render front view over back view
@@ -252,8 +242,6 @@ public class FlipCards {
 				lastPosition = orientationVertical ? event.getY() : event.getX();
 				return isOnTouchEvent;
 			case MotionEvent.ACTION_MOVE:
-				if (waitForTexture)
-					return isOnTouchEvent;
 				float delta = orientationVertical ? (lastPosition - event.getY()) : (lastPosition - event.getX());
 
 				if (Math.abs(delta) > controller.getTouchSlop()) {
@@ -291,12 +279,10 @@ public class FlipCards {
 							if (anglePageIndex == frontCards.getIndex() - 1) { //moved to previous page
 								swapCards(); //frontCards becomes the backCards
 								frontCards.resetWithIndex(backCards.getIndex() - 1);
-								//waitForTexture = true;
 								controller.flippedToView(anglePageIndex, false);
 							} else if (anglePageIndex == frontCards.getIndex() + 1) { //moved to next page
 								swapCards();
 								backCards.resetWithIndex(frontCards.getIndex() + 1);
-								//waitForTexture = true;
 								controller.flippedToView(anglePageIndex, false);
 							} else
 								throw new RuntimeException(AphidLog.format("Inconsistent states: anglePageIndex: %d, accumulatedAngle %.1f, frontCards %d, backCards %d", anglePageIndex, accumulatedAngle, frontCards.getIndex(), backCards.getIndex()));
@@ -332,7 +318,7 @@ public class FlipCards {
 		frontCards = backCards;
 		backCards = tmp;
 	}
-	
+
 	private void setState(int state) {
 		if (this.state != state) {
 			/*
@@ -343,7 +329,7 @@ public class FlipCards {
 			animatedFrame = 0;
 		}
 	}
-	
+
 	private int getPageIndexFromAngle() {
 		return ((int) accumulatedAngle) / 180;
 	}
