@@ -5,6 +5,14 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
 	
+	<Button
+		android:id="@+id/toggle_button"
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:textAppearance="@android:style/TextAppearance.Large"
+	  android:text="@string/hide_fragment"
+		/>
+	
 	<fragment android:name="com.aphidmobile.flip.demo.fragment.FlipTextViewFragment"
 	          android:id="@+id/flip_text_view_fragment"
 	          android:layout_height="match_parent"
