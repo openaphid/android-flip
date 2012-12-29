@@ -26,7 +26,7 @@ public class AphidLog {
 	private AphidLog() {
 	}
 
-	public static final String TAG = "OpenAphid";
+	public static final String TAG = "FlipView";
 
 	/**
 	 * A little trick to reuse a formatter in the same thread

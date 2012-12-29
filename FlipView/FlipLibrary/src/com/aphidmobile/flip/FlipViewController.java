@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
@@ -39,6 +40,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	public static final int ORIENTATION_VERTICAL = 0;
 	public static final int ORIENTATION_HORIZONTAL = 1;
+	
+	private static final int MAX_RELEASED_VIEW_SIZE = 1;
 	
 	public static interface ViewFlipListener {
 		void onViewFlipped(View view, int position);
@@ -100,6 +103,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private float maxVelocity;
 	
 	private ViewFlipListener onViewFlipListener;
+	
+	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
 
 	public FlipViewController(Context context) {
 		this(context, true);
@@ -126,6 +131,18 @@ public class FlipViewController extends AdapterView<Adapter> {
 		init(context, isOrientationVertical(context, attrs));
 	}
 	
+	public Bitmap.Config getAnimationBitmapFormat() {
+		return animationBitmapFormat;
+	}
+
+	/**
+	 * Set the bitmap config for the animation, default is ARGB_8888, which provides the best quality with large peak memory consumption.
+	 * @param animationBitmapFormat ALPHA_8 is not supported and will throw exception when binding textures
+	 */
+	public void setAnimationBitmapFormat(Bitmap.Config animationBitmapFormat) {
+		this.animationBitmapFormat = animationBitmapFormat;
+	}
+	
 	/**
 	 * Check the attributes for a declared orientation. (Defaults to true)
 	 */
@@ -136,14 +153,15 @@ public class FlipViewController extends AdapterView<Adapter> {
 				R.styleable.FlipViewController,
 				0, 0);
 		try {
-			vertical = a.getInteger(R.styleable.FlipViewController_orientation,
-					0) == 0 ? true : false;
+			vertical = a.getInteger(R.styleable.FlipViewController_orientation, 0) == 0;
 		} finally {
 			a.recycle();
 		}
 		return vertical;
 	}
+
 	
+
 	private void init(Context context, boolean orientationVertical) {
 		ViewConfiguration configuration = ViewConfiguration.get(getContext());
 		touchSlop = configuration.getScaledTouchSlop();
@@ -199,19 +217,33 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	/**
-	 * Request the animator to update display if the pageView is active.
+	 * Request the animator to update display if the pageView has been preloaded.
 	 * 
-	 * If the pageView is being used in the animation or its content has been buffered, the animator reloads it forcibly.
+	 * If the pageView is being used in the animation or its content has been buffered, the animator forcibly reloads it.
 	 * 
 	 * The reloading process is a bit heavy for an active page, so please don't invoke it too frequently for an active page. The cost is trivial for inactive pages.
 	 * @param pageView
 	 */
 	public void refreshPage(View pageView) {
-		cards.refreshPageView(pageView);
+		if (cards.refreshPageView(pageView))
+			requestLayout();
 	}
-	
+
+	/**
+	 * @see #refreshPage(android.view.View) 
+	 * @param pageIndex
+	 */
 	public void refreshPage(int pageIndex) {
-		cards.refreshPage(pageIndex);
+		if (cards.refreshPage(pageIndex))
+			requestLayout();
+	}
+
+	/**
+	 * Force the animator reload all preloaded pages
+	 */
+	public void refreshAllPages() {
+		cards.refreshAllPages();
+		requestLayout();
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -291,6 +323,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 		requestLayout();
 		updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
+		
+		cards.resetSelection(position, adapter.getCount());
 	}
 
 	@Override
@@ -368,16 +402,23 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private void releaseView(View view) {
 		Assert.assertNotNull(view);
 		detachViewFromParent(view);
-		releasedViews.add(view);
+		addReleasedView(view);
+	}
+	
+	private void addReleasedView(View view) {
+		Assert.assertNotNull(view);
+		if (releasedViews.size() < MAX_RELEASED_VIEW_SIZE)
+			releasedViews.add(view);
 	}
 
 	private View viewFromAdapter(int position, boolean addToTop) {
 		Assert.assertNotNull(adapter);
-
+		
 		View releasedView = releasedViews.isEmpty() ? null : releasedViews.removeFirst();
+		
 		View view = adapter.getView(position, releasedView, this);
-		if (view != releasedView)
-			releasedViews.add(releasedView);
+		if (releasedView != null && view != releasedView)
+			addReleasedView(releasedView);
 		
 		setupAdapterView(view, addToTop, view == releasedView);
 		return view;
@@ -396,15 +437,16 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	private void updateVisibleView(int index) {
+		/*
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("Update visible views, index %d, buffered: %d, adapter %d", index, bufferedViews.size(), adapterIndex);
+		*/
 		
 		for (int i = 0; i < bufferedViews.size(); i++)
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 	}
 
 	void postFlippedToView(final int indexInAdapter) {
-		AphidLog.d("postFlippedToView: " + indexInAdapter);
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -418,7 +460,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
 	}
 
-	void flippedToView(final int indexInAdapter, boolean isPost) { //XXX: can be simplified and unified with setSelection
+	void flippedToView(final int indexInAdapter, boolean isPost) {
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("flippedToView: %d, isPost %s", indexInAdapter, isPost);
 
@@ -451,13 +493,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 					updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
 				}
 			} else {
-				//Issue #17
-				if (indexInAdapter == 0 || indexInAdapter != adapterIndex) //indexInAdapter=0 is a special case after bouncing from edge
-					setSelection(indexInAdapter);
+				AphidLog.e("Should not happen: indexInAdapter %d, adapterIndex %d", indexInAdapter, adapterIndex);
 			}
 		} else
-			Assert.assertTrue("Invalid indexInAdapter: " + indexInAdapter, false);
-		debugBufferedViews();
+			Assert.fail("Invalid indexInAdapter: " + indexInAdapter);
+		//debugBufferedViews();
 	}
 
 	void postHideFlipAnimation() {
@@ -498,8 +538,10 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 			handler.post(new Runnable() {
 				public void run() {
-					if (!inFlipAnimation)
+					if (!inFlipAnimation) {
 						cards.setVisible(false);
+						surfaceView.requestRender(); //ask OpenGL to clear its display
+					}
 				}
 			});
 		}
