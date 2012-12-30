@@ -245,16 +245,30 @@ public class FlipViewController extends AdapterView<Adapter> {
 		cards.refreshAllPages();
 		requestLayout();
 	}
+	
+	//--------------------------------------------------------------------------------------------------------------------
+	// Locking - Allow to lock the touch input.
+	private boolean locked = false;
+	
+	public void lock() {
+		locked = true;
+	}
+	
+	public void unlock() {
+		locked = false;
+	}
 
 	//--------------------------------------------------------------------------------------------------------------------
 	// Touch Event
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
+		if (locked) return false;
 		return cards.handleTouchEvent(event, false);
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if (locked) return false;
 		return cards.handleTouchEvent(event, true);
 	}
 
