@@ -75,6 +75,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Issue #5", Issue5Activity.class);
 		addItem(data, "XML Configuration", FlipTextViewXmlActivity.class);
 		addItem(data, "Fragment Demo", FlipFragmentActivity.class);
+		addItem(data, "Dynamic Adapter Size", FlipDynamicAdapterActivity.class);
 		
 		return data;
 	}

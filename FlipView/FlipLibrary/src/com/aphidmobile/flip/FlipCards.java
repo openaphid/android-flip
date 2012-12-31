@@ -53,6 +53,8 @@ public class FlipCards {
 	private boolean visible = false;
 
 	private int maxIndex = 0;
+	
+	private int lastPageIndex;
 
 	public FlipCards(FlipViewController controller, boolean orientationVertical) {
 		this.controller = controller;
@@ -235,8 +237,6 @@ public class FlipCards {
 		frontCards.abandonTexture();
 		backCards.abandonTexture();
 	}
-	
-	private int lastPageIndex;
 
 	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
 		switch (event.getAction()) {

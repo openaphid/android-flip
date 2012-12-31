@@ -20,6 +20,8 @@ import com.aphidmobile.utils.UI;
 public class TravelAdapter extends BaseAdapter {
 
 	private LayoutInflater inflater;
+	
+	private int repeatCount = 1;
 
 	public TravelAdapter(Context context) {
 		inflater = LayoutInflater.from(context);
@@ -27,7 +29,15 @@ public class TravelAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		return Travels.IMG_DESCRIPTIONS.size();
+		return Travels.IMG_DESCRIPTIONS.size() * repeatCount;
+	}
+
+	public int getRepeatCount() {
+		return repeatCount;
+	}
+
+	public void setRepeatCount(int repeatCount) {
+		this.repeatCount = repeatCount;
 	}
 
 	@Override
@@ -48,7 +58,7 @@ public class TravelAdapter extends BaseAdapter {
 			AphidLog.d("created new view from adapter: %d", position);
 		}
 
-		final Travels.Data data = Travels.IMG_DESCRIPTIONS.get(position);
+		final Travels.Data data = Travels.IMG_DESCRIPTIONS.get(position % Travels.IMG_DESCRIPTIONS.size());
 		
 		UI
 			.<TextView>findViewById(layout, R.id.title)

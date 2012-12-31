@@ -31,6 +31,7 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewXmlActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.Issue5Activity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipFragmentActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipDynamicAdapterActivity"/>
     
   </application>
   
