@@ -112,7 +112,7 @@ public class FlipCards {
 				AphidLog.d("reloading texture: %s and %s; old views: %s, %s, front changed %s, back changed %s", frontView, backView, frontCards.getView(), backCards.getView(), frontChanged, backChanged);
 
 			if (AphidLog.ENABLE_DEBUG)
-				AphidLog.d("reloadTexture: activeIndex %d, front %d, back %d, angle %.1f", getPageIndexFromAngle(), frontIndex, backIndex, accumulatedAngle);
+				AphidLog.d("reloadTexture: activeIndex %d, front %d, back %d, angle %.1f", getPageIndexFromAngle(accumulatedAngle), frontIndex, backIndex, accumulatedAngle);
 		}
 	}
 
@@ -235,10 +235,14 @@ public class FlipCards {
 		frontCards.abandonTexture();
 		backCards.abandonTexture();
 	}
+	
+	private int lastPageIndex;
 
 	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				// remember page we started on...
+				lastPageIndex = getPageIndexFromAngle(accumulatedAngle);
 				lastPosition = orientationVertical ? event.getY() : event.getX();
 				return isOnTouchEvent;
 			case MotionEvent.ACTION_MOVE:
@@ -262,8 +266,11 @@ public class FlipCards {
 
 					if (Math.abs(angleDelta) > MAX_TOUCH_MOVE_ANGLE) //prevent large delta when moving too fast
 						angleDelta = Math.signum(angleDelta) * MAX_TOUCH_MOVE_ANGLE;
-
-					accumulatedAngle += angleDelta;
+					
+					// do not flip more than one page with one touch...
+					if (Math.abs(getPageIndexFromAngle(accumulatedAngle + angleDelta) - lastPageIndex) <= 1) {
+						accumulatedAngle += angleDelta;
+					}
 
 					//Bounce the page for the first and the last page
 					if (frontCards.getIndex() == maxIndex - 1) { //the last page
@@ -272,7 +279,7 @@ public class FlipCards {
 					} else if (accumulatedAngle < -MAX_TIP_ANGLE)
 						accumulatedAngle = -MAX_TIP_ANGLE;
 
-					int anglePageIndex = getPageIndexFromAngle();
+					int anglePageIndex = getPageIndexFromAngle(accumulatedAngle);
 
 					if (accumulatedAngle >= 0) {
 						if (anglePageIndex != frontCards.getIndex()) {
@@ -330,8 +337,8 @@ public class FlipCards {
 		}
 	}
 
-	private int getPageIndexFromAngle() {
-		return ((int) accumulatedAngle) / 180;
+	private int getPageIndexFromAngle(float angle) {
+		return ((int) angle) / 180;
 	}
 
 	private float getDisplayAngle() {
