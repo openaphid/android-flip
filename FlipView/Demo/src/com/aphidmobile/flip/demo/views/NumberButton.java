@@ -1,6 +1,5 @@
 package com.aphidmobile.flip.demo.views;
 
-import android.R;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -12,7 +11,7 @@ public class NumberButton extends Button {
 	private int number;
 
 	public NumberButton(Context context, final int n) {
-		super(context, null, R.attr.buttonStyleInset);
+		super(context, null, android.R.attr.buttonStyleInset);
 		setNumber(n);
 		setOnClickListener(new OnClickListener() {
 			@Override

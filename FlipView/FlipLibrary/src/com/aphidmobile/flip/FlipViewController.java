@@ -27,10 +27,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.AbsListView;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -42,8 +39,8 @@ import java.util.LinkedList;
 
 public class FlipViewController extends AdapterView<Adapter> {
 
-	public static final int ORIENTATION_VERTICAL = 0;
-	public static final int ORIENTATION_HORIZONTAL = 1;
+	public static final int VERTICAL = 0;
+	public static final int HORIZONTAL = 1;
 
 	public static interface ViewFlipListener {
 		void onViewFlipped(View view, int position);
@@ -73,9 +70,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private int contentWidth;
 	private int contentHeight;
 
-	private boolean orientationVertical;
-
-	private boolean enableFlipAnimation = true;
+	@ViewDebug.ExportedProperty
+	private int flipOrientation;
 
 	private boolean inFlipAnimation = false;
 
@@ -93,20 +89,18 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private int sideBufferSize = 1;
 
 	private float touchSlop;
-	@SuppressWarnings("unused")
-	private float maxVelocity;
 
 	private ViewFlipListener onViewFlipListener;
 
 	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
 
 	public FlipViewController(Context context) {
-		this(context, true);
+		this(context, VERTICAL);
 	}
 
-	public FlipViewController(Context context, boolean orientationVertical) {
+	public FlipViewController(Context context, int flipOrientation) {
 		super(context);
-		init(context, orientationVertical);
+		init(context, flipOrientation);
 	}
 
 	/**
@@ -114,15 +108,34 @@ public class FlipViewController extends AdapterView<Adapter> {
 	 */
 	public FlipViewController(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		init(context, isOrientationVertical(context, attrs));
+
+		int orientation = VERTICAL;
+
+		TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.FlipViewController, 0, 0);
+
+		try {
+			orientation = a.getInteger(R.styleable.FlipViewController_orientation, VERTICAL);
+			if (orientation != VERTICAL)
+				orientation = HORIZONTAL;
+		} finally {
+			a.recycle();
+		}
+
+		init(context, orientation);
 	}
 
 	/**
 	 * Constructor required for XML inflation.
 	 */
 	public FlipViewController(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		init(context, isOrientationVertical(context, attrs));
+		this(context, attrs, 0);
+	}
+
+	private void init(Context context, int orientation) {
+		ViewConfiguration configuration = ViewConfiguration.get(getContext());
+		touchSlop = configuration.getScaledTouchSlop();
+		this.flipOrientation = orientation;
+		setupSurfaceView(context);
 	}
 
 	public Bitmap.Config getAnimationBitmapFormat() {
@@ -138,64 +151,12 @@ public class FlipViewController extends AdapterView<Adapter> {
 		this.animationBitmapFormat = animationBitmapFormat;
 	}
 
-	/**
-	 * Check the attributes for a declared orientation. (Defaults to true)
-	 */
-	private boolean isOrientationVertical(Context context, AttributeSet attrs) {
-		boolean vertical = true;
-		TypedArray a = context.getTheme().obtainStyledAttributes(
-			attrs,
-			R.styleable.FlipViewController,
-			0, 0);
-		try {
-			vertical = a.getInteger(R.styleable.FlipViewController_orientation, 0) == 0;
-		} finally {
-			a.recycle();
-		}
-		return vertical;
-	}
-
-
-	private void init(Context context, boolean orientationVertical) {
-		ViewConfiguration configuration = ViewConfiguration.get(getContext());
-		touchSlop = configuration.getScaledTouchSlop();
-		maxVelocity = configuration.getScaledMaximumFlingVelocity();
-		this.orientationVertical = orientationVertical;
-		setupSurfaceView();
-	}
-
 	public ViewFlipListener getOnViewFlipListener() {
 		return onViewFlipListener;
 	}
 
-
 	public void setOnViewFlipListener(ViewFlipListener onViewFlipListener) {
 		this.onViewFlipListener = onViewFlipListener;
-	}
-
-
-	float getTouchSlop() {
-		return touchSlop;
-	}
-
-	GLSurfaceView getSurfaceView() {
-		return surfaceView;
-	}
-
-	FlipRenderer getRenderer() {
-		return renderer;
-	}
-
-	int getContentWidth() {
-		return contentWidth;
-	}
-
-	int getContentHeight() {
-		return contentHeight;
-	}
-
-	public void setEnableFlipAnimation(boolean enable) {
-		enableFlipAnimation = enable;
 	}
 
 	public void onResume() {
@@ -204,10 +165,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	public void onPause() {
 		surfaceView.onPause();
-	}
-
-	void reloadTexture() {
-		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
 	}
 
 	/**
@@ -350,7 +307,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			}
 		}
 
-		if (enableFlipAnimation && bufferedViews.size() >= 1) {
+		if (bufferedViews.size() >= 1) {
 			View frontView = bufferedViews.get(bufferIndex);
 			View backView = null;
 			if (bufferIndex < bufferedViews.size() - 1)
@@ -370,11 +327,37 @@ public class FlipViewController extends AdapterView<Adapter> {
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
+	//internal exposed properties & methods
+	float getTouchSlop() {
+		return touchSlop;
+	}
+
+	GLSurfaceView getSurfaceView() {
+		return surfaceView;
+	}
+
+	FlipRenderer getRenderer() {
+		return renderer;
+	}
+
+	int getContentWidth() {
+		return contentWidth;
+	}
+
+	int getContentHeight() {
+		return contentHeight;
+	}
+	
+	void reloadTexture() {
+		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
+	}
+
+	//--------------------------------------------------------------------------------------------------------------------
 	// Internals
-	private void setupSurfaceView() {
+	private void setupSurfaceView(Context context) {
 		surfaceView = new GLSurfaceView(getContext());
 
-		cards = new FlipCards(this, orientationVertical);
+		cards = new FlipCards(this, flipOrientation == VERTICAL);
 		renderer = new FlipRenderer(this, cards);
 
 		surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
@@ -441,6 +424,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 			bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
 	}
 
+	private void debugBufferedViews() {
+		if (AphidLog.ENABLE_DEBUG)
+			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
+	}
+	
 	void postFlippedToView(final int indexInAdapter) {
 		handler.post(new Runnable() {
 			@Override
@@ -448,11 +436,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 				flippedToView(indexInAdapter, true);
 			}
 		});
-	}
-
-	private void debugBufferedViews() {
-		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
 	}
 
 	void flippedToView(final int indexInAdapter, boolean isPost) {
@@ -495,17 +478,6 @@ public class FlipViewController extends AdapterView<Adapter> {
 		//debugBufferedViews();
 	}
 
-	void postHideFlipAnimation() {
-		if (inFlipAnimation) {
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					hideFlipAnimation();
-				}
-			});
-		}
-	}
-
 	void showFlipAnimation() {
 		if (!inFlipAnimation) {
 			inFlipAnimation = true;
@@ -519,6 +491,17 @@ public class FlipViewController extends AdapterView<Adapter> {
 						updateVisibleView(-1);
 				}
 			}, 100);
+		}
+	}
+	
+	void postHideFlipAnimation() {
+		if (inFlipAnimation) {
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					hideFlipAnimation();
+				}
+			});
 		}
 	}
 
@@ -541,7 +524,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			});
 		}
 	}
-	
+
 	private void onDataChanged() {
 		adapterDataCount = adapter.getCount();
 		int activeIndex;
@@ -549,7 +532,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			activeIndex = 0;
 		else
 			activeIndex = Math.min(adapterIndex, adapterDataCount - 1);
-		
+
 		releaseViews();
 		setSelection(activeIndex);
 	}

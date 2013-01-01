@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -123,9 +122,7 @@ public class GalleryFlipItem extends LinearLayout {
 
 				is = new BufferedInputStream(conn.getInputStream());
 
-				Bitmap bim = BitmapFactory.decodeStream(is);
-
-				return bim;
+				return BitmapFactory.decodeStream(is);
 			} catch (IOException e) {
 				AphidLog.e(e, "Failed to load bitmap from url: " + url);
 			} finally {
@@ -220,17 +217,16 @@ public class GalleryFlipItem extends LinearLayout {
 		txtDistrict = (TextView) findViewById(R.id.gallery_flip_item_place_district_textview);
 		txtCity = (TextView) findViewById(R.id.gallery_flip_item_place_city_textview);
 
-		int Measuredwidth = 0;
-		int Measuredheight = 0;
-		Point size = new Point();
+		int measuredwidth = 0;
+		int measuredheight = 0;
 		WindowManager w = ((Activity) context).getWindowManager();
 
 		Display d = w.getDefaultDisplay();
-		Measuredwidth = d.getWidth();
-		Measuredheight = d.getHeight();
+		measuredwidth = d.getWidth();
+		measuredheight = d.getHeight();
 
 		//notes: it's not the right approach to make the background fill its parent, using a RelativeLayout could be much better
-		imgBackground.setLayoutParams(new LayoutParams(Measuredwidth, Measuredheight));
+		imgBackground.setLayoutParams(new LayoutParams(measuredwidth, measuredheight));
 		
 		refreshView(mGalleryPage, controller, pageIndex);
 	}

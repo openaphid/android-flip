@@ -37,6 +37,7 @@ public class MainActivity extends ListActivity {
 				this, getData(), android.R.layout.simple_list_item_1, new String[]{"title"}, new int[]{android.R.id.text1}
 			)
 		);
+		getListView().setScrollbarFadingEnabled(false);
 	}
 	
 	@Override
@@ -66,15 +67,15 @@ public class MainActivity extends ListActivity {
 
 	private List<? extends Map<String, ?>> getData() {
 		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-		addItem(data, "Flip Text Views", FlipTextViewActivity.class);
-		addItem(data, "Flip Buttons", FlipButtonActivity.class);
-		addItem(data, "Flip Complex Layouts", FlipComplexLayoutActivity.class);
-		addItem(data, "Flip Async Content", FlipAsyncContentActivity.class);
-		addItem(data, "Flip with Event Listener", FlipTextViewAltActivity.class);
-		addItem(data, "Flip Horizontal", FlipHorizontalLayoutActivity.class);
+		addItem(data, "TextViews", FlipTextViewActivity.class);
+		addItem(data, "Buttons", FlipButtonActivity.class);
+		addItem(data, "Complex Layouts", FlipComplexLayoutActivity.class);
+		addItem(data, "Async Content", FlipAsyncContentActivity.class);
+		addItem(data, "Event Listener", FlipTextViewAltActivity.class);
+		addItem(data, "Horizontal", FlipHorizontalLayoutActivity.class);
 		addItem(data, "Issue #5", Issue5Activity.class);
 		addItem(data, "XML Configuration", FlipTextViewXmlActivity.class);
-		addItem(data, "Fragment Demo", FlipFragmentActivity.class);
+		addItem(data, "Fragment", FlipFragmentActivity.class);
 		addItem(data, "Dynamic Adapter Size", FlipDynamicAdapterActivity.class);
 		
 		return data;
@@ -82,7 +83,7 @@ public class MainActivity extends ListActivity {
 
 	private void addItem(List<Map<String, Object>> data, String title, Class<? extends Activity> activityClass) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("title", title);
+		map.put("title", data.size() + ". " + title);
 		map.put("activity", activityClass);
 		data.add(map);
 	}
