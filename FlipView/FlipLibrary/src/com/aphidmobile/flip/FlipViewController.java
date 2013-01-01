@@ -83,7 +83,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private DataSetObserver adapterDataObserver;
 
 	private final LinkedList<View> bufferedViews = new LinkedList<View>();
-	private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to log the related view indices?
+	private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to keep the related view indices?
 	private int bufferIndex = -1;
 	private int adapterIndex = -1;
 	private int sideBufferSize = 1;
@@ -92,6 +92,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private ViewFlipListener onViewFlipListener;
 
+	@ViewDebug.ExportedProperty
 	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
 
 	public FlipViewController(Context context) {
@@ -114,9 +115,17 @@ public class FlipViewController extends AdapterView<Adapter> {
 		TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.FlipViewController, 0, 0);
 
 		try {
-			orientation = a.getInteger(R.styleable.FlipViewController_orientation, VERTICAL);
-			if (orientation != VERTICAL)
+			int value = a.getInteger(R.styleable.FlipViewController_orientation, VERTICAL);
+			if (value == HORIZONTAL)
 				orientation = HORIZONTAL;
+
+			value = a.getInteger(R.styleable.FlipViewController_animationBitmapFormat, 0);
+			if (value == 1)
+				setAnimationBitmapFormat(Bitmap.Config.ARGB_4444);
+			else if (value == 2)
+				setAnimationBitmapFormat(Bitmap.Config.RGB_565);
+			else
+				setAnimationBitmapFormat(Bitmap.Config.ARGB_8888);
 		} finally {
 			a.recycle();
 		}
@@ -347,7 +356,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	int getContentHeight() {
 		return contentHeight;
 	}
-	
+
 	void reloadTexture() {
 		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
 	}
@@ -428,7 +437,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("bufferedViews: %s; buffer index %d, adapter index %d", bufferedViews, bufferIndex, adapterIndex);
 	}
-	
+
 	void postFlippedToView(final int indexInAdapter) {
 		handler.post(new Runnable() {
 			@Override
@@ -493,7 +502,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 			}, 100);
 		}
 	}
-	
+
 	void postHideFlipAnimation() {
 		if (inFlipAnimation) {
 			handler.post(new Runnable() {
