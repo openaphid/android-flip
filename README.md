@@ -25,7 +25,7 @@ For a complete change list please checkout our [issue tracker](https://github.co
 
 - The demo [FlipAsyncContentActivity](https://github.com/openaphid/android-flip/blob/master/FlipView/Demo/src/com/aphidmobile/flip/demo/FlipAsyncContentActivity.java) has been rewritten to illustrate the correct way of handling async content. ([#37](https://github.com/openaphid/android-flip/issues/37))
 
-- A new demo [FlipDynamicAdapterActivity](https://github.com/openaphid/android-flip/blob/master/FlipView/Demo/src/com/aphidmobile/flip/FlipDynamicAdapterActivity.java) to demonstrate how to dynamically load more pages. ([#41](https://github.com/openaphid/android-flip/issues/41))
+- A new demo [FlipDynamicAdapterActivity](https://github.com/openaphid/android-flip/blob/master/FlipView/Demo/src/com/aphidmobile/flip/demo/FlipDynamicAdapterActivity.java) to demonstrate how to dynamically load more pages. ([#41](https://github.com/openaphid/android-flip/issues/41))
 
 - Thanks to [@siegfriedpammer](https://github.com/siegfriedpammer) for his contribution. ([Pull #40](https://github.com/openaphid/android-flip/pull/40))
 
