@@ -236,13 +236,12 @@ public class FlipCards {
 		backCards.abandonTexture();
 	}
 	
-	private int lastPageIndex;
+	private boolean alreadyFlipped;
 
 	public synchronized boolean handleTouchEvent(MotionEvent event, boolean isOnTouchEvent) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
-				// remember page we started on...
-				lastPageIndex = getPageIndexFromAngle(accumulatedAngle);
+				alreadyFlipped = false;
 				lastPosition = orientationVertical ? event.getY() : event.getX();
 				return isOnTouchEvent;
 			case MotionEvent.ACTION_MOVE:
@@ -268,7 +267,7 @@ public class FlipCards {
 						angleDelta = Math.signum(angleDelta) * MAX_TOUCH_MOVE_ANGLE;
 					
 					// do not flip more than one page with one touch...
-					if (Math.abs(getPageIndexFromAngle(accumulatedAngle + angleDelta) - lastPageIndex) <= 1) {
+					if (!alreadyFlipped) {
 						accumulatedAngle += angleDelta;
 					}
 
@@ -287,10 +286,12 @@ public class FlipCards {
 								swapCards(); //frontCards becomes the backCards
 								frontCards.resetWithIndex(backCards.getIndex() - 1);
 								controller.flippedToView(anglePageIndex, false);
+								alreadyFlipped = true;
 							} else if (anglePageIndex == frontCards.getIndex() + 1) { //moved to next page
 								swapCards();
 								backCards.resetWithIndex(frontCards.getIndex() + 1);
 								controller.flippedToView(anglePageIndex, false);
+								alreadyFlipped = true;
 							} else
 								throw new RuntimeException(AphidLog.format("Inconsistent states: anglePageIndex: %d, accumulatedAngle %.1f, frontCards %d, backCards %d", anglePageIndex, accumulatedAngle, frontCards.getIndex(), backCards.getIndex()));
 						}
