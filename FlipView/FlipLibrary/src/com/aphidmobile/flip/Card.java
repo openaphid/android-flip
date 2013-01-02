@@ -17,14 +17,16 @@ limitations under the License.
 
 package com.aphidmobile.flip;
 
-import static com.aphidmobile.flip.FlipRenderer.*;
-import static com.aphidmobile.utils.TextureUtils.*;
-import static javax.microedition.khronos.opengles.GL10.*;
-import static android.util.FloatMath.*;
+import com.aphidmobile.utils.AphidLog;
 
 import javax.microedition.khronos.opengles.GL10;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
+import static android.util.FloatMath.*;
+import static com.aphidmobile.flip.FlipRenderer.*;
+import static com.aphidmobile.utils.TextureUtils.*;
+import static javax.microedition.khronos.opengles.GL10.*;
 
 public class Card {
 	public static final int AXIS_TOP = 0;
@@ -36,15 +38,15 @@ public class Card {
 	public static final int X_00 = 0;
 	public static final int Y_00 = 1;
 	public static final int Z_00 = 2;
-	
+
 	public static final int X_01 = 3;
 	public static final int Y_01 = 4;
 	public static final int Z_01 = 5;
-	
+
 	public static final int X_11 = 6;
 	public static final int Y_11 = 7;
 	public static final int Z_11 = 8;
-	
+
 	public static final int X_10 = 9;
 	public static final int Y_10 = 10;
 	public static final int Z_10 = 11;
@@ -68,7 +70,7 @@ public class Card {
 	private int axis = AXIS_TOP;
 
 	private boolean orientationVertical = true;
-	
+
 	private boolean dirty = false;
 
 	public Texture getTexture() {
@@ -112,7 +114,7 @@ public class Card {
 	public void setOrientation(boolean orientationVertical) {
 		this.orientationVertical = orientationVertical;
 	}
-	
+
 	public void draw(GL10 gl) {
 		if (dirty)
 			updateVertices();
@@ -141,11 +143,12 @@ public class Card {
 			gl.glBindTexture(GL_TEXTURE_2D, texture.getId()[0]);
 		}
 
-		checkError(gl);
+		if (AphidLog.ENABLE_DEBUG)
+			checkError(gl);
 
 		gl.glPushMatrix();
 
-		if(orientationVertical){
+		if (orientationVertical) {
 			if (angle > 0) {
 				if (axis == AXIS_TOP) {
 					gl.glTranslatef(0, cardVertices[Y_00], 0f);
@@ -156,11 +159,11 @@ public class Card {
 					gl.glRotatef(angle, 1f, 0f, 0f);
 					gl.glTranslatef(0, -cardVertices[Y_11], 0f);
 				}
-			}			
+			}
 		} else {
 			if (angle > 0) {
 				if (axis == AXIS_TOP) {
-					gl.glTranslatef(cardVertices[X_00], 0,  0f);
+					gl.glTranslatef(cardVertices[X_00], 0, 0f);
 					gl.glRotatef(-angle, 0f, 1f, 0f);
 					gl.glTranslatef(-cardVertices[X_00], 0, 0f);
 				} else {
@@ -174,7 +177,8 @@ public class Card {
 		gl.glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
 		gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 
-		checkError(gl);
+		if (AphidLog.ENABLE_DEBUG)
+			checkError(gl);
 
 		gl.glPopMatrix();
 
@@ -182,16 +186,18 @@ public class Card {
 			gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			gl.glDisable(GL_TEXTURE_2D);
 		}
-		
-		float w,h,z;
+
+		float w, h, z;
 		float[] shadowVertices;
-		
+
 		if (angle > 0) {
 			gl.glDisable(GL_LIGHTING);
 			gl.glDisable(GL_DEPTH_TEST);
 
+			float alpha = 1f * (90f - angle) / 90f;
+
 			if (axis == AXIS_TOP) {
-				if(orientationVertical){
+				if (orientationVertical) {
 					h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1.0f - cos(d2r(angle)));
 					z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
 					shadowVertices = new float[]{
@@ -210,14 +216,8 @@ public class Card {
 						cardVertices[X_10], cardVertices[Y_10], 0f
 					};
 				}
-
-				float alpha = 1f * (90f - angle) / 90f;
-
-				gl.glColor4f(0f, 0.0f, 0f, alpha);
-				gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
-				gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 			} else {
-				if(orientationVertical){
+				if (orientationVertical) {
 					h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1f - cos(d2r(angle)));
 					z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
 					shadowVertices = new float[]{
@@ -227,7 +227,7 @@ public class Card {
 						cardVertices[X_10], cardVertices[Y_00], 0f
 					};
 				} else { //horizontal
-					w = (cardVertices[X_10] - cardVertices[X_00])  * (1f - cos(d2r(angle)));
+					w = (cardVertices[X_10] - cardVertices[X_00]) * (1f - cos(d2r(angle)));
 					z = (cardVertices[X_10] - cardVertices[X_00]) * sin(d2r(angle));
 					shadowVertices = new float[]{
 						cardVertices[X_00], cardVertices[Y_00], 0f,
@@ -236,17 +236,18 @@ public class Card {
 						cardVertices[X_01] + w, cardVertices[Y_10], z
 					};
 				}
-				float alpha = 1f * (90f - angle) / 90f;
-
-				gl.glColor4f(0f, 0.0f, 0f, alpha);
-				gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
-				gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 			}
+
+			gl.glColor4f(0f, 0.0f, 0f, alpha);
+			gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
+			gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
+
 			gl.glEnable(GL_DEPTH_TEST);
 			gl.glEnable(GL_LIGHTING);
 		}
 
-		checkError(gl);
+		if (AphidLog.ENABLE_DEBUG)
+			checkError(gl);
 
 		gl.glDisable(GL_BLEND);
 		gl.glDisableClientState(GL_VERTEX_ARRAY);

@@ -1,0 +1,142 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:id="@+id/FrameLayout1"
+             android:layout_width="fill_parent"
+             android:layout_height="fill_parent">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:gravity="center"
+		android:background="@color/darkgrey">
+
+
+		<ImageView
+			android:id="@+id/gallery_flip_item_background_imageview"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:scaleType="centerCrop"
+			android:visibility="gone"/>
+
+
+		<ProgressBar
+			android:id="@+id/gallery_flip_item_background_progressbar"
+			style="?android:attr/progressBarStyleLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:indeterminate="true"
+			android:indeterminateBehavior="cycle"/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom"
+		android:background="@color/transparentBlack"
+		android:orientation="horizontal"
+		android:padding="5dp">
+
+
+		<ImageView
+			android:id="@+id/imageView2"
+			android:layout_width="40dp"
+			android:layout_height="40dp"
+			android:src="@drawable/feed_taggeduser_image"/>
+
+
+		<TextView
+			android:id="@+id/gallery_flip_item_place_name_ellipsizingtextview"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:layout_marginLeft="5dp"
+			android:layout_marginRight="5dp"
+			android:gravity="center_vertical"
+			android:maxLines="2"
+			android:text="Merve B (Gezgin): &quot;Big Chefs&apos;te Big Burger yedim ve gerçekten adını hak edecek kadar büyüktu :) Merve B (Gezgin): &quot;Big Chefs&apos;te Big Burger yedim ve gerçekten adını hak edecek kadar büyüktu :)"
+			android:textColor="@color/white"
+			android:textSize="12sp"/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:id="@+id/gallery_flip_item_place_linearlayout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="top"
+		android:background="@color/transparentBlack"
+		android:orientation="horizontal"
+		android:padding="5dp">
+
+
+		<ImageView
+			android:id="@+id/gallery_flip_item_place_icon_imageview"
+			android:layout_width="50dp"
+			android:layout_height="50dp"
+			android:layout_marginTop="3dp"
+			android:scaleType="fitXY"/>
+
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="5dp"
+			android:orientation="vertical">
+
+
+			<TextView
+				android:id="@+id/gallery_flip_item_place_name_textview"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:singleLine="true"
+				android:text="Rumeli Hısarı İskele Restaurant"
+				android:textColor="@color/white"
+				android:textSize="19sp"
+				android:textStyle="bold"/>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="3dp">
+
+
+				<ImageView
+					android:id="@+id/imageView1"
+					android:layout_width="12dp"
+					android:layout_height="wrap_content"
+					android:src="@drawable/icon_place_checkin"/>
+
+
+				<LinearLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="5dp"
+					android:orientation="vertical">
+
+
+					<TextView
+						android:id="@+id/gallery_flip_item_place_district_textview"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="Mercan"
+						android:textColor="@color/white"
+						android:textSize="11sp"/>
+
+
+					<TextView
+						android:id="@+id/gallery_flip_item_place_city_textview"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="İstanbul"
+						android:textColor="@color/white"
+						android:textSize="11sp"/>
+
+				</LinearLayout>
+			</LinearLayout>
+		</LinearLayout>
+	</LinearLayout>
+
+</FrameLayout>

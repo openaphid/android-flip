@@ -1,3 +1,12 @@
+package com.aphidmobile.flip.demo;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import com.aphidmobile.flip.FlipViewController;
+import com.aphidmobile.flip.demo.adapter.TravelAdapter;
+import com.aphidmobile.flipview.demo.R;
+
 /*
 Copyright 2012 Aphid Mobile
 
@@ -12,29 +21,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
  */
-
-package com.aphidmobile.flip.demo;
-
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.text.Html;
-import android.view.*;
-import android.widget.*;
-import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.adapter.TravelAdapter;
-import com.aphidmobile.flipview.demo.R;
-import com.aphidmobile.utils.AphidLog;
-import com.aphidmobile.utils.IO;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class FlipHorizontalLayoutActivity extends Activity {
+public class FlipDynamicAdapterActivity extends Activity {
 	private FlipViewController flipView;
+
+	private TravelAdapter adapter;
 
 	/**
 	 * Called when the activity is first created.
@@ -45,9 +37,20 @@ public class FlipHorizontalLayoutActivity extends Activity {
 
 		setTitle(R.string.activity_title);
 
-		flipView = new FlipViewController(this, FlipViewController.HORIZONTAL);
+		flipView = new FlipViewController(this);
 
-		flipView.setAdapter(new TravelAdapter(this));
+		adapter = new TravelAdapter(this);
+		flipView.setAdapter(adapter);
+
+		flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
+			@Override
+			public void onViewFlipped(View view, int position) {
+				if (position == adapter.getCount() - 1) {//expand the data size on the last page 
+					adapter.setRepeatCount(adapter.getRepeatCount() + 1);
+					adapter.notifyDataSetChanged();
+				}
+			}
+		});
 
 		setContentView(flipView);
 	}

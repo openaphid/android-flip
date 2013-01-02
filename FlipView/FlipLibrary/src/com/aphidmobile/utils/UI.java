@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.aphidmobile.utils;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
@@ -62,5 +63,10 @@ public class UI {
 	@SuppressWarnings("unchecked")
 	public static <T> T findViewById(View parent, int id) {
 		return (T)parent.findViewById(id);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T findViewById(Activity activity, int id) {
+		return (T)activity.findViewById(id);
 	}
 }

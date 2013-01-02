@@ -53,8 +53,15 @@ public class ViewDualCards {
 	public View getView() {
 		return viewRef != null ? viewRef.get() : null;
 	}
+	
+	synchronized void resetWithIndex(int index) {
+		this.index = index;
+		viewRef = null;
+		recycleScreenshot();
+		recycleTexture();
+	}
 
-	public synchronized boolean setView(int index, View view) {
+	synchronized boolean loadView(int index, View view, Bitmap.Config format) {
 		UI.assertInMainThread();
 
 		if (this.index == index 
@@ -65,29 +72,16 @@ public class ViewDualCards {
 		
 		this.index = index;
 		viewRef = null;
-		if (texture != null) {
-			texture.postDestroy();
-			texture = null;
-		}
+		recycleTexture();
 		if (view != null) {
 			viewRef = new WeakReference<View>(view);
 			recycleScreenshot();
-			screenshot = GrabIt.takeScreenshot(view);
+			screenshot = GrabIt.takeScreenshot(view, format);
 		} else {
 			recycleScreenshot();
 		}
 
 		return true;
-	}
-
-	synchronized void markForceReload() {
-		UI.assertInMainThread();
-
-		recycleScreenshot();
-		if (texture != null) {
-			texture.postDestroy();
-			texture = null;
-		}
 	}
 
 	public Texture getTexture() {
@@ -191,4 +185,13 @@ public class ViewDualCards {
 		UI.recycleBitmap(screenshot);
 		screenshot = null;
 	}
+	
+	private void recycleTexture() {
+		if (texture != null) {
+			texture.postDestroy();
+			texture = null;
+		}
+	}
+
+	
 }

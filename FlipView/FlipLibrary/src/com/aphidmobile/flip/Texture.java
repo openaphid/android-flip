@@ -27,7 +27,7 @@ limitations under the License.
  */
 public class Texture {
 	private FlipRenderer renderer;
-	
+
 	private int[] id = {0};
 
 	private int width, height;
@@ -44,32 +44,49 @@ public class Texture {
 
 		Assert.assertTrue("bitmap should not be null or recycled", bitmap != null && !bitmap.isRecycled());
 
-		int w = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
-		int h = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
+		int potW = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
+		int potH = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
 
 		t.contentWidth = bitmap.getWidth();
 		t.contentHeight = bitmap.getHeight();
-		t.width = w;
-		t.height = h;
+		t.width = potW;
+		t.height = potH;
 
 		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
+			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), potW, potH);
 
 
 		gl.glGenTextures(1, t.id, 0);
 		gl.glBindTexture(GL_TEXTURE_2D, t.id[0]);
+		
 		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		/*
-		 gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		 gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		 */
-		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-		GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		switch (bitmap.getConfig()) {
+			case ARGB_8888:
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+				break;
+			case ARGB_4444:
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, null);
+				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+				break;
+			case RGB_565:
+				gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potW, potH, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, null);
+				GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+				break;
+			case ALPHA_8:
+			default:
+				throw new RuntimeException("Unrecognized bitmap format for OpenGL texture: " + bitmap.getConfig());
+		}
+		
+		FlipRenderer.checkError(gl);
 
 		return t;
 	}
-	
+
 	public void postDestroy() {
 		renderer.postDestroyTexture(this);
 	}

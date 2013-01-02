@@ -1,8 +1,13 @@
 package com.aphidmobile.flip.demo;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.view.View;
+import android.widget.Button;
 import com.aphidmobile.flipview.demo.R;
+import com.aphidmobile.utils.UI;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -25,5 +30,22 @@ public class FlipFragmentActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.fragment_layout);
+
+		Button button = UI.findViewById(this, R.id.toggle_button);
+		button.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FragmentManager fragmentManager = getSupportFragmentManager();
+				Fragment fragment = fragmentManager.findFragmentById(R.id.flip_text_view_fragment);
+				if (fragment.isHidden()) {
+					fragmentManager.beginTransaction().show(fragment).commit();
+					((Button)v).setText(R.string.hide_fragment);
+				}
+				else {
+					fragmentManager.beginTransaction().hide(fragment).commit();
+					((Button)v).setText(R.string.show_fragment);
+				}
+			}
+		});
 	}
 }

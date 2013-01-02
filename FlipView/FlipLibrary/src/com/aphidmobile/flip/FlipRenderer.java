@@ -1,30 +1,16 @@
 package com.aphidmobile.flip;
 
-import static javax.microedition.khronos.opengles.GL10.GL_AMBIENT;
-import static javax.microedition.khronos.opengles.GL10.GL_COLOR_BUFFER_BIT;
-import static javax.microedition.khronos.opengles.GL10.GL_DEPTH_BUFFER_BIT;
-import static javax.microedition.khronos.opengles.GL10.GL_DEPTH_TEST;
-import static javax.microedition.khronos.opengles.GL10.GL_LEQUAL;
-import static javax.microedition.khronos.opengles.GL10.GL_LIGHT0;
-import static javax.microedition.khronos.opengles.GL10.GL_LIGHTING;
-import static javax.microedition.khronos.opengles.GL10.GL_MODELVIEW;
-import static javax.microedition.khronos.opengles.GL10.GL_NICEST;
-import static javax.microedition.khronos.opengles.GL10.GL_PERSPECTIVE_CORRECTION_HINT;
-import static javax.microedition.khronos.opengles.GL10.GL_POSITION;
-import static javax.microedition.khronos.opengles.GL10.GL_PROJECTION;
-import static javax.microedition.khronos.opengles.GL10.GL_SMOOTH;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
-import com.aphidmobile.utils.AphidLog;
-
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.view.View;
+import com.aphidmobile.utils.AphidLog;
 import com.aphidmobile.utils.TextureUtils;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 import java.util.LinkedList;
+
+import static javax.microedition.khronos.opengles.GL10.*;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -47,9 +33,9 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	private FlipViewController flipViewController;
 
 	private FlipCards cards;
-	
+
 	private boolean created = false;
-	
+
 	private final LinkedList<Texture> postDestroyTextures = new LinkedList<Texture>();
 
 	public FlipRenderer(FlipViewController flipViewController, FlipCards cards) {
@@ -65,12 +51,12 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		
+
 		created = true;
-		
+
 		cards.invalidateTexture();
 		flipViewController.reloadTexture();
-		
+
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("onSurfaceCreated");
 	}
@@ -112,18 +98,18 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 	}
 
 	@Override
-	public void onDrawFrame(GL10 gl) {		
+	public void onDrawFrame(GL10 gl) {
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		synchronized (postDestroyTextures) {
 			for (Texture texture : postDestroyTextures)
 				texture.destroy(gl);
 			postDestroyTextures.clear();
 		}
-		
+
 		cards.draw(this, gl);
 	}
-	
+
 	public void postDestroyTexture(Texture texture) {
 		synchronized (postDestroyTextures) {
 			postDestroyTextures.add(texture);
@@ -134,12 +120,14 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		if (created) {
 			cards.reloadTexture(frontIndex, frontView, backIndex, backView);
 			flipViewController.getSurfaceView().requestRender();
-		}		
+		}
 	}
 
 	public static void checkError(GL10 gl) {
-		int error = gl.glGetError();
-		if (error != 0)
-			throw new RuntimeException(GLU.gluErrorString(error));
+		if (AphidLog.ENABLE_DEBUG) {
+			int error = gl.glGetError();
+			if (error != 0)
+				throw new RuntimeException(GLU.gluErrorString(error));
+		}
 	}
 }
