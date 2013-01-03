@@ -77,6 +77,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "XML Configuration", FlipTextViewXmlActivity.class);
 		addItem(data, "Fragment", FlipFragmentActivity.class);
 		addItem(data, "Dynamic Adapter Size", FlipDynamicAdapterActivity.class);
+		addItem(data, "WebView", FlipWebViewActivity.class);
 		
 		return data;
 	}
