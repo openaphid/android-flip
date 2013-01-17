@@ -73,14 +73,14 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		float fovy = 20f;
 		float eyeZ = height / 2f / (float) Math.tan(TextureUtils.d2r(fovy / 2));
 
-		GLU.gluPerspective(gl, fovy, (float) width / (float) height, 0.5f, Math.max(2500.0f, eyeZ));
+		GLU.gluPerspective(gl, fovy, (float) width / (float) height, 0.5f, eyeZ + height / 2); //set zFar be larger than eyeZ to fix issue #5
 
 		gl.glMatrixMode(GL_MODELVIEW);
 		gl.glLoadIdentity();
 
 		GLU.gluLookAt(gl,
-			width / 2.0f, height / 2f, eyeZ,
-			width / 2.0f, height / 2.0f, 0.0f,
+			width / 2f, height / 2f, eyeZ,
+			width / 2f, height / 2f, 0.0f,
 			0.0f, 1.0f, 0.0f
 		);
 
