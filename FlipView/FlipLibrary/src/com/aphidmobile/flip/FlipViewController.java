@@ -93,6 +93,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private ViewFlipListener onViewFlipListener;
 	
 	private boolean overFlipEnabled = true;
+	
+	private boolean flipByTouchEnabled = true;
 
 	@ViewDebug.ExportedProperty
 	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
@@ -217,16 +219,30 @@ public class FlipViewController extends AdapterView<Adapter> {
 		this.overFlipEnabled = overFlipEnabled;
 	}
 
+	public boolean isFlipByTouchEnabled() {
+		return flipByTouchEnabled;
+	}
+
+	public void setFlipByTouchEnabled(boolean flipByTouchEnabled) {
+		this.flipByTouchEnabled = flipByTouchEnabled;
+	}
+
 	//--------------------------------------------------------------------------------------------------------------------
 	// Touch Event
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent event) {
-		return cards.handleTouchEvent(event, false);
+		if (flipByTouchEnabled)
+			return cards.handleTouchEvent(event, false);
+		else 
+			return false;
 	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		return cards.handleTouchEvent(event, true);
+		if (flipByTouchEnabled)
+			return cards.handleTouchEvent(event, true);
+		else
+			return false;
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
