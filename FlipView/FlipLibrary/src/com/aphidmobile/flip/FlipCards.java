@@ -53,7 +53,7 @@ public class FlipCards {
 	private boolean visible = false;
 
 	private int maxIndex = 0;
-	
+
 	private int lastPageIndex;
 
 	public FlipCards(FlipViewController controller, boolean orientationVertical) {
@@ -266,7 +266,7 @@ public class FlipCards {
 
 					if (Math.abs(angleDelta) > MAX_TOUCH_MOVE_ANGLE) //prevent large delta when moving too fast
 						angleDelta = Math.signum(angleDelta) * MAX_TOUCH_MOVE_ANGLE;
-					
+
 					// do not flip more than one page with one touch...
 					if (Math.abs(getPageIndexFromAngle(accumulatedAngle + angleDelta) - lastPageIndex) <= 1) {
 						accumulatedAngle += angleDelta;
@@ -274,10 +274,10 @@ public class FlipCards {
 
 					//Bounce the page for the first and the last page
 					if (frontCards.getIndex() == maxIndex - 1) { //the last page
-						if (accumulatedAngle > frontCards.getIndex() * 180 + MAX_TIP_ANGLE)
-							accumulatedAngle = frontCards.getIndex() * 180 + MAX_TIP_ANGLE;
-					} else if (accumulatedAngle < -MAX_TIP_ANGLE)
-						accumulatedAngle = -MAX_TIP_ANGLE;
+						if (accumulatedAngle > frontCards.getIndex() * 180)
+							accumulatedAngle = Math.min(accumulatedAngle, controller.isOverFlipEnabled() ? (frontCards.getIndex() * 180 + MAX_TIP_ANGLE) : (frontCards.getIndex() * 180));
+					} else if (accumulatedAngle < 0)
+						accumulatedAngle = Math.max(accumulatedAngle, controller.isOverFlipEnabled() ? -MAX_TIP_ANGLE : 0);
 
 					int anglePageIndex = getPageIndexFromAngle(accumulatedAngle);
 
@@ -308,7 +308,7 @@ public class FlipCards {
 				if (state == STATE_TOUCH) {
 					if (accumulatedAngle < 0)
 						forward = true;
-					else if (accumulatedAngle > frontCards.getIndex() * 180 && frontCards.getIndex() == maxIndex - 1)
+					else if (accumulatedAngle >= frontCards.getIndex() * 180 && frontCards.getIndex() == maxIndex - 1)
 						forward = false;
 
 					setState(STATE_AUTO_ROTATE);

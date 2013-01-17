@@ -91,6 +91,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 	private float touchSlop;
 
 	private ViewFlipListener onViewFlipListener;
+	
+	private boolean overFlipEnabled = true;
 
 	@ViewDebug.ExportedProperty
 	private Bitmap.Config animationBitmapFormat = Bitmap.Config.ARGB_8888;
@@ -205,6 +207,14 @@ public class FlipViewController extends AdapterView<Adapter> {
 	public void refreshAllPages() {
 		cards.refreshAllPages();
 		requestLayout();
+	}
+
+	public boolean isOverFlipEnabled() {
+		return overFlipEnabled;
+	}
+
+	public void setOverFlipEnabled(boolean overFlipEnabled) {
+		this.overFlipEnabled = overFlipEnabled;
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
