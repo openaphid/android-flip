@@ -276,7 +276,9 @@ public class FlipCards {
 					if (frontCards.getIndex() == maxIndex - 1) { //the last page
 						if (accumulatedAngle > frontCards.getIndex() * 180)
 							accumulatedAngle = Math.min(accumulatedAngle, controller.isOverFlipEnabled() ? (frontCards.getIndex() * 180 + MAX_TIP_ANGLE) : (frontCards.getIndex() * 180));
-					} else if (accumulatedAngle < 0)
+					} 
+					
+					if (accumulatedAngle < 0)
 						accumulatedAngle = Math.max(accumulatedAngle, controller.isOverFlipEnabled() ? -MAX_TIP_ANGLE : 0);
 
 					int anglePageIndex = getPageIndexFromAngle(accumulatedAngle);
