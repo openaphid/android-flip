@@ -79,6 +79,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Dynamic Adapter Size", FlipDynamicAdapterActivity.class);
 		addItem(data, "WebView", FlipWebViewActivity.class);
 		addItem(data, "Delete page", FlipDeleteAdapterActivity.class);
+		addItem(data, "Issue #51", Issue51Activity.class);
 		
 		return data;
 	}

@@ -30,6 +30,7 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipDynamicAdapterActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipWebViewActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipDeleteAdapterActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.Issue51Activity"/>
     
   </application>
   

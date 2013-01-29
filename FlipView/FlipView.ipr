@@ -163,6 +163,7 @@
         <inspection_tool class="RequiredAttributes" enabled="false" level="WARNING" enabled_by_default="false">
           <option name="myAdditionalRequiredHtmlAttributes" value="" />
         </inspection_tool>
+        <inspection_tool class="RubyUnnecessaryReturnStatement" enabled="false" level="WARNING" enabled_by_default="false" />
         <inspection_tool class="SimplifiableIfStatement" enabled="false" level="WARNING" enabled_by_default="false" />
         <inspection_tool class="UnresolvedReference" enabled="false" level="ERROR" enabled_by_default="false" />
         <inspection_tool class="UnusedDeclaration" enabled="false" level="WARNING" enabled_by_default="false">
