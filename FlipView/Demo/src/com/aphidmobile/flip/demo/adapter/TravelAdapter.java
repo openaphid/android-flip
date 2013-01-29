@@ -17,19 +17,25 @@ import com.aphidmobile.utils.AphidLog;
 import com.aphidmobile.utils.IO;
 import com.aphidmobile.utils.UI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TravelAdapter extends BaseAdapter {
 
 	private LayoutInflater inflater;
 	
 	private int repeatCount = 1;
+	
+	private List<Travels.Data> travelData;
 
 	public TravelAdapter(Context context) {
 		inflater = LayoutInflater.from(context);
+		travelData = new ArrayList<Travels.Data>(Travels.IMG_DESCRIPTIONS);
 	}
 
 	@Override
 	public int getCount() {
-		return Travels.IMG_DESCRIPTIONS.size() * repeatCount;
+		return travelData.size() * repeatCount;
 	}
 
 	public int getRepeatCount() {
@@ -58,7 +64,7 @@ public class TravelAdapter extends BaseAdapter {
 			AphidLog.d("created new view from adapter: %d", position);
 		}
 
-		final Travels.Data data = Travels.IMG_DESCRIPTIONS.get(position % Travels.IMG_DESCRIPTIONS.size());
+		final Travels.Data data = travelData.get(position % travelData.size());
 		
 		UI
 			.<TextView>findViewById(layout, R.id.title)
@@ -86,5 +92,10 @@ public class TravelAdapter extends BaseAdapter {
 			});
 		
 		return layout;
+	}
+
+	public void removeData(int index) {
+		if (travelData.size() > 1)
+			travelData.remove(index);
 	}
 }

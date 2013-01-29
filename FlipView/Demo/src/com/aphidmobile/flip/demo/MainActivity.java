@@ -69,7 +69,7 @@ public class MainActivity extends ListActivity {
 		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
 		addItem(data, "TextViews", FlipTextViewActivity.class);
 		addItem(data, "Buttons", FlipButtonActivity.class);
-		addItem(data, "Complex Layouts", FlipComplexLayoutActivity.class);
+		addItem(data, "Complex Layouts", FlipDeleteAdapterActivity.class);
 		addItem(data, "Async Content", FlipAsyncContentActivity.class);
 		addItem(data, "Event Listener", FlipTextViewAltActivity.class);
 		addItem(data, "Horizontal", FlipHorizontalLayoutActivity.class);
@@ -78,6 +78,7 @@ public class MainActivity extends ListActivity {
 		addItem(data, "Fragment", FlipFragmentActivity.class);
 		addItem(data, "Dynamic Adapter Size", FlipDynamicAdapterActivity.class);
 		addItem(data, "WebView", FlipWebViewActivity.class);
+		addItem(data, "Delete page", FlipDeleteAdapterActivity.class);
 		
 		return data;
 	}
