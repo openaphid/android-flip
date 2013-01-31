@@ -48,7 +48,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 
 	private static final int MAX_RELEASED_VIEW_SIZE = 1;
 
-	private static final int MSG_SURFACE_CREATED = 1;
+	static final int MSG_SURFACE_CREATED = 1;
+	static final int MSG_ANIMATION_READY = 2;
 
 	private Handler handler = new Handler(new Handler.Callback() {
 		@Override
@@ -58,6 +59,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 				contentHeight = 0;
 				requestLayout();
 				return true;
+			} else if (msg.what == MSG_ANIMATION_READY) {
+				if (inFlipAnimation) {
+					AphidLog.i("First draw is ready, hide real views");
+					updateVisibleView(-1);
+				}
 			}
 			return false;
 		}
@@ -73,7 +79,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 	@ViewDebug.ExportedProperty
 	private int flipOrientation;
 
-	private boolean inFlipAnimation = false;
+	private volatile boolean inFlipAnimation = false;
 
 	//AdapterView Related
 	private Adapter adapter;
@@ -382,9 +388,9 @@ public class FlipViewController extends AdapterView<Adapter> {
 	int getContentHeight() {
 		return contentHeight;
 	}
-
-	void reloadTexture() {
-		handler.sendMessage(Message.obtain(handler, MSG_SURFACE_CREATED));
+	
+	void sendMessage(int message) {
+		handler.sendMessage(Message.obtain(handler, message));
 	}
 
 	//--------------------------------------------------------------------------------------------------------------------
@@ -518,14 +524,8 @@ public class FlipViewController extends AdapterView<Adapter> {
 			inFlipAnimation = true;
 
 			cards.setVisible(true);
+			cards.setWaitForFirstDraw(true);
 			surfaceView.requestRender();
-
-			handler.postDelayed(new Runnable() { //use a delayed message to avoid flicker, the perfect solution would be sending a message from the GL thread 
-				public void run() {
-					if (inFlipAnimation)
-						updateVisibleView(-1);
-				}
-			}, 100);
 		}
 	}
 

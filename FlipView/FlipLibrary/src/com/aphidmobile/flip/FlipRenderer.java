@@ -55,7 +55,7 @@ public class FlipRenderer implements GLSurfaceView.Renderer {
 		created = true;
 
 		cards.invalidateTexture();
-		flipViewController.reloadTexture();
+		flipViewController.sendMessage(FlipViewController.MSG_SURFACE_CREATED);
 
 		if (AphidLog.ENABLE_DEBUG)
 			AphidLog.d("onSurfaceCreated");
