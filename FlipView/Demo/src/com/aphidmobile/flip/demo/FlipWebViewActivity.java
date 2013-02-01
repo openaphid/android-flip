@@ -10,6 +10,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.BaseAdapter;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flipview.demo.R;
 
@@ -34,109 +35,113 @@ limitations under the License.
  */
 
 /**
-NOTES: Both FlipViewController and WebView are not lightweight UI widgets, please re-consider your design before combining them together.
-<p/>
-This demo is only for illustrative purpose. Please refer to the comments inside it for more details.
+ * NOTES: Both FlipViewController and WebView are not lightweight UI widgets, please re-consider
+ * your design before combining them together. <p/> This demo is only for illustrative purpose.
+ * Please refer to the comments inside it for more details.
  */
 public class FlipWebViewActivity extends Activity {
-	private FlipViewController flipView;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  private FlipViewController flipView;
 
-		setTitle(R.string.activity_title);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+    setTitle(R.string.activity_title);
 
-		//flip horizontally may be the better choice as most web pages need scroll vertically
-		flipView = new FlipViewController(this, FlipViewController.HORIZONTAL);
+    requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-		flipView.setAdapter(new MyBaseAdapter(this, flipView));
+    //flip horizontally may be the better choice as most web pages need scroll vertically
+    flipView = new FlipViewController(this, FlipViewController.HORIZONTAL);
 
-		setContentView(flipView);
-	}
+    flipView.setAdapter(new MyBaseAdapter(this, flipView));
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    setContentView(flipView);
+  }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
 
-	private static class MyBaseAdapter extends BaseAdapter {
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 
-		List<String> urls = new ArrayList<String>();
-		FlipViewController controller;
-		Activity activity;
-		int activeLoadingCount = 0;
+  private static class MyBaseAdapter extends BaseAdapter {
 
-		private MyBaseAdapter(Activity activity, FlipViewController controller) {
-			this.activity = activity;
-			this.controller = controller;
+    List<String> urls = new ArrayList<String>();
+    FlipViewController controller;
+    Activity activity;
+    int activeLoadingCount = 0;
 
-			urls.add("http://www.github.com");
-			urls.add("http://www.amazon.com");
-			urls.add("http://www.yahoo.com");
-			urls.add("http://www.google.com");
-		}
+    private MyBaseAdapter(Activity activity, FlipViewController controller) {
+      this.activity = activity;
+      this.controller = controller;
 
-		@Override
-		public int getCount() {
-			return urls.size();
-		}
+      urls.add("http://www.github.com");
+      urls.add("http://www.amazon.com");
+      urls.add("http://www.yahoo.com");
+      urls.add("http://www.google.com");
+    }
 
-		@Override
-		public Object getItem(int position) {
-			return position;
-		}
+    @Override
+    public int getCount() {
+      return urls.size();
+    }
 
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
+    @Override
+    public Object getItem(int position) {
+      return position;
+    }
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			WebView webView = new WebView(controller.getContext());
-			webView.setWebViewClient(new WebViewClient() {
-				@Override
-				public void onPageStarted(WebView view, String url, Bitmap favicon) {
-					activity.setProgressBarIndeterminateVisibility(true);
-					activeLoadingCount++;
-				}
+    @Override
+    public long getItemId(int position) {
+      return position;
+    }
 
-				@Override
-				public void onPageFinished(WebView view, String url) {
-					controller.refreshPage(view);//This works as the webView is the view for a page. Please use refreshPage(int pageIndex) if the webview is only a part of page view.
-					
-					activeLoadingCount--;
-					activity.setProgressBarIndeterminateVisibility(activeLoadingCount == 0);
-				}
-			});
-			
-			webView.setWebChromeClient(new WebChromeClient() {
-				private int lastRefreshProgress = 0;
-				@Override
-				public void onProgressChanged(WebView view, int newProgress) {
-					if (newProgress - lastRefreshProgress > 20) { //limit the invocation frequency of refreshPage
-						controller.refreshPage(view);
-						lastRefreshProgress = newProgress;
-					}
-				}
-			});
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      WebView webView = new WebView(controller.getContext());
+      webView.setWebViewClient(new WebViewClient() {
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+          activity.setProgressBarIndeterminateVisibility(true);
+          activeLoadingCount++;
+        }
 
-			webView.loadUrl(urls.get(position));
+        @Override
+        public void onPageFinished(WebView view, String url) {
+          controller.refreshPage(
+              view);//This works as the webView is the view for a page. Please use refreshPage(int pageIndex) if the webview is only a part of page view.
 
-			return webView;
-		}
-	}
+          activeLoadingCount--;
+          activity.setProgressBarIndeterminateVisibility(activeLoadingCount == 0);
+        }
+      });
+
+      webView.setWebChromeClient(new WebChromeClient() {
+        private int lastRefreshProgress = 0;
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+          if (newProgress - lastRefreshProgress
+              > 20) { //limit the invocation frequency of refreshPage
+            controller.refreshPage(view);
+            lastRefreshProgress = newProgress;
+          }
+        }
+      });
+
+      webView.loadUrl(urls.get(position));
+
+      return webView;
+    }
+  }
 }

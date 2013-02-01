@@ -2,14 +2,13 @@ package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
 import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.adapter.TravelAdapter;
 import com.aphidmobile.flipview.demo.R;
 
 /*
@@ -29,62 +28,65 @@ limitations under the License.
 
  */
 public class Issue51Activity extends Activity {
-	private FlipViewController flipView;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setTitle(R.string.activity_title);
+  private FlipViewController flipView;
 
-		flipView = new FlipViewController(this);
-		
-		flipView.setAdapter(new MyBaseAdapter(this));
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setTitle(R.string.activity_title);
 
-		setContentView(flipView);
-	}
+    flipView = new FlipViewController(this);
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    flipView.setAdapter(new MyBaseAdapter(this));
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+    setContentView(flipView);
+  }
 
-	private static class MyBaseAdapter extends BaseAdapter {
-		private LayoutInflater inflater;
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
 
-		private MyBaseAdapter(Context context) {
-			inflater = LayoutInflater.from(context);
-		}
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 
-		@Override
-		public int getCount() {
-			return 3;
-		}
+  private static class MyBaseAdapter extends BaseAdapter {
 
-		@Override
-		public Object getItem(int position) {
-			return position;
-		}
+    private LayoutInflater inflater;
 
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
+    private MyBaseAdapter(Context context) {
+      inflater = LayoutInflater.from(context);
+    }
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			if (position == 0)
-				return inflater.inflate(R.layout.page1, null);
-			else if (position == 1)
-				return inflater.inflate(R.layout.page2, null);
-			else 
-				return inflater.inflate(R.layout.page3, null);
-		}
-	}
+    @Override
+    public int getCount() {
+      return 3;
+    }
+
+    @Override
+    public Object getItem(int position) {
+      return position;
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      if (position == 0) {
+        return inflater.inflate(R.layout.page1, null);
+      } else if (position == 1) {
+        return inflater.inflate(R.layout.page2, null);
+      } else {
+        return inflater.inflate(R.layout.page3, null);
+      }
+    }
+  }
 }

@@ -3,6 +3,7 @@ package com.aphidmobile.flip.demo;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.adapter.TravelAdapter;
 import com.aphidmobile.flipview.demo.R;
@@ -24,46 +25,47 @@ limitations under the License.
 
  */
 public class FlipDynamicAdapterActivity extends Activity {
-	private FlipViewController flipView;
 
-	private TravelAdapter adapter;
+  private FlipViewController flipView;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  private TravelAdapter adapter;
 
-		setTitle(R.string.activity_title);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView = new FlipViewController(this);
+    setTitle(R.string.activity_title);
 
-		adapter = new TravelAdapter(this);
-		flipView.setAdapter(adapter);
+    flipView = new FlipViewController(this);
 
-		flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
-			@Override
-			public void onViewFlipped(View view, int position) {
-				if (position == adapter.getCount() - 1) {//expand the data size on the last page 
-					adapter.setRepeatCount(adapter.getRepeatCount() + 1);
-					adapter.notifyDataSetChanged();
-				}
-			}
-		});
+    adapter = new TravelAdapter(this);
+    flipView.setAdapter(adapter);
 
-		setContentView(flipView);
-	}
+    flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
+      @Override
+      public void onViewFlipped(View view, int position) {
+        if (position == adapter.getCount() - 1) {//expand the data size on the last page 
+          adapter.setRepeatCount(adapter.getRepeatCount() + 1);
+          adapter.notifyDataSetChanged();
+        }
+      }
+    });
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    setContentView(flipView);
+  }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 }

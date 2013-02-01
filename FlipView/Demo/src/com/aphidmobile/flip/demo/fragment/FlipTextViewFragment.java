@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
@@ -28,63 +29,64 @@ limitations under the License.
 
  */
 public class FlipTextViewFragment extends Fragment {
-	private FlipViewController flipView;
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		flipView = new FlipViewController(inflater.getContext());
-		
-		flipView.setAdapter(new BaseAdapter() {
-			@Override
-			public int getCount() {
-				return 10;
-			}
 
-			@Override
-			public Object getItem(int position) {
-				return position;
-			}
+  private FlipViewController flipView;
 
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    flipView = new FlipViewController(inflater.getContext());
 
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				NumberTextView view;
-				if (convertView == null) {
-					final Context context = parent.getContext();
-					view = new NumberTextView(context, position);
-					view.setTextSize(context.getResources().getDimension(R.dimen.textSize));
-				}
-				else {
-					view = (NumberTextView) convertView;
-					view.setNumber(position);
-				}
-				
-				return view;
-			}
-		});
-		
-		return flipView;
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    flipView.setAdapter(new BaseAdapter() {
+      @Override
+      public int getCount() {
+        return 10;
+      }
 
-	@Override
-	public void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+      @Override
+      public Object getItem(int position) {
+        return position;
+      }
 
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		flipView = null;
-	}
+      @Override
+      public long getItemId(int position) {
+        return position;
+      }
+
+      @Override
+      public View getView(int position, View convertView, ViewGroup parent) {
+        NumberTextView view;
+        if (convertView == null) {
+          final Context context = parent.getContext();
+          view = new NumberTextView(context, position);
+          view.setTextSize(context.getResources().getDimension(R.dimen.textSize));
+        } else {
+          view = (NumberTextView) convertView;
+          view.setNumber(position);
+        }
+
+        return view;
+      }
+    });
+
+    return flipView;
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
+
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    flipView = null;
+  }
 }

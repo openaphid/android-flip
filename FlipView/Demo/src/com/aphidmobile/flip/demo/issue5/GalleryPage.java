@@ -1,48 +1,50 @@
 package com.aphidmobile.flip.demo.issue5;
 
 public class GalleryPage {
-	private String pageTitle;
-	private String imageURL;
-	private String targetLinkCaption;
-	private String targetURL;
 
-	public GalleryPage(String pageTitle, String imageURL, String targetLinkCaption, String targetURL) {
-		this.pageTitle = pageTitle;
-		this.imageURL = imageURL;
-		this.targetLinkCaption = targetLinkCaption;
-		this.targetURL = targetURL;
-	}
+  private String pageTitle;
+  private String imageURL;
+  private String targetLinkCaption;
+  private String targetURL;
 
-	public String getPageTitle() {
-		return pageTitle;
-	}
+  public GalleryPage(String pageTitle, String imageURL, String targetLinkCaption,
+                     String targetURL) {
+    this.pageTitle = pageTitle;
+    this.imageURL = imageURL;
+    this.targetLinkCaption = targetLinkCaption;
+    this.targetURL = targetURL;
+  }
 
-	public void setPageTitle(String pageTitle) {
-		this.pageTitle = pageTitle;
-	}
+  public String getPageTitle() {
+    return pageTitle;
+  }
 
-	public String getImageURL() {
-		return imageURL;
-	}
+  public void setPageTitle(String pageTitle) {
+    this.pageTitle = pageTitle;
+  }
 
-	public void setImageURL(String imageURL) {
-		this.imageURL = imageURL;
-	}
+  public String getImageURL() {
+    return imageURL;
+  }
 
-	public String getTargetLinkCaption() {
-		return targetLinkCaption;
-	}
+  public void setImageURL(String imageURL) {
+    this.imageURL = imageURL;
+  }
 
-	public void setTargetLinkCaption(String targetLinkCaption) {
-		this.targetLinkCaption = targetLinkCaption;
-	}
+  public String getTargetLinkCaption() {
+    return targetLinkCaption;
+  }
 
-	public String getTargetURL() {
-		return targetURL;
-	}
+  public void setTargetLinkCaption(String targetLinkCaption) {
+    this.targetLinkCaption = targetLinkCaption;
+  }
 
-	public void setTargetURL(String targetURL) {
-		this.targetURL = targetURL;
-	}
+  public String getTargetURL() {
+    return targetURL;
+  }
+
+  public void setTargetURL(String targetURL) {
+    this.targetURL = targetURL;
+  }
 
 }

@@ -16,10 +16,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flipview.demo.R;
 import com.aphidmobile.utils.AphidLog;
 import com.aphidmobile.utils.IO;
+
 import junit.framework.Assert;
 
 import java.io.BufferedInputStream;
@@ -30,204 +32,224 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Modified from the issue#5 comment contributed by @cagkanciloglu
- * <p/>
- * Only corrected its async loading logic, although its layout hierarchy can be optimized too.
+ * Modified from the issue#5 comment contributed by @cagkanciloglu <p/> Only corrected its async
+ * loading logic, although its layout hierarchy can be optimized too.
  */
 public class GalleryFlipItem extends LinearLayout {
-	/**
-	 * Borrowed from the official BitmapFun tutorial: http://developer.android.com/training/displaying-bitmaps/index.html
-	 */
-	private static final class AsyncDrawable extends BitmapDrawable {
-		private final WeakReference<ContentPhotosDownloader> taskRef;
 
-		public AsyncDrawable(Resources res, Bitmap bitmap, ContentPhotosDownloader task) {
-			super(res, bitmap);
-			this.taskRef = new WeakReference<ContentPhotosDownloader>(task);
-		}
+  /**
+   * Borrowed from the official BitmapFun tutorial: http://developer.android.com/training/displaying-bitmaps/index.html
+   */
+  private static final class AsyncDrawable extends BitmapDrawable {
 
-		public static ContentPhotosDownloader getTask(ImageView imageView) {
-			Drawable drawable = imageView.getDrawable();
-			if (drawable instanceof AsyncDrawable)
-				return ((AsyncDrawable) drawable).taskRef.get();
+    private final WeakReference<ContentPhotosDownloader> taskRef;
 
-			return null;
-		}
-	}
+    public AsyncDrawable(Resources res, Bitmap bitmap, ContentPhotosDownloader task) {
+      super(res, bitmap);
+      this.taskRef = new WeakReference<ContentPhotosDownloader>(task);
+    }
 
-	//Change to a static inner class from a normal inner class, otherwise it may holds a strong reference to GalleryFlipItem, which is not a good practise for AsyncTask 
-	private static class ContentPhotosDownloader extends AsyncTask<Void, Void, Bitmap> {
-		private String url;
+    public static ContentPhotosDownloader getTask(ImageView imageView) {
+      Drawable drawable = imageView.getDrawable();
+      if (drawable instanceof AsyncDrawable) {
+        return ((AsyncDrawable) drawable).taskRef.get();
+      }
 
-		private WeakReference<FlipViewController> controllerRef;
-		//Use WeakReference
-		private WeakReference<ImageView> imgViewRef;
-		private WeakReference<ProgressBar> progressBarRef;
-		private int pageIndex;
-		private boolean hideProgress;
+      return null;
+    }
+  }
 
-		public ContentPhotosDownloader(String url, ImageView imgView, ProgressBar progressBar, FlipViewController controller, int pageIndex) {
-			Assert.assertNotNull(url);
-			Assert.assertNotNull(imgView);
-			Assert.assertNotNull(controller);
-			//progressBar can be null
+  //Change to a static inner class from a normal inner class, otherwise it may holds a strong reference to GalleryFlipItem, which is not a good practise for AsyncTask 
+  private static class ContentPhotosDownloader extends AsyncTask<Void, Void, Bitmap> {
 
-			this.url = url;
-			this.imgViewRef = new WeakReference<ImageView>(imgView);
-			this.controllerRef = new WeakReference<FlipViewController>(controller);
-			this.pageIndex = pageIndex;
-			if (progressBar != null)
-				progressBarRef = new WeakReference<ProgressBar>(progressBar);
-		}
+    private String url;
 
-		public String getUrl() {
-			return url;
-		}
+    private WeakReference<FlipViewController> controllerRef;
+    //Use WeakReference
+    private WeakReference<ImageView> imgViewRef;
+    private WeakReference<ProgressBar> progressBarRef;
+    private int pageIndex;
+    private boolean hideProgress;
 
-		public int getPageIndex() {
-			return pageIndex;
-		}
+    public ContentPhotosDownloader(String url, ImageView imgView, ProgressBar progressBar,
+                                   FlipViewController controller, int pageIndex) {
+      Assert.assertNotNull(url);
+      Assert.assertNotNull(imgView);
+      Assert.assertNotNull(controller);
+      //progressBar can be null
 
-		private ProgressBar getProgressBar() {
-			return progressBarRef != null ? progressBarRef.get() : null;
-		}
+      this.url = url;
+      this.imgViewRef = new WeakReference<ImageView>(imgView);
+      this.controllerRef = new WeakReference<FlipViewController>(controller);
+      this.pageIndex = pageIndex;
+      if (progressBar != null) {
+        progressBarRef = new WeakReference<ProgressBar>(progressBar);
+      }
+    }
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
+    public String getUrl() {
+      return url;
+    }
 
-			ProgressBar bar = getProgressBar();
-			if (bar != null) {
-				bar.setVisibility(View.VISIBLE);
-				ImageView iv = imgViewRef.get();
-				if (iv != null)
-					iv.setVisibility(GONE);
-			}
+    public int getPageIndex() {
+      return pageIndex;
+    }
 
-			//Commented out; pd and imgBackground should not be accessed directly 
-			/*
-			pd.setVisibility(View.VISIBLE);
-			imgBackground.setVisibility(View.GONE);
-			*/
-		}
+    private ProgressBar getProgressBar() {
+      return progressBarRef != null ? progressBarRef.get() : null;
+    }
 
-		@Override
-		protected Bitmap doInBackground(Void... params) {
-			InputStream is = null;
-			try {
-				URL aURL = new URL(url);
-				URLConnection conn = aURL.openConnection();
+    @Override
+    protected void onPreExecute() {
+      super.onPreExecute();
 
-				conn.connect();
+      ProgressBar bar = getProgressBar();
+      if (bar != null) {
+        bar.setVisibility(View.VISIBLE);
+        ImageView iv = imgViewRef.get();
+        if (iv != null) {
+          iv.setVisibility(GONE);
+        }
+      }
 
-				is = new BufferedInputStream(conn.getInputStream());
+      //Commented out; pd and imgBackground should not be accessed directly                         
+      /*
+        pd.setVisibility(View.VISIBLE);
+        imgBackground.setVisibility(View.GONE);
+	*/
+    }
 
-				return BitmapFactory.decodeStream(is);
-			} catch (IOException e) {
-				AphidLog.e(e, "Failed to load bitmap from url: " + url);
-			} finally {
-				IO.close(is);
-			}
+    @Override
+    protected Bitmap doInBackground(Void... params) {
+      InputStream is = null;
+      try {
+        URL aURL = new URL(url);
+        URLConnection conn = aURL.openConnection();
 
-			return null;
-		}
+        conn.connect();
 
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			if (isCancelled())
-				return;
-			
-			ImageView imgView = imgViewRef.get();
+        is = new BufferedInputStream(conn.getInputStream());
 
-			if (imgView != null && AsyncDrawable.getTask(imgView) == this) { //make sure the ImageView instance has not been reused for another page
-				if (result != null) {
-					imgView.setImageBitmap(result);
-					imgView.setVisibility(View.VISIBLE);
-				}
+        return BitmapFactory.decodeStream(is);
+      } catch (IOException e) {
+        AphidLog.e(e, "Failed to load bitmap from url: " + url);
+      } finally {
+        IO.close(is);
+      }
 
-				ProgressBar bar = getProgressBar();
-				if (bar != null)
-					bar.setVisibility(View.GONE);
-				
-				FlipViewController controller = controllerRef.get();
-				if (controller != null)
-					controller.refreshPage(pageIndex);
-			}			
-		}
-	}
+      return null;
+    }
 
-	public GalleryPage mGalleryPage;
+    @Override
+    protected void onPostExecute(Bitmap result) {
+      if (isCancelled()) {
+        return;
+      }
 
-	private ImageView imgBackground;
-	private ProgressBar pd;
-	private LinearLayout lnlPlace;
+      ImageView imgView = imgViewRef.get();
 
-	private ImageView imgIcon;
-	private TextView txtName;
-	private TextView txtDistrict;
-	private TextView txtCity;
+      if (imgView != null && AsyncDrawable.getTask(imgView)
+                             == this) { //make sure the ImageView instance has not been reused for another page
+        if (result != null) {
+          imgView.setImageBitmap(result);
+          imgView.setVisibility(View.VISIBLE);
+        }
 
-	private Context mContext;
+        ProgressBar bar = getProgressBar();
+        if (bar != null) {
+          bar.setVisibility(View.GONE);
+        }
 
-	public void refreshView(GalleryPage mGalleryPage, FlipViewController controller, int pageIndex) {
-		this.mGalleryPage = mGalleryPage;
+        FlipViewController controller = controllerRef.get();
+        if (controller != null) {
+          controller.refreshPage(pageIndex);
+        }
+      }
+    }
+  }
 
-		if (shouldStartAsyncLoad(imgIcon, mGalleryPage.getTargetURL(), pageIndex)) {
-			ContentPhotosDownloader downloader = new ContentPhotosDownloader(mGalleryPage.getTargetURL(), imgIcon, null, controller, pageIndex);
-			imgIcon.setImageDrawable(new AsyncDrawable(getResources(), null, downloader));
-			downloader.execute();
-		}
+  public GalleryPage mGalleryPage;
 
-		txtName.setText(this.mGalleryPage.getPageTitle());
+  private ImageView imgBackground;
+  private ProgressBar pd;
+  private LinearLayout lnlPlace;
 
-		if (shouldStartAsyncLoad(imgBackground, mGalleryPage.getImageURL(), pageIndex)) {
-			ContentPhotosDownloader downloader = new ContentPhotosDownloader(mGalleryPage.getImageURL(), imgBackground, pd, controller, pageIndex);
-			imgBackground.setImageDrawable(new AsyncDrawable(getResources(), null, downloader));
-			downloader.execute();
-		}
-	}
-	
-	private boolean shouldStartAsyncLoad(ImageView imageView, String url, int pageIndex) {
-		ContentPhotosDownloader downloader = AsyncDrawable.getTask(imageView);
-		boolean shouldStart = true;
-		if (downloader != null) {
-			if (downloader.getPageIndex() == pageIndex && url.equals(downloader.getUrl()))
-				shouldStart = false;
-			else 
-				downloader.cancel(true);
-		}
-		return shouldStart;
-	}
+  private ImageView imgIcon;
+  private TextView txtName;
+  private TextView txtDistrict;
+  private TextView txtCity;
 
-	@SuppressWarnings("deprecation")
-	public GalleryFlipItem(Context context, GalleryPage mGalleryPage, FlipViewController controller, int pageIndex) {
-		super(context);
-		mContext = context;
+  private Context mContext;
 
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(R.layout.gallery_flip_item_layout, this);
+  public void refreshView(GalleryPage mGalleryPage, FlipViewController controller, int pageIndex) {
+    this.mGalleryPage = mGalleryPage;
 
-		pd = (ProgressBar) findViewById(R.id.gallery_flip_item_background_progressbar);
-		imgBackground = (ImageView) findViewById(R.id.gallery_flip_item_background_imageview);
+    if (shouldStartAsyncLoad(imgIcon, mGalleryPage.getTargetURL(), pageIndex)) {
+      ContentPhotosDownloader
+          downloader =
+          new ContentPhotosDownloader(mGalleryPage.getTargetURL(), imgIcon, null, controller,
+                                      pageIndex);
+      imgIcon.setImageDrawable(new AsyncDrawable(getResources(), null, downloader));
+      downloader.execute();
+    }
 
-		lnlPlace = (LinearLayout) findViewById(R.id.gallery_flip_item_place_linearlayout);
+    txtName.setText(this.mGalleryPage.getPageTitle());
 
-		imgIcon = (ImageView) findViewById(R.id.gallery_flip_item_place_icon_imageview);
-		txtName = (TextView) findViewById(R.id.gallery_flip_item_place_name_textview);
-		txtDistrict = (TextView) findViewById(R.id.gallery_flip_item_place_district_textview);
-		txtCity = (TextView) findViewById(R.id.gallery_flip_item_place_city_textview);
+    if (shouldStartAsyncLoad(imgBackground, mGalleryPage.getImageURL(), pageIndex)) {
+      ContentPhotosDownloader
+          downloader =
+          new ContentPhotosDownloader(mGalleryPage.getImageURL(), imgBackground, pd, controller,
+                                      pageIndex);
+      imgBackground.setImageDrawable(new AsyncDrawable(getResources(), null, downloader));
+      downloader.execute();
+    }
+  }
 
-		int measuredwidth = 0;
-		int measuredheight = 0;
-		WindowManager w = ((Activity) context).getWindowManager();
+  private boolean shouldStartAsyncLoad(ImageView imageView, String url, int pageIndex) {
+    ContentPhotosDownloader downloader = AsyncDrawable.getTask(imageView);
+    boolean shouldStart = true;
+    if (downloader != null) {
+      if (downloader.getPageIndex() == pageIndex && url.equals(downloader.getUrl())) {
+        shouldStart = false;
+      } else {
+        downloader.cancel(true);
+      }
+    }
+    return shouldStart;
+  }
 
-		Display d = w.getDefaultDisplay();
-		measuredwidth = d.getWidth();
-		measuredheight = d.getHeight();
+  @SuppressWarnings("deprecation")
+  public GalleryFlipItem(Context context, GalleryPage mGalleryPage, FlipViewController controller,
+                         int pageIndex) {
+    super(context);
+    mContext = context;
 
-		//notes: it's not the right approach to make the background fill its parent, using a RelativeLayout could be much better
-		imgBackground.setLayoutParams(new LayoutParams(measuredwidth, measuredheight));
-		
-		refreshView(mGalleryPage, controller, pageIndex);
-	}
+    LayoutInflater
+        inflater =
+        (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    inflater.inflate(R.layout.gallery_flip_item_layout, this);
+
+    pd = (ProgressBar) findViewById(R.id.gallery_flip_item_background_progressbar);
+    imgBackground = (ImageView) findViewById(R.id.gallery_flip_item_background_imageview);
+
+    lnlPlace = (LinearLayout) findViewById(R.id.gallery_flip_item_place_linearlayout);
+
+    imgIcon = (ImageView) findViewById(R.id.gallery_flip_item_place_icon_imageview);
+    txtName = (TextView) findViewById(R.id.gallery_flip_item_place_name_textview);
+    txtDistrict = (TextView) findViewById(R.id.gallery_flip_item_place_district_textview);
+    txtCity = (TextView) findViewById(R.id.gallery_flip_item_place_city_textview);
+
+    int measuredwidth = 0;
+    int measuredheight = 0;
+    WindowManager w = ((Activity) context).getWindowManager();
+
+    Display d = w.getDefaultDisplay();
+    measuredwidth = d.getWidth();
+    measuredheight = d.getHeight();
+
+    //notes: it's not the right approach to make the background fill its parent, using a RelativeLayout could be much better
+    imgBackground.setLayoutParams(new LayoutParams(measuredwidth, measuredheight));
+
+    refreshView(mGalleryPage, controller, pageIndex);
+  }
 }

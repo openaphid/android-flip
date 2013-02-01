@@ -16,25 +16,25 @@ limitations under the License.
 
 package com.aphidmobile.flip.demo;
 
-import com.aphidmobile.flip.FlipViewController;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.aphidmobile.flip.FlipViewController;
+
 public class FlipTextViewAltActivity extends FlipTextViewActivity {
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
+    flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
 
-			@Override
-			public void onViewFlipped(View view, int position) {
-				Toast.makeText(view.getContext(), "Flipped to page " + position, Toast.LENGTH_SHORT).show();
-			}
-		});
-	}
+      @Override
+      public void onViewFlipped(View view, int position) {
+        Toast.makeText(view.getContext(), "Flipped to page " + position, Toast.LENGTH_SHORT).show();
+      }
+    });
+  }
 
 }

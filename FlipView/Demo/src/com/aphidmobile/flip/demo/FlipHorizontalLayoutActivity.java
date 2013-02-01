@@ -17,50 +17,41 @@ limitations under the License.
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.Html;
-import android.view.*;
-import android.widget.*;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.adapter.TravelAdapter;
 import com.aphidmobile.flipview.demo.R;
-import com.aphidmobile.utils.AphidLog;
-import com.aphidmobile.utils.IO;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FlipHorizontalLayoutActivity extends Activity {
-	private FlipViewController flipView;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  private FlipViewController flipView;
 
-		setTitle(R.string.activity_title);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView = new FlipViewController(this, FlipViewController.HORIZONTAL);
+    setTitle(R.string.activity_title);
 
-		flipView.setAdapter(new TravelAdapter(this));
+    flipView = new FlipViewController(this, FlipViewController.HORIZONTAL);
 
-		setContentView(flipView);
-	}
+    flipView.setAdapter(new TravelAdapter(this));
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    setContentView(flipView);
+  }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 }

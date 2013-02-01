@@ -21,56 +21,58 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.adapter.TravelAdapter;
 import com.aphidmobile.flipview.demo.R;
 
 public class FlipDeleteAdapterActivity extends Activity {
-	private FlipViewController flipView;
-	private TravelAdapter adapter;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  private FlipViewController flipView;
+  private TravelAdapter adapter;
 
-		setTitle(R.string.activity_title);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView = new FlipViewController(this);
-		
-		//Use RGB_565 can reduce peak memory usage on large screen device, but it's up to you to choose the best bitmap format 
-		flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
+    setTitle(R.string.activity_title);
 
-		adapter = new TravelAdapter(this);
-		flipView.setAdapter(adapter);
+    flipView = new FlipViewController(this);
 
-		setContentView(flipView);
-	}
+    //Use RGB_565 can reduce peak memory usage on large screen device, but it's up to you to choose the best bitmap format 
+    flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    adapter = new TravelAdapter(this);
+    flipView.setAdapter(adapter);
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+    setContentView(flipView);
+  }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("Delete Page");
-		return true;
-	}
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		adapter.removeData(flipView.getSelectedItemPosition());
-		adapter.notifyDataSetChanged();
-		return true;
-	}
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    menu.add("Delete Page");
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    adapter.removeData(flipView.getSelectedItemPosition());
+    adapter.notifyDataSetChanged();
+    return true;
+  }
 }

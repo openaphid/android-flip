@@ -20,10 +20,13 @@ limitations under the License.
  */
 public class ImagePlaceholders {
 
-	public static final String[] CATEGORIES = { "abstract", "animals", "city", "food", "nightlife", "fashion", "people",
-			"nature", "sports", "technics", "transport" };
-	
-	public static String getImageUrl(String category, int w, int h) {
-		return AphidLog.format("http://lorempixel.com/%d/%d/%s/1/", w, h, category);
-	}
+  public static final
+  String[]
+      CATEGORIES =
+      {"abstract", "animals", "city", "food", "nightlife", "fashion", "people",
+       "nature", "sports", "technics", "transport"};
+
+  public static String getImageUrl(String category, int w, int h) {
+    return AphidLog.format("http://lorempixel.com/%d/%d/%s/1/", w, h, category);
+  }
 }

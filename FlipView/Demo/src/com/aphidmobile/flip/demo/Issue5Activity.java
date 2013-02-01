@@ -1,52 +1,41 @@
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
-import android.text.Html;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.data.Travels;
 import com.aphidmobile.flip.demo.issue5.GalleryFlipAdapter;
 import com.aphidmobile.flipview.demo.R;
-import com.aphidmobile.utils.AphidLog;
-import com.aphidmobile.utils.IO;
-import com.aphidmobile.utils.UI;
 
 public class Issue5Activity extends Activity {
-	private FlipViewController flipView;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+  private FlipViewController flipView;
 
-		setTitle(R.string.activity_title);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView = new FlipViewController(this);
+    setTitle(R.string.activity_title);
 
-		flipView.setAdapter(new GalleryFlipAdapter(this, flipView));
+    flipView = new FlipViewController(this);
 
-		setContentView(flipView);
-	}
+    flipView.setAdapter(new GalleryFlipAdapter(this, flipView));
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+    setContentView(flipView);
+  }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 }

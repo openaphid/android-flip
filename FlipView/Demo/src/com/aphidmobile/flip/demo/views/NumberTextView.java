@@ -21,28 +21,29 @@ import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.TextView;
 
-public class NumberTextView extends TextView{
-	private int number;
+public class NumberTextView extends TextView {
 
-	public NumberTextView(Context context, int number) {
-		super(context);
-		setNumber(number);
-		setTextColor(Color.BLACK);
-		setBackgroundColor(Color.WHITE);
-		setGravity(Gravity.CENTER);
-	}
+  private int number;
 
-	public int getNumber() {
-		return number;
-	}
+  public NumberTextView(Context context, int number) {
+    super(context);
+    setNumber(number);
+    setTextColor(Color.BLACK);
+    setBackgroundColor(Color.WHITE);
+    setGravity(Gravity.CENTER);
+  }
 
-	public void setNumber(int number) {
-		this.number = number;
-		setText(String.valueOf(number));
-	}
+  public int getNumber() {
+    return number;
+  }
 
-	@Override
-	public String toString() {
-		return "NumberTextView: " + number;
-	}
+  public void setNumber(int number) {
+    this.number = number;
+    setText(String.valueOf(number));
+  }
+
+  @Override
+  public String toString() {
+    return "NumberTextView: " + number;
+  }
 }

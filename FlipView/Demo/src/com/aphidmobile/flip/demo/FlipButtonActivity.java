@@ -19,72 +19,73 @@ package com.aphidmobile.flip.demo;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.*;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
 import com.aphidmobile.flip.FlipViewController;
 import com.aphidmobile.flip.demo.views.NumberButton;
-import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
 
 public class FlipButtonActivity extends Activity {
-	private FlipViewController flipView;
 
-	/**
-	 * Called when the activity is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		setTitle(R.string.activity_title);
+  private FlipViewController flipView;
 
-		flipView = new FlipViewController(this);
+  /**
+   * Called when the activity is first created.
+   */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-		flipView.setAdapter(new BaseAdapter() {
-			@Override
-			public int getCount() {
-				return 10;
-			}
+    setTitle(R.string.activity_title);
 
-			@Override
-			public Object getItem(int position) {
-				return position;
-			}
+    flipView = new FlipViewController(this);
 
-			@Override
-			public long getItemId(int position) {
-				return position;
-			}
+    flipView.setAdapter(new BaseAdapter() {
+      @Override
+      public int getCount() {
+        return 10;
+      }
 
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				NumberButton button;
-				if (convertView == null) {
-					final Context context = parent.getContext();
-					button = new NumberButton(context, position);
-					button.setTextSize(context.getResources().getDimension(R.dimen.textSize));
-				}
-				else {
-					button = (NumberButton) convertView;
-					button.setNumber(position);
-				}
-				
-				return button;
-			}
-		});
+      @Override
+      public Object getItem(int position) {
+        return position;
+      }
 
-		setContentView(flipView);
-	}
+      @Override
+      public long getItemId(int position) {
+        return position;
+      }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		flipView.onResume();
-	}
+      @Override
+      public View getView(int position, View convertView, ViewGroup parent) {
+        NumberButton button;
+        if (convertView == null) {
+          final Context context = parent.getContext();
+          button = new NumberButton(context, position);
+          button.setTextSize(context.getResources().getDimension(R.dimen.textSize));
+        } else {
+          button = (NumberButton) convertView;
+          button.setNumber(position);
+        }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		flipView.onPause();
-	}
+        return button;
+      }
+    });
+
+    setContentView(flipView);
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    flipView.onResume();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    flipView.onPause();
+  }
 }
