@@ -103,7 +103,7 @@ public class FlipViewController extends AdapterView<Adapter> {
       //XXX: use a SparseArray to keep the related view indices?
   private int bufferIndex = -1;
   private int adapterIndex = -1;
-  private int sideBufferSize = 1;
+  private final int sideBufferSize = 1;
 
   private float touchSlop;
 
@@ -374,13 +374,13 @@ public class FlipViewController extends AdapterView<Adapter> {
     }
 
     if (bufferedViews.size() >= 1) {
-      View frontView = bufferedViews.get(bufferIndex);
-      View backView = null;
-      if (bufferIndex < bufferedViews.size() - 1) {
-        backView = bufferedViews.get(bufferIndex + 1);
-      }
-      renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1,
-                             backView);
+        View frontView = bufferedViews.get(bufferIndex);
+        View backView = null;
+        if (bufferIndex < bufferedViews.size() - 1) {
+          backView = bufferedViews.get(bufferIndex + 1);
+        }
+        renderer.updateTexture(adapterIndex, frontView, backView == null ? -1 : adapterIndex + 1,
+                               backView);
     }
   }
 
@@ -529,7 +529,7 @@ public class FlipViewController extends AdapterView<Adapter> {
         if (adapterIndex < adapterDataCount - 1) {
           adapterIndex++;
           View old = bufferedViews.get(bufferIndex);
-          if (bufferIndex > 0) {
+          if (bufferIndex + 1 > sideBufferSize) {
             releaseView(bufferedViews.removeFirst());
           }
           if (adapterIndex + sideBufferSize < adapterDataCount) {
@@ -543,7 +543,7 @@ public class FlipViewController extends AdapterView<Adapter> {
         if (adapterIndex > 0) {
           adapterIndex--;
           View old = bufferedViews.get(bufferIndex);
-          if (bufferIndex < bufferedViews.size() - 1) {
+          if (bufferIndex - 1 + sideBufferSize < bufferedViews.size() - 1) {
             releaseView(bufferedViews.removeLast());
           }
           if (adapterIndex - sideBufferSize >= 0) {
