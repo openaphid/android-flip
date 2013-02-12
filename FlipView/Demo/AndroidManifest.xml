@@ -20,6 +20,7 @@
     
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipButtonActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipComplexLayoutActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipDeleteAdapterActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipAsyncContentActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewAltActivity"/>
@@ -29,7 +30,6 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipFragmentActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipDynamicAdapterActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipWebViewActivity"/>
-    <activity android:name="com.aphidmobile.flip.demo.FlipDeleteAdapterActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.Issue51Activity"/>
     
   </application>
