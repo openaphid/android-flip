@@ -103,7 +103,7 @@ public class FlipViewController extends AdapterView<Adapter> {
       //XXX: use a SparseArray to keep the related view indices?
   private int bufferIndex = -1;
   private int adapterIndex = -1;
-  private final int sideBufferSize = 1;
+  private int sideBufferSize = 1;
 
   private float touchSlop;
 
@@ -238,6 +238,11 @@ public class FlipViewController extends AdapterView<Adapter> {
 
   public void setOverFlipEnabled(boolean overFlipEnabled) {
     this.overFlipEnabled = overFlipEnabled;
+  }
+  
+  public void setSideBufferSize(int sideBufferSize) {
+    Assert.assertTrue("sideBufferSize cant be less than 1", sideBufferSize >= 1);
+    this.sideBufferSize = sideBufferSize;
   }
 
   public boolean isFlipByTouchEnabled() {
