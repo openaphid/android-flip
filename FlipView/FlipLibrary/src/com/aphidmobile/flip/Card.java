@@ -39,8 +39,8 @@ import static javax.microedition.khronos.opengles.GL10.GL_CULL_FACE;
 import static javax.microedition.khronos.opengles.GL10.GL_DEPTH_TEST;
 import static javax.microedition.khronos.opengles.GL10.GL_FLOAT;
 import static javax.microedition.khronos.opengles.GL10.GL_LIGHTING;
+import static javax.microedition.khronos.opengles.GL10.GL_ONE;
 import static javax.microedition.khronos.opengles.GL10.GL_ONE_MINUS_SRC_ALPHA;
-import static javax.microedition.khronos.opengles.GL10.GL_SRC_ALPHA;
 import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_2D;
 import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_COORD_ARRAY;
 import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_WRAP_S;
@@ -154,7 +154,7 @@ public class Card {
     gl.glEnableClientState(GL_VERTEX_ARRAY);
 
     gl.glEnable(GL_BLEND);
-    gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
     gl.glColor4f(1f, 1.0f, 1f, 1.0f);
 
@@ -217,9 +217,6 @@ public class Card {
     float[] shadowVertices;
 
     if (angle > 0) {
-      gl.glDisable(GL_LIGHTING);
-      gl.glDisable(GL_DEPTH_TEST);
-
       float alpha = 1f * (90f - angle) / 90f;
 
       if (axis == AXIS_TOP) {
@@ -264,10 +261,16 @@ public class Card {
         }
       }
 
+      gl.glDisable(GL_LIGHTING);
+      gl.glDisable(GL_DEPTH_TEST);
+      gl.glDisable(GL_TEXTURE_2D);
+      gl.glEnable(GL_BLEND);
+      gl.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
       gl.glColor4f(0f, 0.0f, 0f, alpha);
       gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
       gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 
+      gl.glEnable(GL_TEXTURE_2D);
       gl.glEnable(GL_DEPTH_TEST);
       gl.glEnable(GL_LIGHTING);
     }

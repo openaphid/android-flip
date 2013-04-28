@@ -56,7 +56,6 @@ public class FlipViewController extends AdapterView<Adapter> {
   private static final int MAX_RELEASED_VIEW_SIZE = 1;
 
   static final int MSG_SURFACE_CREATED = 1;
-  static final int MSG_ANIMATION_READY = 2;
 
   private Handler handler = new Handler(new Handler.Callback() {
     @Override
@@ -66,11 +65,8 @@ public class FlipViewController extends AdapterView<Adapter> {
         contentHeight = 0;
         requestLayout();
         return true;
-      } else if (msg.what == MSG_ANIMATION_READY) {
-        if (inFlipAnimation) {
-          AphidLog.i("First draw is ready, hide real views");
-          updateVisibleView(-1);
-        }
+      } else {
+        AphidLog.w("Unknown msg.what: " + msg.what);
       }
       return false;
     }
@@ -96,11 +92,7 @@ public class FlipViewController extends AdapterView<Adapter> {
   private DataSetObserver adapterDataObserver;
 
   private final LinkedList<View> bufferedViews = new LinkedList<View>();
-  private final
-  LinkedList<View>
-      releasedViews =
-      new LinkedList<View>();
-      //XXX: use a SparseArray to keep the related view indices?
+  private final LinkedList<View> releasedViews = new LinkedList<View>(); //XXX: use a SparseArray to keep the related view indices?
   private int bufferIndex = -1;
   private int adapterIndex = -1;
   private final int sideBufferSize = 1;
@@ -490,11 +482,7 @@ public class FlipViewController extends AdapterView<Adapter> {
     }
   }
 
-  private void updateVisibleView(int index) {                /*
-		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("Update visible views, index %d, buffered: %d, adapter %d", index, bufferedViews.size(), adapterIndex);
-		*/
-
+  private void updateVisibleView(int index) {
     for (int i = 0; i < bufferedViews.size(); i++) {
       bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
     }
@@ -568,7 +556,6 @@ public class FlipViewController extends AdapterView<Adapter> {
       inFlipAnimation = true;
 
       cards.setVisible(true);
-      cards.setWaitForFirstDraw(true);
       surfaceView.requestRender();
     }
   }

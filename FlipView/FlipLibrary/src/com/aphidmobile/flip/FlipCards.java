@@ -54,7 +54,6 @@ public class FlipCards {
   private FlipViewController controller;
 
   private volatile boolean visible = false;
-  private volatile boolean waitForFirstDraw = false;
 
   private int maxIndex = 0;
 
@@ -74,10 +73,6 @@ public class FlipCards {
 
   public void setVisible(boolean visible) {
     this.visible = visible;
-  }
-
-  public void setWaitForFirstDraw(boolean waitForFirstDraw) {
-    this.waitForFirstDraw = waitForFirstDraw;
   }
 
   boolean refreshPageView(View view) {
@@ -223,7 +218,7 @@ public class FlipCards {
         AphidLog.e("Invalid state: " + state);
         break;
     }
-
+    
     float angle = getDisplayAngle();
     if (angle < 0) {
       frontCards.getTopCard().setAxis(Card.AXIS_BOTTOM);
@@ -256,11 +251,6 @@ public class FlipCards {
         backCards.getBottomCard().setAngle(0);
         backCards.getBottomCard().draw(gl);
       }
-    }
-
-    if (waitForFirstDraw) {
-      waitForFirstDraw = false;
-      controller.sendMessage(FlipViewController.MSG_ANIMATION_READY);
     }
   }
 

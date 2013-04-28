@@ -22,7 +22,7 @@ import java.util.Formatter;
 
 public class AphidLog {
 
-  public static final boolean ENABLE_DEBUG = true;
+  public static final boolean ENABLE_DEBUG = false;
 
   private AphidLog() {
   }
