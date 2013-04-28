@@ -556,6 +556,7 @@ public class FlipViewController extends AdapterView<Adapter> {
       inFlipAnimation = true;
 
       cards.setVisible(true);
+      cards.setFirstDrawFinished(false);
       surfaceView.requestRender();
     }
   }

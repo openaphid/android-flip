@@ -54,6 +54,8 @@ public class FlipCards {
   private FlipViewController controller;
 
   private volatile boolean visible = false;
+  
+  private volatile boolean firstDrawFinished = false;
 
   private int maxIndex = 0;
 
@@ -73,6 +75,14 @@ public class FlipCards {
 
   public void setVisible(boolean visible) {
     this.visible = visible;
+  }
+
+  public boolean isFirstDrawFinished() {
+    return firstDrawFinished;
+  }
+
+  public void setFirstDrawFinished(boolean firstDrawFinished) {
+    this.firstDrawFinished = firstDrawFinished;
   }
 
   boolean refreshPageView(View view) {
@@ -252,6 +262,8 @@ public class FlipCards {
         backCards.getBottomCard().draw(gl);
       }
     }
+    
+    firstDrawFinished = true;
   }
 
   public void invalidateTexture() {
