@@ -484,7 +484,7 @@ public class FlipViewController extends AdapterView<Adapter> {
 
   private void updateVisibleView(int index) {
     for (int i = 0; i < bufferedViews.size(); i++) {
-      bufferedViews.get(i).setVisibility(index == i ? VISIBLE : INVISIBLE);
+      bufferedViews.get(i).setVisibility(index == i ? VISIBLE : GONE);
     }
   }
 
@@ -525,7 +525,7 @@ public class FlipViewController extends AdapterView<Adapter> {
           }
           bufferIndex = bufferedViews.indexOf(old) + 1;
           requestLayout();
-          updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
+          updateVisibleView(bufferIndex);
         }
       } else if (indexInAdapter == adapterIndex - 1) {
         if (adapterIndex > 0) {
@@ -539,7 +539,7 @@ public class FlipViewController extends AdapterView<Adapter> {
           }
           bufferIndex = bufferedViews.indexOf(old) - 1;
           requestLayout();
-          updateVisibleView(inFlipAnimation ? -1 : bufferIndex);
+          updateVisibleView(bufferIndex);
         }
       } else {
         AphidLog.e("Should not happen: indexInAdapter %d, adapterIndex %d", indexInAdapter,

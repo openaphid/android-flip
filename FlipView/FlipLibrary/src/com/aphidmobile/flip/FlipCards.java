@@ -160,8 +160,8 @@ public class FlipCards {
     frontCards.buildTexture(renderer, gl);
     backCards.buildTexture(renderer, gl);
 
-    if (!TextureUtils.isValidTexture(frontCards.getTexture()) && !TextureUtils
-        .isValidTexture(backCards.getTexture())) {
+    if (!TextureUtils.isValidTexture(frontCards.getTexture()) &&
+        !TextureUtils.isValidTexture(backCards.getTexture())) {
       return;
     }
 
@@ -263,7 +263,10 @@ public class FlipCards {
       }
     }
     
-    firstDrawFinished = true;
+    if ((frontCards.getView() == null || TextureUtils.isValidTexture(frontCards.getTexture())) &&
+        (backCards.getView() == null || TextureUtils.isValidTexture(backCards.getTexture()))
+        )
+      firstDrawFinished = true;
   }
 
   public void invalidateTexture() {
