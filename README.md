@@ -15,6 +15,12 @@ Please also refer to our blog posts for more details:
 
 For a complete change list please checkout our [issue tracker](https://github.com/openaphid/android-flip/issues/milestones?state=closed)
 
+### [v0.9.8, May 7th 2013](https://github.com/openaphid/android-flip/issues?milestone=4&state=closed)
+
+- Fixes the occasional flash issue when flipping. ([#52](https://github.com/openaphid/android-flip/issues/52))
+
+- Disables the dropping shadow of title bar in the demo app.
+
 ### [v0.9.7, Jan 1th 2012](https://github.com/openaphid/android-flip/issues?milestone=3&state=closed)
 
 - The core control flow has been rewritten, which fixes several performance and reliability issues about adapter and async content support. ([#36](https://github.com/openaphid/android-flip/issues/36), [#29](https://github.com/openaphid/android-flip/issues/29), [#28](https://github.com/openaphid/android-flip/issues/28), [#8](https://github.com/openaphid/android-flip/issues/8))
