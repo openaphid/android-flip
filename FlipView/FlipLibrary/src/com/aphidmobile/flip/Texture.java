@@ -2,12 +2,25 @@ package com.aphidmobile.flip;
 
 import android.graphics.Bitmap;
 import android.opengl.GLUtils;
+
 import com.aphidmobile.utils.AphidLog;
+
 import junit.framework.Assert;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import static javax.microedition.khronos.opengles.GL10.*;
+import static javax.microedition.khronos.opengles.GL10.GL_CLAMP_TO_EDGE;
+import static javax.microedition.khronos.opengles.GL10.GL_LINEAR;
+import static javax.microedition.khronos.opengles.GL10.GL_RGB;
+import static javax.microedition.khronos.opengles.GL10.GL_RGBA;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_2D;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_MAG_FILTER;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_MIN_FILTER;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_WRAP_S;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_WRAP_T;
+import static javax.microedition.khronos.opengles.GL10.GL_UNSIGNED_BYTE;
+import static javax.microedition.khronos.opengles.GL10.GL_UNSIGNED_SHORT_4_4_4_4;
+import static javax.microedition.khronos.opengles.GL10.GL_UNSIGNED_SHORT_5_6_5;
 
 /*
 Copyright 2012 Aphid Mobile
@@ -26,86 +39,110 @@ limitations under the License.
 
  */
 public class Texture {
-	private FlipRenderer renderer;
-	
-	private int[] id = {0};
 
-	private int width, height;
-	private int contentWidth, contentHeight;
+  private FlipRenderer renderer;
 
-	private boolean destroyed = false;
+  private int[] id = {0};
 
-	private Texture() {
-	}
+  private int width, height;
+  private int contentWidth, contentHeight;
 
-	public static Texture createTexture(Bitmap bitmap, FlipRenderer renderer, GL10 gl) {
-		Texture t = new Texture();
-		t.renderer = renderer;
+  private boolean destroyed = false;
 
-		Assert.assertTrue("bitmap should not be null or recycled", bitmap != null && !bitmap.isRecycled());
+  private Texture() {
+  }
 
-		int w = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
-		int h = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
+  public static Texture createTexture(Bitmap bitmap, FlipRenderer renderer, GL10 gl) {
+    Texture t = new Texture();
+    t.renderer = renderer;
 
-		t.contentWidth = bitmap.getWidth();
-		t.contentHeight = bitmap.getHeight();
-		t.width = w;
-		t.height = h;
+    Assert.assertTrue("bitmap should not be null or recycled",
+                      bitmap != null && !bitmap.isRecycled());
 
-		if (AphidLog.ENABLE_DEBUG)
-			AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), w, h);
+    int potW = Integer.highestOneBit(bitmap.getWidth() - 1) << 1;
+    int potH = Integer.highestOneBit(bitmap.getHeight() - 1) << 1;
 
+    t.contentWidth = bitmap.getWidth();
+    t.contentHeight = bitmap.getHeight();
+    t.width = potW;
+    t.height = potH;
 
-		gl.glGenTextures(1, t.id, 0);
-		gl.glBindTexture(GL_TEXTURE_2D, t.id[0]);
-		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		/*
-		 gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		 gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		 */
-		gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-		GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+    if (AphidLog.ENABLE_DEBUG) {
+      AphidLog.d("createTexture: %d, %d; POT: %d, %d", bitmap.getWidth(), bitmap.getHeight(), potW,
+                 potH);
+    }
 
-		return t;
-	}
-	
-	public void postDestroy() {
-		renderer.postDestroyTexture(this);
-	}
+    gl.glGenTextures(1, t.id, 0);
+    gl.glBindTexture(GL_TEXTURE_2D, t.id[0]);
 
-	public void destroy(GL10 gl) {
-		if (id[0] != 0) {
-			gl.glDeleteTextures(1, id, 0);
-			if (AphidLog.ENABLE_DEBUG)
-				AphidLog.d("Destroy texture: %d", id[0]);
-		}
+    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		id[0] = 0;
-		destroyed = true;
-	}
+    switch (bitmap.getConfig()) {
+      case ARGB_8888:
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+        GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+        break;
+      case ARGB_4444:
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potW, potH, 0, GL_RGBA,
+                        GL_UNSIGNED_SHORT_4_4_4_4, null);
+        GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+        break;
+      case RGB_565:
+        gl.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, potW, potH, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
+                        null);
+        GLUtils.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bitmap);
+        break;
+      case ALPHA_8:
+      default:
+        throw new RuntimeException(
+            "Unrecognized bitmap format for OpenGL texture: " + bitmap.getConfig());
+    }
 
-	public boolean isDestroyed() {
-		return destroyed;
-	}
+    FlipRenderer.checkError(gl);
 
-	public int[] getId() {
-		return id;
-	}
+    return t;
+  }
 
-	public int getWidth() {
-		return width;
-	}
+  public void postDestroy() {
+    renderer.postDestroyTexture(this);
+  }
 
-	public int getHeight() {
-		return height;
-	}
+  public void destroy(GL10 gl) {
+    if (id[0] != 0) {
+      gl.glDeleteTextures(1, id, 0);
+      if (AphidLog.ENABLE_DEBUG) {
+        AphidLog.d("Destroy texture: %d", id[0]);
+      }
+    }
 
-	public int getContentWidth() {
-		return contentWidth;
-	}
+    id[0] = 0;
+    destroyed = true;
+  }
 
-	public int getContentHeight() {
-		return contentHeight;
-	}
+  public boolean isDestroyed() {
+    return destroyed;
+  }
+
+  public int[] getId() {
+    return id;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public int getContentWidth() {
+    return contentWidth;
+  }
+
+  public int getContentHeight() {
+    return contentHeight;
+  }
 }

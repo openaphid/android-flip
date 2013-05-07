@@ -3,17 +3,13 @@
           android:versionCode="1"
           android:versionName="1.0">
 
-  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15"/>
+  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
   
-  <!-- Required by ImageLoader library -->
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-  <!-- end -->
 
   <application android:label="@string/app_name"
                android:icon="@drawable/ic_launcher"
-               android:theme="@style/AppTheme" android:debuggable="true">
+               android:theme="@style/AppTheme">
 
     <activity android:name="com.aphidmobile.flip.demo.MainActivity">
       <intent-filter>
@@ -25,9 +21,16 @@
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipButtonActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipComplexLayoutActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipDeleteAdapterActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipAsyncContentActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipTextViewAltActivity"/>
     <activity android:name="com.aphidmobile.flip.demo.FlipHorizontalLayoutActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipTextViewXmlActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.Issue5Activity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipFragmentActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipDynamicAdapterActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.FlipWebViewActivity"/>
+    <activity android:name="com.aphidmobile.flip.demo.Issue51Activity"/>
     
   </application>
   

@@ -1,3 +1,13 @@
+package com.aphidmobile.flip.demo;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+
+import com.aphidmobile.flip.FlipViewController;
+import com.aphidmobile.flip.demo.adapter.TravelAdapter;
+import com.aphidmobile.flipview.demo.R;
+
 /*
 Copyright 2012 Aphid Mobile
 
@@ -12,21 +22,13 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
  */
-
-package com.aphidmobile.flip.demo;
-
-import android.app.Activity;
-import android.graphics.Bitmap;
-import android.os.Bundle;
-
-import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.adapter.TravelAdapter;
-import com.aphidmobile.flipview.demo.R;
-
-public class FlipComplexLayoutActivity extends Activity {
+public class FlipDynamicAdapterActivity extends Activity {
 
   private FlipViewController flipView;
+
+  private TravelAdapter adapter;
 
   /**
    * Called when the activity is first created.
@@ -39,10 +41,18 @@ public class FlipComplexLayoutActivity extends Activity {
 
     flipView = new FlipViewController(this);
 
-    //Use RGB_565 can reduce peak memory usage on large screen device, but it's up to you to choose the best bitmap format 
-    flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
+    adapter = new TravelAdapter(this);
+    flipView.setAdapter(adapter);
 
-    flipView.setAdapter(new TravelAdapter(this));
+    flipView.setOnViewFlipListener(new FlipViewController.ViewFlipListener() {
+      @Override
+      public void onViewFlipped(View view, int position) {
+        if (position == adapter.getCount() - 1) {//expand the data size on the last page 
+          adapter.setRepeatCount(adapter.getRepeatCount() + 1);
+          adapter.notifyDataSetChanged();
+        }
+      }
+    });
 
     setContentView(flipView);
   }
@@ -58,5 +68,4 @@ public class FlipComplexLayoutActivity extends Activity {
     super.onPause();
     flipView.onPause();
   }
-
 }

@@ -3,5 +3,7 @@
     <string name="app_name">FlipView Demo</string>
     <string name="activity_title">FlipView Demo By Aphid Mobile</string>
     <string name="item_about">about</string>
-    <item name="tag_async_image_view_position" type="id"/>
+	<string name="hide_fragment">Hide Fragment</string>
+	<string name="show_fragment">Show Fragment</string>
+	<item name="tag_async_image_view_position" type="id"/>
 </resources>

@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.aphidmobile.flip.demo;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
@@ -24,12 +23,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.views.NumberButton;
+import com.aphidmobile.flip.demo.views.NumberTextView;
 import com.aphidmobile.flipview.demo.R;
 
-public class FlipButtonActivity extends Activity {
+/**
+ * @author Paul Burke paulburke.co
+ */
+public class FlipTextViewXmlActivity extends FlipTextViewActivity {
 
-  private FlipViewController flipView;
+  protected FlipViewController flipView;
 
   /**
    * Called when the activity is first created.
@@ -39,8 +41,9 @@ public class FlipButtonActivity extends Activity {
     super.onCreate(savedInstanceState);
 
     setTitle(R.string.activity_title);
+    setContentView(R.layout.xml_layout);
 
-    flipView = new FlipViewController(this);
+    flipView = (FlipViewController) findViewById(R.id.flipView);
 
     flipView.setAdapter(new BaseAdapter() {
       @Override
@@ -60,21 +63,19 @@ public class FlipButtonActivity extends Activity {
 
       @Override
       public View getView(int position, View convertView, ViewGroup parent) {
-        NumberButton button;
+        NumberTextView view;
         if (convertView == null) {
           final Context context = parent.getContext();
-          button = new NumberButton(context, position);
-          button.setTextSize(context.getResources().getDimension(R.dimen.textSize));
+          view = new NumberTextView(context, position);
+          view.setTextSize(context.getResources().getDimension(R.dimen.textSize));
         } else {
-          button = (NumberButton) convertView;
-          button.setNumber(position);
+          view = (NumberTextView) convertView;
+          view.setNumber(position);
         }
 
-        return button;
+        return view;
       }
     });
-
-    setContentView(flipView);
   }
 
   @Override
@@ -88,4 +89,5 @@ public class FlipButtonActivity extends Activity {
     super.onPause();
     flipView.onPause();
   }
+
 }

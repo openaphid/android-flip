@@ -1,5 +1,9 @@
 <resources>
 
-    <style name="AppTheme" parent="android:Theme.Light" />
+    <style name="AppTheme" parent="android:Theme.Light">
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    <color name="white">#ffffff</color>
+    <color name="transparentBlack">#55000000</color>
 
 </resources>

@@ -20,36 +20,30 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.widget.TextView;
-import com.aphidmobile.utils.AphidLog;
 
-public class NumberTextView extends TextView{
-	private int number;
+public class NumberTextView extends TextView {
 
-	public NumberTextView(Context context, int number) {
-		super(context);
-		setNumber(number);
-		setTextColor(Color.BLACK);
-		setBackgroundColor(Color.WHITE);
-		setGravity(Gravity.CENTER);
-	}
+  private int number;
 
-	public int getNumber() {
-		return number;
-	}
+  public NumberTextView(Context context, int number) {
+    super(context);
+    setNumber(number);
+    setTextColor(Color.BLACK);
+    setBackgroundColor(Color.WHITE);
+    setGravity(Gravity.CENTER);
+  }
 
-	public void setNumber(int number) {
-		this.number = number;
-		setText(String.valueOf(number));
-	}
+  public int getNumber() {
+    return number;
+  }
 
-	@Override
-	public void setVisibility(int visibility) {
-		super.setVisibility(visibility);
-		AphidLog.i("View %d, visibility %d", number, visibility);
-	}
+  public void setNumber(int number) {
+    this.number = number;
+    setText(String.valueOf(number));
+  }
 
-	@Override
-	public String toString() {
-		return "NumberTextView: " + number;
-	}
+  @Override
+  public String toString() {
+    return "NumberTextView: " + number;
+  }
 }

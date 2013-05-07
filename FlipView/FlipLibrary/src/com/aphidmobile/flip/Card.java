@@ -17,245 +17,276 @@ limitations under the License.
 
 package com.aphidmobile.flip;
 
-import static com.aphidmobile.flip.FlipRenderer.*;
-import static com.aphidmobile.utils.TextureUtils.*;
-import static javax.microedition.khronos.opengles.GL10.*;
-import static android.util.FloatMath.*;
+import com.aphidmobile.utils.AphidLog;
 
-import javax.microedition.khronos.opengles.GL10;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import javax.microedition.khronos.opengles.GL10;
+
+import static android.util.FloatMath.cos;
+import static android.util.FloatMath.sin;
+import static com.aphidmobile.flip.FlipRenderer.checkError;
+import static com.aphidmobile.utils.TextureUtils.d2r;
+import static com.aphidmobile.utils.TextureUtils.isValidTexture;
+import static com.aphidmobile.utils.TextureUtils.toFloatBuffer;
+import static com.aphidmobile.utils.TextureUtils.toShortBuffer;
+import static javax.microedition.khronos.opengles.GL10.GL_BACK;
+import static javax.microedition.khronos.opengles.GL10.GL_BLEND;
+import static javax.microedition.khronos.opengles.GL10.GL_CCW;
+import static javax.microedition.khronos.opengles.GL10.GL_CLAMP_TO_EDGE;
+import static javax.microedition.khronos.opengles.GL10.GL_CULL_FACE;
+import static javax.microedition.khronos.opengles.GL10.GL_DEPTH_TEST;
+import static javax.microedition.khronos.opengles.GL10.GL_FLOAT;
+import static javax.microedition.khronos.opengles.GL10.GL_LIGHTING;
+import static javax.microedition.khronos.opengles.GL10.GL_ONE;
+import static javax.microedition.khronos.opengles.GL10.GL_ONE_MINUS_SRC_ALPHA;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_2D;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_COORD_ARRAY;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_WRAP_S;
+import static javax.microedition.khronos.opengles.GL10.GL_TEXTURE_WRAP_T;
+import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLES;
+import static javax.microedition.khronos.opengles.GL10.GL_UNSIGNED_SHORT;
+import static javax.microedition.khronos.opengles.GL10.GL_VERTEX_ARRAY;
+
 public class Card {
-	public static final int AXIS_TOP = 0;
-	public static final int AXIS_BOTTOM = 1;
 
-	/**
-	 * The indices of x,y,z for vertices (0, 0), (0, 1), (1, 1), (1, 0)
-	 */
-	public static final int X_00 = 0;
-	public static final int Y_00 = 1;
-	public static final int Z_00 = 2;
-	
-	public static final int X_01 = 3;
-	public static final int Y_01 = 4;
-	public static final int Z_01 = 5;
-	
-	public static final int X_11 = 6;
-	public static final int Y_11 = 7;
-	public static final int Z_11 = 8;
-	
-	public static final int X_10 = 9;
-	public static final int Y_10 = 10;
-	public static final int Z_10 = 11;
+  public static final int AXIS_TOP = 0;
+  public static final int AXIS_BOTTOM = 1;
 
-	private float cardVertices[];
+  /**
+   * The indices of x,y,z for vertices (0, 0), (0, 1), (1, 1), (1, 0)
+   */
+  public static final int X_00 = 0;
+  public static final int Y_00 = 1;
+  public static final int Z_00 = 2;
 
-	private short[] indices = {0, 1, 2, 0, 2, 3};
+  public static final int X_01 = 3;
+  public static final int Y_01 = 4;
+  public static final int Z_01 = 5;
 
-	private FloatBuffer vertexBuffer;
+  public static final int X_11 = 6;
+  public static final int Y_11 = 7;
+  public static final int Z_11 = 8;
 
-	private ShortBuffer indexBuffer;
+  public static final int X_10 = 9;
+  public static final int Y_10 = 10;
+  public static final int Z_10 = 11;
 
-	private float textureCoordinates[];
+  private float cardVertices[];
 
-	private FloatBuffer textureBuffer;
+  private short[] indices = {0, 1, 2, 0, 2, 3};
 
-	private Texture texture;
+  private FloatBuffer vertexBuffer;
 
-	private float angle = 0f;
+  private ShortBuffer indexBuffer;
 
-	private int axis = AXIS_TOP;
+  private float textureCoordinates[];
 
-	private boolean orientationVertical = true;
-	
-	private boolean dirty = false;
+  private FloatBuffer textureBuffer;
 
-	public Texture getTexture() {
-		return texture;
-	}
+  private Texture texture;
 
-	public void setTexture(Texture texture) {
-		this.texture = texture;
-	}
+  private float angle = 0f;
 
-	public float[] getCardVertices() {
-		return cardVertices;
-	}
+  private int axis = AXIS_TOP;
 
-	public short[] getIndices() {
-		return indices;
-	}
+  private boolean orientationVertical = true;
 
-	public ShortBuffer getIndexBuffer() {
-		return indexBuffer;
-	}
+  private boolean dirty = false;
 
-	public void setCardVertices(float[] cardVertices) {
-		this.cardVertices = cardVertices;
-		this.dirty = true;
-	}
+  public Texture getTexture() {
+    return texture;
+  }
 
-	public void setTextureCoordinates(float[] textureCoordinates) {
-		this.textureCoordinates = textureCoordinates;
-		this.dirty = true;
-	}
+  public void setTexture(Texture texture) {
+    this.texture = texture;
+  }
 
-	public void setAngle(float angle) {
-		this.angle = angle;
-	}
+  public float[] getCardVertices() {
+    return cardVertices;
+  }
 
-	public void setAxis(int axis) {
-		this.axis = axis;
-	}
+  public short[] getIndices() {
+    return indices;
+  }
 
-	public void setOrientation(boolean orientationVertical) {
-		this.orientationVertical = orientationVertical;
-	}
-	
-	public void draw(GL10 gl) {
-		if (dirty)
-			updateVertices();
+  public ShortBuffer getIndexBuffer() {
+    return indexBuffer;
+  }
 
-		if (cardVertices == null)
-			return;
+  public void setCardVertices(float[] cardVertices) {
+    this.cardVertices = cardVertices;
+    this.dirty = true;
+  }
 
-		gl.glFrontFace(GL_CCW);
+  public void setTextureCoordinates(float[] textureCoordinates) {
+    this.textureCoordinates = textureCoordinates;
+    this.dirty = true;
+  }
 
-		gl.glEnable(GL_CULL_FACE);
-		gl.glCullFace(GL_BACK);
+  public void setAngle(float angle) {
+    this.angle = angle;
+  }
 
-		gl.glEnableClientState(GL_VERTEX_ARRAY);
+  public void setAxis(int axis) {
+    this.axis = axis;
+  }
 
-		gl.glEnable(GL_BLEND);
-		gl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  public void setOrientation(boolean orientationVertical) {
+    this.orientationVertical = orientationVertical;
+  }
 
-		gl.glColor4f(1f, 1.0f, 1f, 1.0f);
+  public void draw(GL10 gl) {
+    if (dirty) {
+      updateVertices();
+    }
 
-		if (isValidTexture(texture)) {
-			gl.glEnable(GL_TEXTURE_2D);
-			gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			gl.glTexCoordPointer(2, GL_FLOAT, 0, textureBuffer);
-			gl.glBindTexture(GL_TEXTURE_2D, texture.getId()[0]);
-		}
+    if (cardVertices == null) {
+      return;
+    }
 
-		checkError(gl);
+    gl.glFrontFace(GL_CCW);
 
-		gl.glPushMatrix();
+    gl.glEnable(GL_CULL_FACE);
+    gl.glCullFace(GL_BACK);
 
-		if(orientationVertical){
-			if (angle > 0) {
-				if (axis == AXIS_TOP) {
-					gl.glTranslatef(0, cardVertices[Y_00], 0f);
-					gl.glRotatef(-angle, 1f, 0f, 0f);
-					gl.glTranslatef(0, -cardVertices[Y_00], 0f);
-				} else {
-					gl.glTranslatef(0, cardVertices[Y_11], 0f);
-					gl.glRotatef(angle, 1f, 0f, 0f);
-					gl.glTranslatef(0, -cardVertices[Y_11], 0f);
-				}
-			}			
-		} else {
-			if (angle > 0) {
-				if (axis == AXIS_TOP) {
-					gl.glTranslatef(cardVertices[X_00], 0,  0f);
-					gl.glRotatef(-angle, 0f, 1f, 0f);
-					gl.glTranslatef(-cardVertices[X_00], 0, 0f);
-				} else {
-					gl.glTranslatef(cardVertices[X_11], 0, 0f);
-					gl.glRotatef(angle, 0f, 1f, 0f);
-					gl.glTranslatef(-cardVertices[X_11], 0, 0f);
-				}
-			}
-		}
+    gl.glEnableClientState(GL_VERTEX_ARRAY);
 
-		gl.glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
-		gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
+    gl.glEnable(GL_BLEND);
+    gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
-		checkError(gl);
+    gl.glColor4f(1f, 1.0f, 1f, 1.0f);
 
-		gl.glPopMatrix();
+    if (isValidTexture(texture)) {
+      gl.glEnable(GL_TEXTURE_2D);
+      gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      gl.glTexCoordPointer(2, GL_FLOAT, 0, textureBuffer);
+      gl.glBindTexture(GL_TEXTURE_2D, texture.getId()[0]);
+    }
 
-		if (isValidTexture(texture)) {
-			gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			gl.glDisable(GL_TEXTURE_2D);
-		}
-		
-		float w,h,z;
-		float[] shadowVertices;
-		
-		if (angle > 0) {
-			gl.glDisable(GL_LIGHTING);
-			gl.glDisable(GL_DEPTH_TEST);
+    if (AphidLog.ENABLE_DEBUG) {
+      checkError(gl);
+    }
 
-			if (axis == AXIS_TOP) {
-				if(orientationVertical){
-					h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1.0f - cos(d2r(angle)));
-					z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
-					shadowVertices = new float[]{
-						cardVertices[X_00], cardVertices[Y_01] + h, z,
-						cardVertices[X_01], cardVertices[Y_01], 0f,
-						cardVertices[X_11], cardVertices[Y_11], 0f,
-						cardVertices[X_10], cardVertices[Y_01] + h, z
-					};
-				} else { //horizontal
-					w = (cardVertices[X_10] - cardVertices[X_00]) * (1.0f - cos(d2r(angle)));
-					z = (cardVertices[X_10] - cardVertices[X_00]) * sin(d2r(angle));
-					shadowVertices = new float[]{
-						cardVertices[X_10] - w, cardVertices[Y_00], z,
-						cardVertices[X_11] - w, cardVertices[Y_01], z,
-						cardVertices[X_11], cardVertices[Y_11], 0f,
-						cardVertices[X_10], cardVertices[Y_10], 0f
-					};
-				}
+    gl.glPushMatrix();
 
-				float alpha = 1f * (90f - angle) / 90f;
+    if (orientationVertical) {
+      if (angle > 0) {
+        if (axis == AXIS_TOP) {
+          gl.glTranslatef(0, cardVertices[Y_00], 0f);
+          gl.glRotatef(-angle, 1f, 0f, 0f);
+          gl.glTranslatef(0, -cardVertices[Y_00], 0f);
+        } else {
+          gl.glTranslatef(0, cardVertices[Y_11], 0f);
+          gl.glRotatef(angle, 1f, 0f, 0f);
+          gl.glTranslatef(0, -cardVertices[Y_11], 0f);
+        }
+      }
+    } else {
+      if (angle > 0) {
+        if (axis == AXIS_TOP) {
+          gl.glTranslatef(cardVertices[X_00], 0, 0f);
+          gl.glRotatef(-angle, 0f, 1f, 0f);
+          gl.glTranslatef(-cardVertices[X_00], 0, 0f);
+        } else {
+          gl.glTranslatef(cardVertices[X_11], 0, 0f);
+          gl.glRotatef(angle, 0f, 1f, 0f);
+          gl.glTranslatef(-cardVertices[X_11], 0, 0f);
+        }
+      }
+    }
 
-				gl.glColor4f(0f, 0.0f, 0f, alpha);
-				gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
-				gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
-			} else {
-				if(orientationVertical){
-					h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1f - cos(d2r(angle)));
-					z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
-					shadowVertices = new float[]{
-						cardVertices[X_00], cardVertices[Y_00], 0f,
-						cardVertices[X_01], cardVertices[Y_00] - h, z,
-						cardVertices[X_11], cardVertices[Y_00] - h, z,
-						cardVertices[X_10], cardVertices[Y_00], 0f
-					};
-				} else { //horizontal
-					w = (cardVertices[X_10] - cardVertices[X_00])  * (1f - cos(d2r(angle)));
-					z = (cardVertices[X_10] - cardVertices[X_00]) * sin(d2r(angle));
-					shadowVertices = new float[]{
-						cardVertices[X_00], cardVertices[Y_00], 0f,
-						cardVertices[X_01], cardVertices[Y_01], 0f,
-						cardVertices[X_00] + w, cardVertices[Y_11], z,
-						cardVertices[X_01] + w, cardVertices[Y_10], z
-					};
-				}
-				float alpha = 1f * (90f - angle) / 90f;
+    gl.glVertexPointer(3, GL_FLOAT, 0, vertexBuffer);
+    gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
 
-				gl.glColor4f(0f, 0.0f, 0f, alpha);
-				gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
-				gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
-			}
-			gl.glEnable(GL_DEPTH_TEST);
-			gl.glEnable(GL_LIGHTING);
-		}
+    if (AphidLog.ENABLE_DEBUG) {
+      checkError(gl);
+    }
 
-		checkError(gl);
+    gl.glPopMatrix();
 
-		gl.glDisable(GL_BLEND);
-		gl.glDisableClientState(GL_VERTEX_ARRAY);
-		gl.glDisable(GL_CULL_FACE);
-	}
+    if (isValidTexture(texture)) {
+      gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      gl.glDisable(GL_TEXTURE_2D);
+    }
 
-	private void updateVertices() {
-		vertexBuffer = toFloatBuffer(cardVertices);
-		indexBuffer = toShortBuffer(indices);
-		textureBuffer = toFloatBuffer(textureCoordinates);
-	}
+    float w, h, z;
+    float[] shadowVertices;
+
+    if (angle > 0) {
+      float alpha = 1f * (90f - angle) / 90f;
+
+      if (axis == AXIS_TOP) {
+        if (orientationVertical) {
+          h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1.0f - cos(d2r(angle)));
+          z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
+          shadowVertices = new float[]{
+              cardVertices[X_00], cardVertices[Y_01] + h, z,
+              cardVertices[X_01], cardVertices[Y_01], 0f,
+              cardVertices[X_11], cardVertices[Y_11], 0f,
+              cardVertices[X_10], cardVertices[Y_01] + h, z
+          };
+        } else { //horizontal
+          w = (cardVertices[X_10] - cardVertices[X_00]) * (1.0f - cos(d2r(angle)));
+          z = (cardVertices[X_10] - cardVertices[X_00]) * sin(d2r(angle));
+          shadowVertices = new float[]{
+              cardVertices[X_10] - w, cardVertices[Y_00], z,
+              cardVertices[X_11] - w, cardVertices[Y_01], z,
+              cardVertices[X_11], cardVertices[Y_11], 0f,
+              cardVertices[X_10], cardVertices[Y_10], 0f
+          };
+        }
+      } else {
+        if (orientationVertical) {
+          h = (cardVertices[Y_00] - cardVertices[Y_01]) * (1f - cos(d2r(angle)));
+          z = (cardVertices[Y_00] - cardVertices[Y_01]) * sin(d2r(angle));
+          shadowVertices = new float[]{
+              cardVertices[X_00], cardVertices[Y_00], 0f,
+              cardVertices[X_01], cardVertices[Y_00] - h, z,
+              cardVertices[X_11], cardVertices[Y_00] - h, z,
+              cardVertices[X_10], cardVertices[Y_00], 0f
+          };
+        } else { //horizontal
+          w = (cardVertices[X_10] - cardVertices[X_00]) * (1f - cos(d2r(angle)));
+          z = (cardVertices[X_10] - cardVertices[X_00]) * sin(d2r(angle));
+          shadowVertices = new float[]{
+              cardVertices[X_00], cardVertices[Y_00], 0f,
+              cardVertices[X_01], cardVertices[Y_01], 0f,
+              cardVertices[X_00] + w, cardVertices[Y_11], z,
+              cardVertices[X_01] + w, cardVertices[Y_10], z
+          };
+        }
+      }
+
+      gl.glDisable(GL_LIGHTING);
+      gl.glDisable(GL_DEPTH_TEST);
+      gl.glDisable(GL_TEXTURE_2D);
+      gl.glEnable(GL_BLEND);
+      gl.glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      gl.glColor4f(0f, 0.0f, 0f, alpha);
+      gl.glVertexPointer(3, GL_FLOAT, 0, toFloatBuffer(shadowVertices));
+      gl.glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_SHORT, indexBuffer);
+
+      gl.glEnable(GL_TEXTURE_2D);
+      gl.glEnable(GL_DEPTH_TEST);
+      gl.glEnable(GL_LIGHTING);
+    }
+
+    if (AphidLog.ENABLE_DEBUG) {
+      checkError(gl);
+    }
+
+    gl.glDisable(GL_BLEND);
+    gl.glDisableClientState(GL_VERTEX_ARRAY);
+    gl.glDisable(GL_CULL_FACE);
+  }
+
+  private void updateVertices() {
+    vertexBuffer = toFloatBuffer(cardVertices);
+    indexBuffer = toShortBuffer(indices);
+    textureBuffer = toFloatBuffer(textureCoordinates);
+  }
 }

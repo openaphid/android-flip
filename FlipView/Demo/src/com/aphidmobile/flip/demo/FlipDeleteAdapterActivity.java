@@ -17,19 +17,19 @@ limitations under the License.
 package com.aphidmobile.flip.demo;
 
 import android.app.Activity;
-import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.aphidmobile.flip.FlipViewController;
-import com.aphidmobile.flip.demo.views.NumberButton;
+import com.aphidmobile.flip.demo.adapter.TravelAdapter;
 import com.aphidmobile.flipview.demo.R;
 
-public class FlipButtonActivity extends Activity {
+public class FlipDeleteAdapterActivity extends Activity {
 
   private FlipViewController flipView;
+  private TravelAdapter adapter;
 
   /**
    * Called when the activity is first created.
@@ -42,37 +42,11 @@ public class FlipButtonActivity extends Activity {
 
     flipView = new FlipViewController(this);
 
-    flipView.setAdapter(new BaseAdapter() {
-      @Override
-      public int getCount() {
-        return 10;
-      }
+    //Use RGB_565 can reduce peak memory usage on large screen device, but it's up to you to choose the best bitmap format 
+    flipView.setAnimationBitmapFormat(Bitmap.Config.RGB_565);
 
-      @Override
-      public Object getItem(int position) {
-        return position;
-      }
-
-      @Override
-      public long getItemId(int position) {
-        return position;
-      }
-
-      @Override
-      public View getView(int position, View convertView, ViewGroup parent) {
-        NumberButton button;
-        if (convertView == null) {
-          final Context context = parent.getContext();
-          button = new NumberButton(context, position);
-          button.setTextSize(context.getResources().getDimension(R.dimen.textSize));
-        } else {
-          button = (NumberButton) convertView;
-          button.setNumber(position);
-        }
-
-        return button;
-      }
-    });
+    adapter = new TravelAdapter(this);
+    flipView.setAdapter(adapter);
 
     setContentView(flipView);
   }
@@ -87,5 +61,18 @@ public class FlipButtonActivity extends Activity {
   protected void onPause() {
     super.onPause();
     flipView.onPause();
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    menu.add("Delete Page");
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    adapter.removeData(flipView.getSelectedItemPosition());
+    adapter.notifyDataSetChanged();
+    return true;
   }
 }
