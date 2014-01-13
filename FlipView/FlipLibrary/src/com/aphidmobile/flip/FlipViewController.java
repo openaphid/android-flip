@@ -563,12 +563,12 @@ public class FlipViewController extends AdapterView<Adapter> {
 
   void postHideFlipAnimation() {
     if (inFlipAnimation) {
-      handler.post(new Runnable() {
+      handler.postDelayed(new Runnable() {
         @Override
         public void run() {
           hideFlipAnimation();
         }
-      });
+      }, 200);
     }
   }
 

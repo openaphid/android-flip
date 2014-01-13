@@ -312,9 +312,16 @@ public class FlipCards {
           }
 
           // do not flip more than one page with one touch...
+          if(((accumulatedAngle + angleDelta > lastPageIndex*180)
+        		  && (accumulatedAngle + angleDelta <= (lastPageIndex+1) * 180)) ||  
+        		  ((accumulatedAngle + angleDelta < lastPageIndex*180) && 
+        				  (accumulatedAngle + angleDelta >= (lastPageIndex-1) * 180))){
+        	  accumulatedAngle += angleDelta;
+          }
+          /*
           if (Math.abs(getPageIndexFromAngle(accumulatedAngle + angleDelta) - lastPageIndex) <= 1) {
             accumulatedAngle += angleDelta;
-          }
+          }//*/
 
           //Bounce the page for the first and the last page
           if (frontCards.getIndex() == maxIndex - 1) { //the last page
