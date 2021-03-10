@@ -9,7 +9,7 @@ A pre-built demo APK file for Android OS 2.2+ can be found at:
 
 Please also refer to our blog posts for more details:
 
-[http://openaphid.github.com/blog/categories/flipview/](http://openaphid.github.com/blog/categories/flipview/)
+[https://hubo.dev/tags/#FlipView](https://hubo.dev/tags/#FlipView)
 
 ## Release Notes
 
